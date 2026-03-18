@@ -66,3 +66,32 @@ section:target {
   box-shadow: 0 0 15px rgba(26, 188, 156, 0.3); 
   padding: 20px;
 }
+
+/* Adding layout structure and spacing to all portfolio sections */
+section {
+  margin: 40px auto; 
+  padding: 30px; 
+  max-width: 900px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+}
+
+/* ===== SKILLS SECTION ===== */
+
+#skills ul {
+  line-height: 2;
+  padding-left: 20px;
+}
+
+/*  Use font-weight to differentiate levels  */
+#skills > ul > li {
+  font-weight: bold; 
+  color: #2c3e50;
+}
+
+
+#skills ul ul li {
+  font-weight: normal; 
+  color: #1abc9c;
+}
