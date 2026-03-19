@@ -64,5 +64,44 @@ function calculateAverageMarks(studentList) {
 }
 
 // calling function
-calculateTotalMarks(students);
-calculateAverageMarks(students);
+// calculateTotalMarks(students);
+// calculateAverageMarks(students);
+
+// function to calculate subject-wise highest marks
+function SubjectHighest(students) {
+
+  const subjectData = {};
+
+  students.forEach(student => {
+
+    student.marks.forEach(mark => {
+
+     // it works when the new subject arrive
+      if (!subjectData[mark.subject]) {
+        subjectData[mark.subject] = {
+          highest: mark.score,
+          topper: student.name
+        };
+      } else {
+        // it comapres the higest mark and then put the new value
+        if (mark.score > subjectData[mark.subject].highest) {
+          subjectData[mark.subject].highest = mark.score;
+          subjectData[mark.subject].topper = student.name;
+        }
+      }
+
+    });
+
+  });
+
+  return subjectData;
+}
+const highestMarks = SubjectHighest(students);
+
+console.log("\nSubject-wise Highest Marks:");
+
+for (let subject in highestMarks) {
+  console.log(
+    `${subject}: ${highestMarks[subject].topper} (${highestMarks[subject].highest})`
+  );
+}
