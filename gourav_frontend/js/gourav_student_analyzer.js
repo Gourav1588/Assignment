@@ -96,12 +96,51 @@ function SubjectHighest(students) {
 
   return subjectData;
 }
-const highestMarks = SubjectHighest(students);
+// const highestMarks = SubjectHighest(students);
 
-console.log("\nSubject-wise Highest Marks:");
+// console.log("\nSubject-wise Highest Marks:");
 
-for (let subject in highestMarks) {
-  console.log(
-    `${subject}: ${highestMarks[subject].topper} (${highestMarks[subject].highest})`
-  );
+// for (let subject in highestMarks) {
+//   console.log(
+//     `${subject}: ${highestMarks[subject].topper} (${highestMarks[subject].highest})`
+//   );
+// }
+
+
+
+// function to calculate subject-wise average
+function getSubjectAverage(students) {
+
+  const subjectData = {};
+
+  students.forEach(student => {
+
+    student.marks.forEach(mark => {
+
+      // if subject is seen first time
+      if (!subjectData[mark.subject]) {
+        subjectData[mark.subject] = {
+          total: mark.score,
+          count: 1
+        };
+      } else {
+        // add score and increase count
+        subjectData[mark.subject].total += mark.score;
+        subjectData[mark.subject].count++;
+      }
+
+    });
+
+  });
+
+  return subjectData;
+}
+
+
+const results = getSubjectAverage(students);
+
+for (let subject in results) {
+    const avg = results[subject].total / results[subject].count;
+    
+    console.log(`Average ${subject} Score: ${avg.toFixed(1)}`);
 }
