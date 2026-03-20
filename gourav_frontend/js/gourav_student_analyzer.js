@@ -177,8 +177,8 @@ function getClassTopper(studentList) {
     console.log("\nClass Topper:");
     console.log(`Class Topper: ${topper} with ${highest} marks`);
     console.log("\n")
-}
-getClassTopper(students);
+ }
+ getClassTopper(students);
 
 
 function assignGrade(studentList) {
