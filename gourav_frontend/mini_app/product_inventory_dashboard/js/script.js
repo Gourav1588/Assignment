@@ -61,6 +61,7 @@ window.onload = async function () {
 
   renderProducts(data);
   updateAnalytics();
+  loadCategories();
 };
 // This function calculates dashboard values
 // Like total products, total value and out of stock count
@@ -146,6 +147,33 @@ searchInput.addEventListener("input", function () {
   );
 
   // Re-render UI
+  renderProducts(filteredProducts);
+});
+
+
+const categoryFilter = document.getElementById("categoryFilter");
+
+// Populate category dropdown dynamically
+function loadCategories() {
+  const categories = [...new Set(products.map(p => p.category))];
+
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    categoryFilter.appendChild(option);
+  });
+}
+
+// Filter by category
+categoryFilter.addEventListener("change", function () {
+
+  if (this.value === "all") {
+    filteredProducts = [...products];
+  } else {
+    filteredProducts = products.filter(p => p.category === this.value);
+  }
+
   renderProducts(filteredProducts);
 });
 
