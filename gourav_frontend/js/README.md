@@ -60,3 +60,15 @@ This screenshot shows the average marks for each subject calculated by summing a
 #### . Output
 ![Subject Average Output](Console_Output/SUBJECT_AVG_OUTPUT.png)
 
+---
+
+### 6. Class Topper
+
+This screenshot shows the student with the highest total marks in the class. The program compares total marks of all students to determine the topper.
+
+#### . Code
+![Topper Code](Console_Output/TOPPER_CODE.png)
+
+#### . Output
+![Topper Output](Console_Output/TOPPER_OUTPUT.png)
+
