@@ -77,6 +77,28 @@ function updateAnalytics() {
   document.getElementById("totalProducts").innerText = `Total Products: ${total}`;
   document.getElementById("totalValue").innerText = `Total Value: ₹${value}`;
   document.getElementById("outOfStock").innerText = `Out of Stock: ${outOfStock}`;
+
+
+  // Category-wise count (how many products per category)
+const categoryCount = {};
+
+products.forEach(p => {
+  if (categoryCount[p.category]) {
+    categoryCount[p.category]++;
+  } else {
+    categoryCount[p.category] = 1;
+  }
+});
+
+// Convert object into display string
+let categoryHTML = "";
+
+for (let cat in categoryCount) {
+  categoryHTML += `<p>${cat}: ${categoryCount[cat]}</p>`;
+}
+
+// Show in UI
+document.getElementById("categoryStats").innerHTML = categoryHTML;
 }
 
 // This function handles deletion of product
