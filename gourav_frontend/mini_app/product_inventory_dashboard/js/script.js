@@ -177,3 +177,13 @@ categoryFilter.addEventListener("change", function () {
   renderProducts(filteredProducts);
 });
 
+const lowStockBtn = document.getElementById("lowStockBtn");
+
+// Toggle low stock view
+lowStockBtn.addEventListener("click", function () {
+
+  filteredProducts = products.filter(p => p.stock < 5);
+
+  renderProducts(filteredProducts);
+});
+
