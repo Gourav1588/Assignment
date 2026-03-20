@@ -62,3 +62,18 @@ window.onload = async function () {
   renderProducts(data);
   updateAnalytics();
 };
+// This function calculates dashboard values
+// Like total products, total value and out of stock count
+function updateAnalytics() {
+  const total = products.length;
+
+  // Total inventory value = price * stock for each product
+  const value = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+
+  // Count products where stock is 0
+  const outOfStock = products.filter(p => p.stock === 0).length;
+
+  document.getElementById("totalProducts").innerText = `Total Products: ${total}`;
+  document.getElementById("totalValue").innerText = `Total Value: ₹${value}`;
+  document.getElementById("outOfStock").innerText = `Out of Stock: ${outOfStock}`;
+}
