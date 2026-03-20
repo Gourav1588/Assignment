@@ -77,3 +77,10 @@ function updateAnalytics() {
   document.getElementById("totalValue").innerText = `Total Value: ₹${value}`;
   document.getElementById("outOfStock").innerText = `Out of Stock: ${outOfStock}`;
 }
+
+// This function handles deletion of product
+// It removes product from array and updates UI + storage
+function deleteProduct(id) {
+  products = products.filter(p => p.id !== id);
+  saveAndRender();
+}
