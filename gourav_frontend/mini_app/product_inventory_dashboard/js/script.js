@@ -213,3 +213,42 @@ sortSelect.addEventListener("change", function () {
   renderProducts(sorted);
 });
 
+
+// This function combines all filters together
+function applyFilters() {
+
+  let result = [...products];
+
+  const query = searchInput.value.toLowerCase();
+  const category = categoryFilter.value;
+
+  // Search filter
+  if (query) {
+    result = result.filter(p =>
+      p.name.toLowerCase().includes(query)
+    );
+  }
+
+  // Category filter
+  if (category !== "all") {
+    result = result.filter(p => p.category === category);
+  }
+
+  // Low stock filter (if active)
+  if (lowStockBtn.classList.contains("active")) {
+    result = result.filter(p => p.stock < 5);
+  }
+
+  filteredProducts = result;
+  renderProducts(filteredProducts);
+}
+
+searchInput.addEventListener("input", applyFilters);
+
+categoryFilter.addEventListener("change", applyFilters);
+
+lowStockBtn.addEventListener("click", function () {
+  this.classList.toggle("active");
+  applyFilters();
+});
+
