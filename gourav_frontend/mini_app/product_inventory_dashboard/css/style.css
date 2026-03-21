@@ -21,3 +21,31 @@ header {
 header h1 {
   color: #2c3e50;
 }
+
+
+/* Container for all search, filter, and sort controls */
+/* Uses flexbox to allow items to wrap on smaller screens (Responsive) */
+#controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* Consistent styling for all interactive elements in the control bar */
+#controls input,
+#controls select,
+#controls button {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none; 
+}
+
+/* Visual feedback for user interaction on buttons */
+#controls button:hover {
+  background-color: #3498db;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s; 
+}
