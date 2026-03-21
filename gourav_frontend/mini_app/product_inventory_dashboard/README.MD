@@ -127,5 +127,20 @@ Displays the number of products available in each category.
 Shows validation message when invalid input is submitted in the form.  
 ![Validation](./Screenshots/validation.png)
 
+### Loading State  
+Shows a loading message displayed when the page initially loads before products are rendered.  
+![Loading](./Screenshots/loading.png)
+
+---
+### Multiple Filters Combined  
+Shows how search, category filter, low stock filter, and sorting work together at the same time without breaking functionality.  
+![Multiple Filters](./Screenshots/multiple-filters.png)
+
+---
+### Responsive Mobile View  
+Shows how the layout adapts for smaller screens, with stacked sections and a user-friendly mobile interface.  
+![Mobile View](./Screenshots/mobile.png)
+
+---
 
 
