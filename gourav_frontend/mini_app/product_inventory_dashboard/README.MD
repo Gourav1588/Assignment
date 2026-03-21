@@ -32,3 +32,28 @@ mini_app/
 3. Open index.html in any browser  
 
 No setup is required.
+
+## Features  
+
+### Core Features  
+
+- Dynamic Product Rendering  
+- Search Functionality  
+- Category Filtering  
+- Low Stock Filter  
+- Sorting Options  
+- Inventory Analytics Dashboard  
+- Add Product Feature  
+- Delete Product Feature  
+- Data Persistence (localStorage)  
+- Simulated API Loading  
+
+---
+
+### Bonus Features  
+
+- Edit Product Functionality  
+- Multiple Filters Working Together  
+- Responsive Design  
+- Category-wise Analytics  
+- Empty State Handling  
