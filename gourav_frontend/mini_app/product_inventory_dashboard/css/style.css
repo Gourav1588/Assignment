@@ -1,0 +1,13 @@
+/* Reset default browser spacing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Apply base styles to the entire page */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f6fa;
+  padding: 20px;
+}
