@@ -71,11 +71,61 @@ Shows all products in a grid along with inventory analytics like total products,
 ### Search Functionality  
 Shows how products are filtered in real time when typing in the search bar.  
 
-![Search](./screenshots/search.png)
+![Search](./Screenshots/search.png)
 
 ---
 
 ### Category Filter  
 Displays how products change based on selected category from dropdown.  
 
-![Category Filter](./screenshots/category-filter.png)
+![Category Filter](./Screenshots/category-filter.png)
+
+---
+
+### Low Stock Filter  
+Shows only products with stock less than 5 when the filter is applied.  
+
+![Low Stock](./Screenshots//low-stock.png)
+
+
+---
+
+### Sorting Feature  
+Demonstrates sorting of products by price and alphabetical order.  
+
+![Sorting](./Screenshots/sorting.png)
+
+---
+
+### Delete Product  
+Shows how a product is removed from the dashboard after clicking delete.  
+When you click on delete button the product get removed.
+
+![Delete](./Screenshots/delete.png)
+
+---
+
+### Empty State  
+Displays message when no products match search or filters.  
+
+![Empty State](./Screenshots/empty.png)
+
+---
+
+### Add Product Form  
+Allows users to add a new product by entering name, price, stock, and category. The product appears instantly after submission.  
+![Add Product](./Screenshots/add-product.png)
+
+---
+
+### Category Analytics  
+Displays the number of products available in each category.  
+![Category Analytics](./Screenshots/category-analytics.png)
+
+---
+### Add Product Validation  
+Shows validation message when invalid input is submitted in the form.  
+![Validation](./Screenshots/validation.png)
+
+
+

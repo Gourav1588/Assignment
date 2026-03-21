@@ -158,6 +158,10 @@ function loadCategories() {
   });
 }
 
+
+
+
+
 function applyFilters() {
   let result = [...products];
 
