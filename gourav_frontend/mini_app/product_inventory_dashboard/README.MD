@@ -1,5 +1,5 @@
 # Product Inventory Dashboard  
-Mini App Assignment | 2026  
+
 
 ## Project Overview  
 This is a client-side Product Inventory Dashboard built using HTML, CSS, and JavaScript.
@@ -64,7 +64,7 @@ mini_app/
 ### Dashboard View  
 Shows all products in a grid along with inventory analytics like total products, total value, and out-of-stock count.  
 
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](./Screenshots/dashboard.png)
 
 ---
 
@@ -72,3 +72,10 @@ Shows all products in a grid along with inventory analytics like total products,
 Shows how products are filtered in real time when typing in the search bar.  
 
 ![Search](./screenshots/search.png)
+
+---
+
+### Category Filter  
+Displays how products change based on selected category from dropdown.  
+
+![Category Filter](./screenshots/category-filter.png)

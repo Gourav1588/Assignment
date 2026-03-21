@@ -13,12 +13,8 @@ let products = JSON.parse(localStorage.getItem("products")) || [
 ];
 
 // Getting reference of product grid where cards will be shown
-
 const grid = document.getElementById("productGrid");
 
-
-// This function is responsible for showing products on UI
-// It clears old data and re-renders updated list every time
 function renderProducts(data) {
   grid.innerHTML = "";
 
@@ -63,42 +59,41 @@ window.onload = async function () {
   updateAnalytics();
   loadCategories();
 };
-// This function calculates dashboard values
-// Like total products, total value and out of stock count
+
 function updateAnalytics() {
-  const total = products.length;
+  const selectedCategory = categoryFilter ? categoryFilter.value : "all";
 
-  // Total inventory value = price * stock for each product
-  const value = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+  // Show analytics for selected category only, or all if none selected
+  const data = selectedCategory === "all"
+    ? products
+    : products.filter(p => p.category === selectedCategory);
 
-  // Count products where stock is 0
-  const outOfStock = products.filter(p => p.stock === 0).length;
+  const total = data.length;
+  const value = data.reduce((sum, p) => sum + (p.price * p.stock), 0);
+  const outOfStock = data.filter(p => p.stock === 0).length;
 
   document.getElementById("totalProducts").innerText = `Total Products: ${total}`;
   document.getElementById("totalValue").innerText = `Total Value: ₹${value}`;
   document.getElementById("outOfStock").innerText = `Out of Stock: ${outOfStock}`;
 
-
   // Category-wise count (how many products per category)
-const categoryCount = {};
+  const categoryCount = {};
 
-products.forEach(p => {
-  if (categoryCount[p.category]) {
-    categoryCount[p.category]++;
-  } else {
-    categoryCount[p.category] = 1;
+  data.forEach(p => {
+    if (categoryCount[p.category]) {
+      categoryCount[p.category]++;
+    } else {
+      categoryCount[p.category] = 1;
+    }
+  });
+
+  let categoryHTML = "";
+
+  for (let cat in categoryCount) {
+    categoryHTML += `<p>${cat}: ${categoryCount[cat]}</p>`;
   }
-});
 
-// Convert object into display string
-let categoryHTML = "";
-
-for (let cat in categoryCount) {
-  categoryHTML += `<p>${cat}: ${categoryCount[cat]}</p>`;
-}
-
-// Show in UI
-document.getElementById("categoryStats").innerHTML = categoryHTML;
+  document.getElementById("categoryStats").innerHTML = categoryHTML;
 }
 
 // This function handles deletion of product
@@ -112,68 +107,44 @@ function deleteProduct(id) {
 // and re-renders UI after any change
 function saveAndRender() {
   localStorage.setItem("products", JSON.stringify(products));
-  renderProducts(products);
+  applyFilters();
   updateAnalytics();
 }
-// Handling form submission for adding new product
+
 document.getElementById("productForm").addEventListener("submit", function(e) {
   e.preventDefault();
 
-  // Getting values from input fields
   const name = document.getElementById("name").value;
   const price = +document.getElementById("price").value;
   const stock = +document.getElementById("stock").value;
   const category = document.getElementById("category").value;
 
-  // Basic validation
   if (!name || price <= 0 || stock < 0 || !category) {
     alert("Invalid input");
     return;
   }
 
-  // Creating new product object
   const newProduct = {
-    id: Date.now(), // unique id using timestamp
+    id: Date.now(),
     name,
     price,
     stock,
     category
   };
 
-  // Adding new product to array
   products.push(newProduct);
-
-  // Save and update UI
   saveAndRender();
-
-  // Clear form after submission
   this.reset();
 });
 
 // Create a separate list for filtered/sorted data
 // Original products array stays untouched
-
 let filteredProducts = [...products];
 
-// Getting search input
 const searchInput = document.getElementById("searchInput");
-
-// When user types, filter products
-searchInput.addEventListener("input", function () {
-
-  const query = this.value.toLowerCase();
-
-  // Filter products based on name
-  filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(query)
-  );
-
-  // Re-render UI
-  renderProducts(filteredProducts);
-});
-
-
 const categoryFilter = document.getElementById("categoryFilter");
+const lowStockBtn = document.getElementById("lowStockBtn");
+const sortSelect = document.getElementById("sortSelect");
 
 // Populate category dropdown dynamically
 function loadCategories() {
@@ -187,90 +158,47 @@ function loadCategories() {
   });
 }
 
-// Filter by category
-categoryFilter.addEventListener("change", function () {
-
-  if (this.value === "all") {
-    filteredProducts = [...products];
-  } else {
-    filteredProducts = products.filter(p => p.category === this.value);
-  }
-
-  renderProducts(filteredProducts);
-});
-
-const lowStockBtn = document.getElementById("lowStockBtn");
-
-// Toggle low stock view
-lowStockBtn.addEventListener("click", function () {
-
-  filteredProducts = products.filter(p => p.stock < 5);
-
-  renderProducts(filteredProducts);
-});
-
-
-const sortSelect = document.getElementById("sortSelect");
-
-sortSelect.addEventListener("change", function () {
-
-  const value = this.value;
-
-  // Copy array to avoid modifying original
-  let sorted = [...filteredProducts];
-
-  if (value === "low") {
-    sorted.sort((a, b) => a.price - b.price);
-  } 
-  else if (value === "high") {
-    sorted.sort((a, b) => b.price - a.price);
-  } 
-  else if (value === "az") {
-    sorted.sort((a, b) => a.name.localeCompare(b.name));
-  } 
-  else if (value === "za") {
-    sorted.sort((a, b) => b.name.localeCompare(a.name));
-  }
-
-  renderProducts(sorted);
-});
-
-
-// This function combines all filters together
 function applyFilters() {
-
   let result = [...products];
 
   const query = searchInput.value.toLowerCase();
   const category = categoryFilter.value;
+  const sort = sortSelect.value;
 
-  // Search filter
   if (query) {
-    result = result.filter(p =>
-      p.name.toLowerCase().includes(query)
-    );
+    result = result.filter(p => p.name.toLowerCase().includes(query));
   }
 
-  // Category filter
   if (category !== "all") {
     result = result.filter(p => p.category === category);
   }
 
-  // Low stock filter (if active)
   if (lowStockBtn.classList.contains("active")) {
     result = result.filter(p => p.stock < 5);
   }
 
+  if (sort === "low") {
+    result.sort((a, b) => a.price - b.price);
+  } else if (sort === "high") {
+    result.sort((a, b) => b.price - a.price);
+  } else if (sort === "az") {
+    result.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sort === "za") {
+    result.sort((a, b) => b.name.localeCompare(a.name));
+  }
+
   filteredProducts = result;
   renderProducts(filteredProducts);
+  updateAnalytics();
 }
 
 searchInput.addEventListener("input", applyFilters);
 
 categoryFilter.addEventListener("change", applyFilters);
 
+sortSelect.addEventListener("change", applyFilters);
+
 lowStockBtn.addEventListener("click", function () {
   this.classList.toggle("active");
   applyFilters();
 });
-
