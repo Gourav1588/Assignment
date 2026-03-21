@@ -200,3 +200,65 @@ header h1 {
 #productGrid button:hover {
   opacity: 0.9;
 }
+/* Form container */
+#formSection {
+  background: #1c1b3a;
+  border-radius: 14px;
+  padding: 24px 28px;
+  border: 1px solid #2e2b55;
+}
+
+/* Form title */
+#formSection h2 {
+  font-weight: 700;
+  color: #c0bef0;
+  margin-bottom: 18px;
+}
+
+/* Grid layout for form inputs */
+#productForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Labels styling */
+#productForm label {
+  font-size: 0.75rem;
+  color: #7878aa;
+  margin-bottom: 5px;
+}
+
+/* Inputs */
+#productForm input,
+#productForm select {
+  padding: 9px;
+  border-radius: 8px;
+  border: 1px solid #3a3760;
+  background: #12112a;
+  color: #e0dff8;
+}
+
+/* Submit button */
+#productForm button {
+  grid-column: 1 / -1;
+  padding: 11px;
+  background: linear-gradient(135deg, #6c3fc5, #c042b8);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 700px) {
+  #analytics { grid-template-columns: 1fr 1fr; }
+  #productGrid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  #productGrid { grid-template-columns: 1fr; }
+  #productForm { grid-template-columns: 1fr; }
+  #controls { flex-direction: column; }
+}
