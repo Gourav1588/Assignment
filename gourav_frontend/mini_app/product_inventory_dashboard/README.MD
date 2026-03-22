@@ -147,5 +147,10 @@ Allows users to update product details using a popup form without leaving the da
 ![Edit Product](./Screenshots/edit.png)
 
 ---
+### localStorage Data  
+Shows how product data is stored in the browser using localStorage.  
+![LocalStorage](./Screenshots/localstorage.png)
+
+---
 
 

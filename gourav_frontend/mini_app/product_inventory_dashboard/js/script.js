@@ -1,15 +1,15 @@
 // Try to get products from localStorage If nothing is stored, we will use default data
 let products = JSON.parse(localStorage.getItem("products")) || [
-    { id: 1, name: "Pro Laptop", price: 55000, stock: 5, category: "electronics" },
-    { id: 2, name: "Cotton Shirt", price: 1500, stock: 10, category: "clothing" },
-    { id: 3, name: "JS Guide Book", price: 500, stock: 0, category: "books" },
-    { id: 4, name: "Smart Watch", price: 2000, stock: 3, category: "accessories" },
-    { id: 5, name: "Bluetooth Buds", price: 3000, stock: 12, category: "electronics" },
-    { id: 6, name: "Denim Jeans", price: 2500, stock: 4, category: "clothing" },
-    { id: 7, name: "Data Structures", price: 800, stock: 2, category: "books" },
-    { id: 8, name: "Leather Belt", price: 1200, stock: 15, category: "accessories" },
-    { id: 9, name: "Gaming Mouse", price: 4500, stock: 1, category: "electronics" },
-    { id: 10, name: "Travel Backpack", price: 3500, stock: 0, category: "accessories" }
+  { id: 1, name: "Pro Laptop", price: 55000, stock: 5, category: "electronics" },
+  { id: 2, name: "Cotton Shirt", price: 1500, stock: 10, category: "clothing" },
+  { id: 3, name: "JS Guide Book", price: 500, stock: 0, category: "books" },
+  { id: 4, name: "Smart Watch", price: 2000, stock: 3, category: "accessories" },
+  { id: 5, name: "Bluetooth Buds", price: 3000, stock: 12, category: "electronics" },
+  { id: 6, name: "Denim Jeans", price: 2500, stock: 4, category: "clothing" },
+  { id: 7, name: "Data Structures", price: 800, stock: 2, category: "books" },
+  { id: 8, name: "Leather Belt", price: 1200, stock: 15, category: "accessories" },
+  { id: 9, name: "Gaming Mouse", price: 4500, stock: 1, category: "electronics" },
+  { id: 10, name: "Travel Backpack", price: 3500, stock: 0, category: "accessories" }
 ];
 
 // Getting reference of product grid where cards will be shown
@@ -29,8 +29,8 @@ function renderProducts(data) {
     const stockBadge = p.stock === 0
       ? `<span class="badge out-of-stock">Out of Stock</span>`
       : p.stock < 5
-      ? `<span class="badge low-stock">&#9888; Low Stock</span>`
-      : "";
+        ? `<span class="badge low-stock">&#9888; Low Stock</span>`
+        : "";
 
     card.innerHTML = `
       <h3>${p.name} ${stockBadge}</h3>
@@ -70,11 +70,20 @@ window.onload = async function () {
 
 function updateAnalytics() {
   const selectedCategory = categoryFilter ? categoryFilter.value : "all";
+  const query = searchInput ? searchInput.value.toLowerCase() : "";
 
   // Show analytics for selected category only, or all if none selected
-  const data = selectedCategory === "all"
-    ? products
+  let data = selectedCategory === "all"
+    ? [...products]
     : products.filter(p => p.category === selectedCategory);
+
+  if (query) {
+    data = data.filter(p => p.name.toLowerCase().includes(query));
+  }
+
+  if (lowStockBtn && lowStockBtn.classList.contains("active")) {
+    data = data.filter(p => p.stock < 5);
+  }
 
   const total = data.length;
   const value = data.reduce((sum, p) => sum + (p.price * p.stock), 0);
@@ -119,7 +128,7 @@ function saveAndRender() {
   updateAnalytics();
 }
 
-document.getElementById("productForm").addEventListener("submit", function(e) {
+document.getElementById("productForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
   const name = document.getElementById("name").value;
@@ -242,7 +251,7 @@ function createEditModal() {
 
   document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
   document.getElementById("cancelEditBtn").addEventListener("click", closeEditModal);
-  document.getElementById("editModal").addEventListener("click", function(e) {
+  document.getElementById("editModal").addEventListener("click", function (e) {
     if (e.target === this) closeEditModal();
   });
 }
