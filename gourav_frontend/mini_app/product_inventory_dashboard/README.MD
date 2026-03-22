@@ -18,12 +18,12 @@ The application allows users to manage products by adding, deleting, searching, 
 
 mini_app/  
 └── product_inventory_dashboard/  
-    ├── index.html  
-    ├── css/  
-    │   └── style.css  
-    ├── js/  
-    │   └── script.js  
-    └── README.md  
+      ├── index.html  
+      ├── css/  
+      │   └── style.css  
+      ├── js/  
+      │   └── script.js  
+      └── README.md  
 
     ## How to Run  
 
@@ -144,7 +144,7 @@ Shows how the layout adapts for smaller screens, with stacked sections and a use
 ---
 ### Edit Product (Modal)  
 Allows users to update product details using a popup form without leaving the dashboard.  
-![Edit Product](./screenshots/edit.png)
+![Edit Product](./Screenshots/edit.png)
 
 ---
 
