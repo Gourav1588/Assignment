@@ -142,5 +142,10 @@ Shows how the layout adapts for smaller screens, with stacked sections and a use
 ![Mobile View](./Screenshots/mobile.png)
 
 ---
+### Edit Product (Modal)  
+Allows users to update product details using a popup form without leaving the dashboard.  
+![Edit Product](./screenshots/edit.png)
+
+---
 
 

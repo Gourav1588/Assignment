@@ -38,6 +38,7 @@ function renderProducts(data) {
       <p>Price: ₹${p.price}</p>
       <p>Stock: ${p.stock}</p>
       <button onclick="deleteProduct(${p.id})">Delete</button>
+      <button class="edit-btn" onclick="openEditModal(${p.id})">Edit</button>
     `;
 
     grid.appendChild(card);
@@ -64,6 +65,7 @@ window.onload = async function () {
   renderProducts(data);
   updateAnalytics();
   loadCategories();
+  createEditModal();
 };
 
 function updateAnalytics() {
@@ -208,3 +210,73 @@ lowStockBtn.addEventListener("click", function () {
   this.classList.toggle("active");
   applyFilters();
 });
+
+// ── Edit Feature ──────────────────────────────
+
+let editingId = null;
+
+function createEditModal() {
+  const modal = document.createElement("div");
+  modal.id = "editModal";
+  modal.innerHTML = `
+    <div id="editModalBox">
+      <h2>Edit Product</h2>
+      <label>Name</label>
+      <input type="text" id="editName">
+      <label>Price</label>
+      <input type="number" id="editPrice">
+      <label>Stock</label>
+      <input type="number" id="editStock">
+      <label>Category</label>
+      <select id="editCategory">
+        <option value="electronics">Electronics</option>
+        <option value="clothing">Clothing</option>
+        <option value="books">Books</option>
+        <option value="accessories">Accessories</option>
+      </select>
+      <button id="saveEditBtn">Save</button>
+      <button id="cancelEditBtn">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
+  document.getElementById("cancelEditBtn").addEventListener("click", closeEditModal);
+  document.getElementById("editModal").addEventListener("click", function(e) {
+    if (e.target === this) closeEditModal();
+  });
+}
+
+function openEditModal(id) {
+  const p = products.find(p => p.id === id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById("editName").value = p.name;
+  document.getElementById("editPrice").value = p.price;
+  document.getElementById("editStock").value = p.stock;
+  document.getElementById("editCategory").value = p.category;
+  document.getElementById("editModal").style.display = "flex";
+}
+
+function closeEditModal() {
+  document.getElementById("editModal").style.display = "none";
+  editingId = null;
+}
+
+function saveEdit() {
+  const name = document.getElementById("editName").value.trim();
+  const price = +document.getElementById("editPrice").value;
+  const stock = +document.getElementById("editStock").value;
+  const category = document.getElementById("editCategory").value;
+
+  if (!name || price <= 0 || stock < 0 || !category) {
+    alert("Invalid input");
+    return;
+  }
+
+  const index = products.findIndex(p => p.id === editingId);
+  products[index] = { id: editingId, name, price, stock, category };
+
+  closeEditModal();
+  saveAndRender();
+}

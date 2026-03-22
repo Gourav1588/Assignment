@@ -216,6 +216,21 @@ header h1 {
   opacity: 0.9;
 }
 
+#productGrid > div button.edit-btn {
+  background: transparent;
+  border: 1px solid #3a3760;
+  color: #c0bef0;
+  box-shadow: none;
+  margin-top: 8px;
+}
+
+#productGrid > div button.edit-btn:hover {
+  border-color: #a855f7;
+  color: #a855f7;
+  box-shadow: none;
+  opacity: 1;
+}
+
 #productGrid > p {
   grid-column: 1 / -1;
   text-align: center;
@@ -348,6 +363,94 @@ header h1 {
   transform: translateY(0);
 }
 
+/* ── Edit Modal ── */
+#editModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+#editModalBox {
+  background: #1c1b3a;
+  border: 1px solid #2e2b55;
+  border-radius: 14px;
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#editModalBox h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #c0bef0;
+  margin-bottom: 6px;
+}
+
+#editModalBox label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #7878aa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#editModalBox input,
+#editModalBox select {
+  padding: 9px 12px;
+  border: 1px solid #3a3760;
+  border-radius: 7px;
+  background: #12112a;
+  color: #e0dff8;
+  font-size: 0.88rem;
+  font-family: inherit;
+  outline: none;
+}
+
+#editModalBox input:focus,
+#editModalBox select:focus {
+  border-color: #a855f7;
+}
+
+#editModalBox select option {
+  background: #1c1b3a;
+}
+
+#saveEditBtn {
+  padding: 10px;
+  background: linear-gradient(135deg, #6c3fc5, #c042b8);
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+#cancelEditBtn {
+  padding: 10px;
+  background: transparent;
+  border: 1px solid #3a3760;
+  border-radius: 7px;
+  color: #8888bb;
+  font-size: 0.88rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+#cancelEditBtn:hover {
+  border-color: #a855f7;
+  color: #c0bef0;
+}
+
 /* ── Responsive ── */
 @media (max-width: 700px) {
   #analytics { grid-template-columns: 1fr 1fr; }
@@ -359,26 +462,4 @@ header h1 {
   #productForm { grid-template-columns: 1fr; }
   #controls { flex-direction: column; }
   #controls input, #controls select { width: 100%; }
-}
-
-/* ── Stock Badges ── */
-.badge {
-  display: inline-block;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 20px;
-  vertical-align: middle;
-}
-
-.low-stock {
-  background: rgba(220, 80, 80, 0.15);
-  color: #ff6b6b;
-  border: 1px solid #ff6b6b;
-}
-
-.out-of-stock {
-  background: rgba(180, 40, 40, 0.2);
-  color: #ff4444;
-  border: 1px solid #ff4444;
 }
