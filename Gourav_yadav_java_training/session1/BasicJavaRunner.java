@@ -6,10 +6,12 @@ public class BasicJavaRunner {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        CompareDemo demo = new CompareDemo();
 
         handleArea(scanner);
         handleMath(scanner);
         handlePatterns(scanner);
+         demo.showComparison();
 
         scanner.close();
     }
