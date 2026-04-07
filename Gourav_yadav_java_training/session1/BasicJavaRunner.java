@@ -7,6 +7,7 @@ public class BasicJavaRunner {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         CompareDemo demo = new CompareDemo();
+        NumberChecker checker = new NumberChecker();
 
         handleArea(scanner);
         handleMath(scanner);
@@ -14,6 +15,8 @@ public class BasicJavaRunner {
         demo.showComparison();
         handleOperatorDemo(scanner);
         handleTemperatureConversion(scanner);
+        handlePrimeCheck(scanner, checker);
+        handleLargestNumber(scanner, checker);
 
         scanner.close();
     }
@@ -202,4 +205,58 @@ public class BasicJavaRunner {
                 System.out.println("Invalid choice.");
         }
     }
+     
+
+    // ================= PRIME CHECK =================
+    private static void handlePrimeCheck(Scanner scanner, NumberChecker checker) {
+        System.out.println("\n=== Prime Number Check ===");
+        System.out.print("Enter a number: ");
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid input.");
+            scanner.next();
+            return;
+        }
+
+        int num = scanner.nextInt();
+
+        if (checker.isPrime(num)) {
+            System.out.println(num + " is a Prime number.");
+        } else {
+            System.out.println(num + " is NOT a Prime number.");
+        }
+    }
+
+    // ================= LARGEST NUMBER =================
+    private static void handleLargestNumber(Scanner scanner, NumberChecker checker) {
+        System.out.println("\n=== Find Largest of Three Numbers ===");
+
+        System.out.print("Enter three integers: ");
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid input.");
+            scanner.next();
+            return;
+        }
+        int a = scanner.nextInt();
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid input.");
+            scanner.next();
+            return;
+        }
+        int b = scanner.nextInt();
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid input.");
+            scanner.next();
+            return;
+        }
+        int c = scanner.nextInt();
+
+        int largest = checker.findLargest(a, b, c);
+        System.out.println("Largest number is: " + largest);
+    }
+
+
 }
