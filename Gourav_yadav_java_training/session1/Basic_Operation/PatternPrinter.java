@@ -1,4 +1,4 @@
-package Gourav_yadav_java_training.session1;
+package Gourav_yadav_java_training.session1.Basic_Operation;
 
 public class PatternPrinter {
 

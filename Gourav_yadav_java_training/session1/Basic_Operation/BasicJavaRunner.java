@@ -1,4 +1,4 @@
-package Gourav_yadav_java_training.session1;
+package Gourav_yadav_java_training.session1.Basic_Operation;
 
 import java.util.Scanner;
 
@@ -8,6 +8,7 @@ public class BasicJavaRunner {
         Scanner scanner = new Scanner(System.in);
         CompareDemo demo = new CompareDemo();
         NumberChecker checker = new NumberChecker();
+        LoopOperations loopOps = new LoopOperations();
 
         handleArea(scanner);
         handleMath(scanner);
@@ -17,6 +18,8 @@ public class BasicJavaRunner {
         handleTemperatureConversion(scanner);
         handlePrimeCheck(scanner, checker);
         handleLargestNumber(scanner, checker);
+         handleMultiplicationTable(scanner, loopOps);
+        handleSumOfEvens(loopOps);
 
         scanner.close();
     }
@@ -256,6 +259,29 @@ public class BasicJavaRunner {
 
         int largest = checker.findLargest(a, b, c);
         System.out.println("Largest number is: " + largest);
+    }
+
+     // ================= MULTIPLICATION TABLE =================
+    private static void handleMultiplicationTable(Scanner scanner, LoopOperations loopOps) {
+        System.out.println("\n=== Multiplication Table ===");
+        System.out.print("Enter a number: ");
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid input.");
+            scanner.next();
+            return;
+        }
+
+        int number = scanner.nextInt();
+        loopOps.printMultiplicationTable(number);
+    }
+
+    // ================= SUM OF EVEN NUMBERS =================
+    private static void handleSumOfEvens(LoopOperations loopOps) {
+        System.out.println("\n=== Sum of Even Numbers (1 to 10) ===");
+
+        int sum = loopOps.sumOfEvensToTen();
+        System.out.println("Sum of even numbers from 1 to 10 is: " + sum);
     }
 
 

@@ -1,10 +1,10 @@
-package Gourav_yadav_java_training.session1;
+package Gourav_yadav_java_training.session1.Basic_Operation;
 
 
 
 
 public class NumberChecker {
-    
+
     // Q1: Check if a number is prime using if-else
     public boolean isPrime(int n) {
         if (n <= 1) return false;
