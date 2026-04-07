@@ -6,7 +6,7 @@ public class BasicJavaRunner {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         AreaCalculator areaCalc = new AreaCalculator();
-        
+        MathOperations mathOps = new MathOperations();
 
         System.out.println("--- Area Calculation ---");
         System.out.println("Select Shape: 1. Circle | 2. Rectangle | 3. Triangle");
@@ -33,7 +33,18 @@ public class BasicJavaRunner {
             System.out.println("Invalid choice for Area Calculator.");
         }
 
-        
+        // Testing Even/Odd
+        System.out.print("\nEnter number to check Even/Odd: ");
+        int num = scanner.nextInt();
+        System.out.println(num + " is " + (mathOps.isEven(num) ? "Even" : "Odd"));
+
+        // Testing Factorial
+        System.out.print("\nEnter number for Factorial: ");
+        System.out.println("Factorial: " + mathOps.findFactorial(scanner.nextInt()));
+
+        // Testing Fibonacci
+        System.out.print("\nEnter Fibonacci limit: ");
+        mathOps.printFibonacci(scanner.nextInt());
 
         scanner.close();
     }
