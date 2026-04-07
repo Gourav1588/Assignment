@@ -11,7 +11,9 @@ public class BasicJavaRunner {
         handleArea(scanner);
         handleMath(scanner);
         handlePatterns(scanner);
-         demo.showComparison();
+        demo.showComparison();
+        handleOperatorDemo(scanner);
+        handleTemperatureConversion(scanner);
 
         scanner.close();
     }
@@ -121,6 +123,83 @@ public class BasicJavaRunner {
         } else {
             System.out.println("Invalid input.");
             scanner.next();
+        }
+    }
+
+
+     // ================= OPERATOR DEMO HANDLER =================
+    private static void handleOperatorDemo(Scanner scanner) {
+        OperatorDemo demo = new OperatorDemo();
+
+        System.out.println("\n=== Operator Demonstration ===");
+
+        // Input for a
+        System.out.print("Enter value for a: ");
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid input for a.");
+            scanner.next(); // clear invalid input
+            return;
+        }
+        int a = scanner.nextInt();
+
+        // Input for b
+        System.out.print("Enter value for b: ");
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid input for b.");
+            scanner.next(); // clear invalid input
+            return;
+        }
+        int b = scanner.nextInt();
+
+        // Running  demo
+        demo.runDemo(a, b);
+    }
+
+
+     // ================= TEMPERATURE CONVERSION HANDLER =================
+    private static void handleTemperatureConversion(Scanner scanner) {
+        TempConverter converter = new TempConverter();
+
+        System.out.println("\n=== Temperature Converter ===");
+        System.out.println("Choose conversion type:");
+        System.out.println("1. Celsius to Fahrenheit");
+        System.out.println("2. Fahrenheit to Celsius");
+
+        if (!scanner.hasNextInt()) {
+            System.out.println("Invalid choice.");
+            scanner.next();
+            return;
+        }
+
+        int choice = scanner.nextInt();
+
+        switch (choice) {
+            case 1:
+                System.out.print("Enter temperature in Celsius: ");
+                if (scanner.hasNextDouble()) {
+                    double celsius = scanner.nextDouble();
+                    double result = converter.toFahrenheit(celsius);
+                    System.out.println("Fahrenheit: " + result);
+                } else {
+                    System.out.println("Invalid input.");
+                    scanner.next();
+                }
+                break;
+
+            case 2:
+                System.out.print("Enter temperature in Fahrenheit: ");
+                if (scanner.hasNextDouble()) {
+                    double fahrenheit = scanner.nextDouble();
+                    double result = converter.toCelsius(fahrenheit);
+                    System.out.println("Celsius: " + result);
+                } else {
+                    System.out.println("Invalid input.");
+                    scanner.next();
+                }
+                break;
+
+            default:
+                System.out.println("Invalid choice.");
         }
     }
 }
