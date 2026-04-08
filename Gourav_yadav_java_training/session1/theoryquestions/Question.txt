@@ -1,0 +1,18 @@
+
+(Q1)  Explain the difference between primitive and reference data types with examples.
+
+.Primitive data types store the actual value directly in memory (stack).
+ Examples: int, char, boolean, double
+
+.Reference data types store the memory address (reference) of an object, not the actual data.
+ Examples: String, arrays, objects
+ 
+
+ int a = 10, b = 10;
+ System.out.println(a == b); // true → compares actual values
+
+ String s1 = new String("Hello");
+ String s2 = new String("Hello");
+
+ System.out.println(s1 == s2);        // false → compares memory addresses
+ System.out.println(s1.equals(s2));   // true → compares actual content
