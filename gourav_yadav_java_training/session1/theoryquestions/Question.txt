@@ -1,0 +1,129 @@
+
+(Q1)  Explain the difference between primitive and reference data types with examples.
+
+.Primitive data types store the actual value directly in memory (stack).
+ Examples: int, char, boolean, double
+
+.Reference data types store the memory address (reference) of an object, not the actual data.
+ Examples: String, arrays, objects
+ 
+
+ int a = 10, b = 10;
+ System.out.println(a == b); // true → compares actual values
+
+ String s1 = new String("Hello");
+ String s2 = new String("Hello");
+
+ System.out.println(s1 == s2);        // false → compares memory addresses
+ System.out.println(s1.equals(s2));   // true → compares actual content
+
+ --------------------------------------------------------------------------------------------------------------------------------------------------
+
+ (Q2) Explain the concept of encapsulation with a suitable example.
+
+ Encapsulation is the concept of wrapping data (variables) and methods (functions) into a single unit (class) and restricting direct access to the data.
+
+ . It is achieved using:
+
+    Private variables
+    Public getter and setter methods
+
+
+class Student {
+
+    // Private variable (data hiding)
+    private String name;
+
+    // Getter method (to read data)
+    public String getName() {
+        return name;
+    }
+
+    // Setter method (to update data)
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+
+        Student s = new Student();
+
+        // Setting value using setter
+        s.setName("Gourav");
+
+        // Getting value using getter
+        System.out.println(s.getName());
+    }
+}
+
+. Explanation
+   name is private → cannot be accessed directly
+   Access is controlled using getName() and setName()
+   This ensures data hiding and security
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+(Q3) Explain the concept of interfaces and abstract classes with examples. Create a program to handle exceptions using try-catch blocks.
+
+  In Java, both interfaces and abstract classes are used to achieve abstraction, but they are used in slightly different situations.
+
+  An interface is like a blueprint that contains only method declarations (without implementation). A class that implements an interface
+  
+  must provide the implementation of all its methods. It is mainly used when we want to achieve full abstraction and allow multiple inheritance.
+  
+  Example:
+ 
+  interface Animal {
+    void sound();
+  }
+
+ class Dog implements Animal {
+    public void sound() {
+        System.out.println("Dog barks");
+    }
+ } 
+
+
+On the other hand, an abstract class can have both abstract methods (without body) and normal methods (with body). 
+It is used when some common functionality needs to be shared among different classes.
+
+abstract class Animal {
+    abstract void sound();
+
+    void sleep() {
+        System.out.println("Animal is sleeping");
+    }
+}
+
+class Dog extends Animal {
+    void sound() {
+        System.out.println("Dog barks");
+    }
+}
+
+In short, interfaces provide complete abstraction, while abstract classes provide partial abstraction.
+
+
+ * Exception Handling using try-catch
+
+ Exception handling is used to handle runtime errors so that the program does not crash and continues execution smoothly
+ public class ExceptionDemo {
+    public static void main(String[] args) {
+
+        try {
+            int a = 10;
+            int b = 0;
+
+            int result = a / b; // may cause error
+            System.out.println(result);
+        } 
+        catch (ArithmeticException e) {
+            System.out.println("Cannot divide by zero");
+        }
+
+        System.out.println("Program continues...");
+    }
+}
