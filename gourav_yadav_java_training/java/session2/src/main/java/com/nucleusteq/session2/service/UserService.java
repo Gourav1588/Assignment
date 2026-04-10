@@ -1,0 +1,42 @@
+package com.nucleusteq.session2.service;
+
+import com.nucleusteq.session2.model.User;
+import com.nucleusteq.session2.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * Service layer for User.
+ * Contains all business logic for user operations.
+ */
+@Service
+public class UserService {
+
+    // Repository instance injected via constructor
+    private final UserRepository userRepository;
+
+    /**
+     * Constructor injection of UserRepository.
+     */
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    // Fetches all users from repository
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    // Fetches a single user by id from repository
+    public User getUserById(int id) {
+        return userRepository.findById(id);
+    }
+
+    // Assigns new id to user and saves via repository
+    public User createUser(User user) {
+        int newId = userRepository.findAll().size() + 1;
+        user.setId(newId);
+        return userRepository.save(user);
+    }
+}
