@@ -13,6 +13,12 @@ import java.util.List;
 @Repository
 public class UserRepository {
 
+
+
+    // Tracks the last assigned id
+    // Increments every time a new user is added
+    private int currentId = 0;
+
     // In-memory list to store users (acts as our database)
     private final List<User> userList = new ArrayList<>();
 
@@ -23,6 +29,11 @@ public class UserRepository {
         userList.add(new User(1, "Gourav", "gourav@gmail.com"));
         userList.add(new User(2, "Rahul", "rahul@gmail.com"));
         userList.add(new User(3, "Priya", "priya@gmail.com"));
+
+
+
+        // set currentId to last existing user id
+        currentId = userList.size();
     }
 
     // Returns all users from the list
@@ -42,7 +53,9 @@ public class UserRepository {
     }
 
     // Adds a new user to the list
+    // Assigns new id automatically and saves user
     public User save(User user) {
+        user.setId(++currentId);
         userList.add(user);
         return user;
     }

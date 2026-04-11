@@ -23,7 +23,7 @@ public class MessageController {
     }
 
     // This method handles GET requests like:
-    // http://localhost:8080/message?type=morning
+    // http://localhost:8080/message?type=short
     @GetMapping
     public String getMessage(@RequestParam String type) {
 

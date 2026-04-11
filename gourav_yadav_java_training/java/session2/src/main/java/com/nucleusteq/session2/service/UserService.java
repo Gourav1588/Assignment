@@ -42,8 +42,6 @@ public class UserService {
 
     // Assigns new id to user and saves via repository
     public User createUser(User user) {
-        int newId = userRepository.findAll().size() + 1;
-        user.setId(newId);
         return userRepository.save(user);
     }
 }
