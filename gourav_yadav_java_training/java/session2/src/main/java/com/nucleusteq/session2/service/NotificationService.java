@@ -4,7 +4,6 @@ import com.nucleusteq.session2.component.NotificationComponent;
 import org.springframework.stereotype.Service;
 
 /**
- * Service layer for Notification.
  * Uses NotificationComponent to generate messages.
  */
 @Service

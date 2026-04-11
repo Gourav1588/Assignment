@@ -37,8 +37,10 @@ public class MessageService {
         MessageFormatter formatter = formatters.get(type.toUpperCase());
 
 
+        // Throw when invalid type passed
         if (formatter == null) {
-            return "Invalid type! Use SHORT or LONG.";
+            throw new IllegalArgumentException(
+                    "Invalid type: " + type + ". Please use SHORT or LONG.");
         }
 
         return formatter.format();

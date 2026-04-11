@@ -3,11 +3,12 @@ package com.nucleusteq.session2.service;
 import com.nucleusteq.session2.model.User;
 import com.nucleusteq.session2.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import com.nucleusteq.session2.exception.ResourceNotFoundException;
 
 import java.util.List;
 
 /**
- * Service layer for User.
+
  * Contains all business logic for user operations.
  */
 @Service
@@ -29,8 +30,14 @@ public class UserService {
     }
 
     // Fetches a single user by id from repository
+    // Throw when user not found
     public User getUserById(int id) {
-        return userRepository.findById(id);
+        User user = userRepository.findById(id);
+        if (user == null) {
+            throw new ResourceNotFoundException(
+                    "User not found with id: " + id);
+        }
+        return user;
     }
 
     // Assigns new id to user and saves via repository
