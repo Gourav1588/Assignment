@@ -1,2 +1,0 @@
-Java Assignment 2026 - File I/O Task
-Written successfully using BufferedWriter.
