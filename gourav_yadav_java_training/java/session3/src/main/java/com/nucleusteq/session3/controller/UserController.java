@@ -57,4 +57,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("User submitted successfully.");
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(
+            @PathVariable int id,
+            @RequestParam(required = false) Boolean confirm) {
+
+        String response = userService.deleteUser(id, confirm);
+        return ResponseEntity.ok(response);
+    }
 }

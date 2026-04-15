@@ -23,13 +23,13 @@ public class UserRepository {
      */
     public UserRepository() {
 
-        users.add(new User(1, "Priya", 25, "ADMIN"));
-        users.add(new User(2, "Rahul", 30, "USER"));
-        users.add(new User(3, "Anjali", 28, "USER"));
+        users.add(new User(1, "Mayur", 25, "ADMIN"));
+        users.add(new User(2, "Niraj", 30, "USER"));
+        users.add(new User(3, "Ajay", 28, "USER"));
         users.add(new User(4, "Gourav", 30, "ADMIN"));
-        users.add(new User(5, "Sneha", 22, "USER"));
-        users.add(new User(6, "Arjun", 35, "MANAGER"));
-        users.add(new User(7, "Meera", 28, "USER"));
+        users.add(new User(5, "vikas", 22, "USER"));
+        users.add(new User(6, "Ankit", 35, "MANAGER"));
+        users.add(new User(7, "Monu", 28, "USER"));
     }
 
     /**
