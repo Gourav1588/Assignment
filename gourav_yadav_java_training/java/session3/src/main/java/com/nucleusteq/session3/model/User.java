@@ -6,17 +6,19 @@ package com.nucleusteq.session3.model;
  * between different layers like controller, service, and repository.
  */
 public class User {
-    private int id;
+    private Integer id;
     private String name;
 
     // Stores the age of the user
-    private int age;
+    private Integer age;
     private String role;
 
     /*
      * Instead of setting values one by one, we initialize everything at once.
      */
-    public User(int id, String name, int age, String role) {
+
+    public User() {}
+    public User(Integer id, String name, Integer age, String role) {
         this.id = id;
         this.name = name;
         this.age = age;
@@ -25,7 +27,7 @@ public class User {
 
     // Getter methods are used to read/access the values of variables
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -33,7 +35,7 @@ public class User {
         return name;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
@@ -43,7 +45,7 @@ public class User {
 
     // Setter methods are used to update/change the values when needed
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -51,7 +53,7 @@ public class User {
         this.name = name;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 

@@ -40,7 +40,7 @@ public class UserService {
         // Apply an exact match filter for age if the parameter is present.
         if (age != null) {
             result = result.stream()
-                    .filter(u -> u.getAge()==(age))
+                    .filter(u -> u.getAge().equals(age))
                     .collect(Collectors.toList());
         }
 
@@ -53,5 +53,40 @@ public class UserService {
 
         // Returns all users if no parameters were passed, or the filtered list otherwise.
         return result;
+    }
+
+    public boolean validateAndSave(User user) {
+
+        // Validation
+        if (user.getId() == null) return false;
+
+        if (user.getName() == null || user.getName().trim().isEmpty()) return false;
+
+        if (user.getAge() == null || user.getAge() <= 0) return false;
+
+        if (user.getRole() == null || user.getRole().trim().isEmpty()) return false;
+
+        //  Duplicate ID check.
+        boolean exists = userRepository.findAll()
+                .stream()
+                .anyMatch(u -> u.getId().equals(user.getId()));
+
+        if (exists) return false;
+
+        // Save user if valid
+        userRepository.save(user);
+
+        return true;
+    }
+
+    public String deleteUser(int id, Boolean confirm) {
+        if (confirm == null || !confirm) {
+            return "Confirmation required"; // confirmation is required before deleting.
+        }
+
+        // here we  calls the repository to remove the data
+        boolean isDeleted = userRepository.deleteUserById(id);
+
+        return isDeleted ? "User deleted successfully" : "User not found";
     }
 }
