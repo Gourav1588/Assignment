@@ -44,4 +44,8 @@ public class UserRepository {
         // This  removes the user from the 'users' list
         return users.removeIf(user -> user.getId() == id);
     }
+
+    public void save(User user) {
+        users.add(user);
+    }
 }

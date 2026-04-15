@@ -40,7 +40,7 @@ public class UserService {
         // Apply an exact match filter for age if the parameter is present.
         if (age != null) {
             result = result.stream()
-                    .filter(u -> u.getAge()==(age))
+                    .filter(u -> u.getAge().equals(age))
                     .collect(Collectors.toList());
         }
 
@@ -55,26 +55,28 @@ public class UserService {
         return result;
     }
 
-    public String validateAndSubmit(User user) {
-        // validation for null or empty values
+    public boolean validateAndSave(User user) {
 
-        if (user.getId() == null) {
-            return "invalid";
-        }
+        // Validation
+        if (user.getId() == null) return false;
 
-        if (user.getName() == null || user.getName().trim().isEmpty()) {
-            return "invalid";
-        }
+        if (user.getName() == null || user.getName().trim().isEmpty()) return false;
 
-        if (user.getAge()== null || user.getAge() <= 0) {
-            return "invalid";
-        }
+        if (user.getAge() == null || user.getAge() <= 0) return false;
 
-        if (user.getRole() == null || user.getRole().trim().isEmpty()) {
-            return "invalid";
-        }
+        if (user.getRole() == null || user.getRole().trim().isEmpty()) return false;
 
-        return "success";
+        //  Duplicate ID check.
+        boolean exists = userRepository.findAll()
+                .stream()
+                .anyMatch(u -> u.getId().equals(user.getId()));
+
+        if (exists) return false;
+
+        // Save user if valid
+        userRepository.save(user);
+
+        return true;
     }
 
     public String deleteUser(int id, Boolean confirm) {

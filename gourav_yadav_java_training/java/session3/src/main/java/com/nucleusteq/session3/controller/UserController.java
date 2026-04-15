@@ -44,16 +44,13 @@ public class UserController {
     @PostMapping("/submit")
     public ResponseEntity<String> submitUser(@RequestBody User user) {
 
-        // Let the service handle validation and business logic
-        String result = userService.validateAndSubmit(user);
+        boolean isValid = userService.validateAndSave(user);
 
-        // If validation fails, return a 400 Bad Request
-        if ("invalid".equalsIgnoreCase(result)) {
+        if (!isValid) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid input. Please provide a valid id , name, age, and role.");
+                    .body("Invalid input. Please provide valid id, name, age, and role.");
         }
 
-        // If everything is fine, return 201 Created
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("User submitted successfully.");
     }
@@ -64,6 +61,9 @@ public class UserController {
             @RequestParam(required = false) Boolean confirm) {
 
         String response = userService.deleteUser(id, confirm);
+        if (response.equals("Confirmation required")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
         return ResponseEntity.ok(response);
     }
 }
