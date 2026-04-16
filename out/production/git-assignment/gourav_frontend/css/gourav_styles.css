@@ -1,0 +1,234 @@
+/* ===== GLOBAL RESET ===== */
+/* Reset removes any default padding set by web browsers */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===== BODY STYLING ===== */
+/* Using a simple font to make it easy to read */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f8;
+  color: #333; 
+  line-height: 1.6; 
+}
+
+/* ===== HEADER ===== */
+/* Centered layout for good presentation */
+header {
+  text-align: center;
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px;
+}
+header h1 {
+  font-size: 2.5rem; /* Specific requirement for heading font-size */
+}
+/* Profile image style */
+header img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%; /* makes image circular */
+  margin-top: 10px;
+}
+/* ===== NAVIGATION ===== */
+/* Uses  Flexbox for horizontal layout */
+nav ul {
+  display: flex;
+  justify-content: center;
+  list-style: none; /* removes bullets */
+  background-color: #34495e;
+}
+
+nav ul li {
+  margin: 10px;
+}
+
+/*  links */
+nav ul li a {
+  text-decoration: none;
+  color: white;
+  padding: 8px 12px;
+  transition: 0.3s;
+}
+
+/* Improved UI with a hover effect*/
+nav ul li a:hover {
+  background-color: #1abc9c;
+  border-radius: 5px;
+}
+
+/* Highlights the entire section when the user jumps to it via the nav */
+section:target {
+  border: 2px solid #1abc9c;
+  box-shadow: 0 0 15px rgba(26, 188, 156, 0.3); 
+  padding: 20px;
+}
+
+/* Adding layout structure and spacing to all portfolio sections */
+section {
+  margin: 40px auto; 
+  padding: 30px; 
+  max-width: 900px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+}
+
+/* ===== SKILLS SECTION ===== */
+
+#skills ul {
+  line-height: 2;
+  padding-left: 20px;
+}
+
+/*  Use font-weight to differentiate levels  */
+#skills > ul > li {
+  font-weight: bold; 
+  color: #2c3e50;
+}
+
+
+#skills ul ul li {
+  font-weight: normal; 
+  color: #1abc9c;
+}
+/* =====  EDUCATION  SECTION ===== */
+/* Improve table styling to enhance readability */
+table {
+  width: 100%;
+  border-collapse: collapse; /* remove the double border */
+  margin-top: 10px; 
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  
+}
+table th {
+  background-color: #2c3e50; /* Matches  header theme */
+  color: white;
+  text-align: center; 
+}
+
+/* Use alternating row colors to improve the user interface */
+table tr:nth-child(even) {
+  background-color: #f2f2f2; 
+}
+/* ===== PROJECTS SECTION STYLING ===== */
+
+#projects ol li {
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+/* Styling project titles */
+#projects strong {
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+/*  project links */
+#projects a {
+  color: #3498db; 
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+/*  Add hover color effects */
+#projects a:hover {
+  color: #e74c3c; 
+  text-decoration: underline;
+}/* ===== CONTACT FORM STYLING ===== */
+
+form {
+  max-width: 500px;
+  margin: 20px auto; 
+}
+
+/*  Align labels properly above inputs */
+form label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+/* Style all input fields uniformly (including select and textarea) */
+form input[type="text"],
+form input[type="email"],
+form select,
+form textarea {
+  width: 100%; 
+  padding: 10px; 
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; 
+}
+
+/*  Style the submit button */
+form input[type="submit"] {
+  margin-top: 20px;
+  padding: 12px;
+  width: 100%;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer; 
+  font-size: 1rem;
+  transition: background 0.3s; 
+}
+
+/* Hover effect for better UI/UX */
+form input[type="submit"]:hover {
+  background-color: #1abc9c;
+}
+/* ===== FOOTER STYLING ===== */
+/*In this i  Center content, apply background, and reduce font size */
+footer {
+  text-align: center; 
+  background-color: #2c3e50; 
+  color: white;
+  padding: 20px; 
+  font-size: 0.85rem; 
+  margin-top: 40px; 
+}
+
+/* Styling the footer link for better UI/UX */
+footer a {
+  color: #1abc9c; 
+  text-decoration: none;
+  font-weight: bold;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+
+/* ===== RESPONSIVE DESIGN ===== */
+/* Mobile friendly layout */
+@media (max-width: 768px) {
+
+  /* Stack navigation vertically */
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Reduce space for small screens */
+  section {
+    margin: 10px;
+    padding: 10px;
+  }
+
+  /* Make form fit mobile */
+  form {
+    width: 90%;
+  }
+}
