@@ -56,7 +56,7 @@ public class TodoService {
                     (todo.getStatus() == Todo.Status.COMPLETED && dto.getStatus() == Todo.Status.PENDING)) {
                 todo.setStatus(dto.getStatus());
             } else {
-                throw new RuntimeException("Invalid status transition");
+                throw new IllegalArgumentException("Invalid status transition");
             }
         }
 

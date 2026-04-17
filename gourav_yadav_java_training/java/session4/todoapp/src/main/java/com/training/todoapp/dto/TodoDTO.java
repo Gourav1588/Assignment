@@ -16,7 +16,7 @@ public class TodoDTO {
 
     private String description;
 
-    @NotNull(message = "Status cannot be null")
+
     private Status status;// Optional → defaults to PENDING in backend
 
     public TodoDTO() {}
