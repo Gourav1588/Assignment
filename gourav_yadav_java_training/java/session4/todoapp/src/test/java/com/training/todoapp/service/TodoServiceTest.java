@@ -44,7 +44,7 @@ class TodoServiceTest {
         when(todoRepository.save(any())).thenReturn(pendingTodo);
 
         TodoDTO result = todoService.createTodo(buildDto("Buy groceries", null, null));
-
+        assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getTitle()).isEqualTo("Buy groceries");
         assertThat(result.getStatus()).isEqualTo(Status.PENDING);
         verify(notificationClient).onTodoCreated(1L, "Buy groceries");
