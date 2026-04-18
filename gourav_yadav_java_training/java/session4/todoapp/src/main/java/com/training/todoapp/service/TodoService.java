@@ -1,85 +1,110 @@
 package com.training.todoapp.service;
 
+import com.training.todoapp.client.NotificationServiceClient;
 import com.training.todoapp.dto.TodoDTO;
 import com.training.todoapp.entity.Todo;
+import com.training.todoapp.entity.Todo.Status;
 import com.training.todoapp.exception.TodoNotFoundException;
 import com.training.todoapp.repository.TodoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+// I'm marking this with @Service to hold all the core business logic and data mapping.
 @Service
 public class TodoService {
 
+    private static final Logger log = LoggerFactory.getLogger(TodoService.class);
+
     private final TodoRepository todoRepository;
+    private final NotificationServiceClient notificationClient;
 
-    // Constructor injection for required dependencies
-    public TodoService(TodoRepository todoRepository) {
+    // I'm using constructor injection for dependencies.
+    public TodoService(TodoRepository todoRepository,
+                       NotificationServiceClient notificationClient) {
         this.todoRepository = todoRepository;
+        this.notificationClient = notificationClient;
     }
 
-    /**
-     * Creates a new Todo task with default status and timestamp.
-     */
     public TodoDTO createTodo(TodoDTO dto) {
-        Todo todo = new Todo(dto.getTitle(), dto.getDescription(), dto.getStatus());
-        return convertToDTO(todoRepository.save(todo));
+        log.debug("Creating todo, title='{}'", dto.getTitle());
+
+        Todo saved = todoRepository.save(
+                new Todo(dto.getTitle(), dto.getDescription(), dto.getStatus())
+        );
+
+        log.info("Todo created [id={}]", saved.getId());
+
+        // I'm firing the simulated event only after a successful database save.
+        notificationClient.onTodoCreated(saved.getId(), saved.getTitle());
+
+        return toDTO(saved);
     }
 
-    /**
-     * Retrieves all Todo tasks from the database.
-     */
     public List<TodoDTO> getAllTodos() {
-        return todoRepository.findAll().stream()
-                .map(this::convertToDTO)
+        log.debug("Fetching all todos");
+        return todoRepository.findAll()
+                .stream()
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Retrieves a single Todo by its ID. Throws an exception if not found.
-     */
     public TodoDTO getTodoById(Long id) {
-        return convertToDTO(getTodoEntity(id));
+        log.debug("Fetching todo [id={}]", id);
+        return toDTO(findOrThrow(id));
     }
 
-    /**
-     * Updates an existing Todo. Enforces status transition rules.
-     */
     public TodoDTO updateTodo(Long id, TodoDTO dto) {
-        Todo todo = getTodoEntity(id);
+        log.debug("Updating todo [id={}]", id);
 
-        // Prevent invalid same-state transitions (e.g., PENDING -> PENDING)
+        Todo todo = findOrThrow(id);
+
         if (dto.getStatus() != null) {
-            if (todo.getStatus().equals(dto.getStatus())) {
-                throw new IllegalArgumentException("Invalid transition. Status is already " + todo.getStatus());
+            // I strictly enforce state transitions to prevent redundant database calls.
+            if (todo.getStatus() == dto.getStatus()) {
+                throw new IllegalArgumentException(
+                        "Status is already " + dto.getStatus() + " — no transition needed");
             }
+            String previous = todo.getStatus().name();
             todo.setStatus(dto.getStatus());
+            notificationClient.onTodoStatusChanged(id, previous, dto.getStatus().name());
         }
 
-        // Apply partial updates if fields are provided
-        if (dto.getTitle() != null) todo.setTitle(dto.getTitle());
+        if (dto.getTitle() != null)       todo.setTitle(dto.getTitle());
         if (dto.getDescription() != null) todo.setDescription(dto.getDescription());
 
-        return convertToDTO(todoRepository.save(todo));
+        Todo updated = todoRepository.save(todo);
+        log.info("Todo updated [id={}]", id);
+
+        return toDTO(updated);
     }
 
-    /**
-     * Deletes a Todo by its ID.
-     */
-    public String deleteTodo(Long id) {
-        todoRepository.delete(getTodoEntity(id));
-        return "Todo with id " + id + " deleted successfully";
+    // I've changed this to void to follow RESTful semantics for the DELETE endpoint.
+    public void deleteTodo(Long id) {
+        log.debug("Deleting todo [id={}]", id);
+
+        todoRepository.delete(findOrThrow(id));
+        notificationClient.onTodoDeleted(id);
+
+        log.info("Todo deleted [id={}]", id);
     }
 
-    // Helper method to fetch entity and handle 404s
-    private Todo getTodoEntity(Long id) {
+    // -------------------------------------------------------------------------
+
+    // I use this private helper to centralize the 404 Exception logic.
+    private Todo findOrThrow(Long id) {
         return todoRepository.findById(id)
-                .orElseThrow(() -> new TodoNotFoundException("Todo not found with id: " + id));
+                .orElseThrow(() -> {
+                    log.warn("Todo not found [id={}]", id);
+                    return new TodoNotFoundException("Todo not found with id: " + id);
+                });
     }
 
-    // Manual mapping from Entity to DTO to prevent exposing database models
-    private TodoDTO convertToDTO(Todo todo) {
+    // I manually map Entity to DTO here to prevent exposing internal database fields to the user.
+    private TodoDTO toDTO(Todo todo) {
         TodoDTO dto = new TodoDTO();
         dto.setId(todo.getId());
         dto.setTitle(todo.getTitle());
