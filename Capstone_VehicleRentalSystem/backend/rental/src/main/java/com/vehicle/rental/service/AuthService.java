@@ -70,7 +70,7 @@ public class AuthService {
         if (!passwordEncoder.matches(
                 request.getPassword(), user.getPassword())) {
 
-            throw new BadRequestException("Invalid email or password");
+            throw new BadRequestException(" password");
         }
 
         log.debug("Login successful for: {}", request.getEmail());
