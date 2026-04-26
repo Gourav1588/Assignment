@@ -36,14 +36,8 @@ public class SecurityConfig {
 
                 // Define which endpoints are public and which require authentication
                 .authorizeHttpRequests(auth -> auth
-
-                        // Public endpoints (no authentication required)
-                        .requestMatchers(
-                                "/api/auth/login",
-                                "/api/auth/register"
-                        ).permitAll()
-
-                        // All other endpoints require authentication
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/vehicles/**").permitAll()
                         .anyRequest().authenticated()
                 )
 
