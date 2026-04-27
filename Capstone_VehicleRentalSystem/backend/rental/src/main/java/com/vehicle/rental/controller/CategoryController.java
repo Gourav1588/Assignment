@@ -58,21 +58,5 @@ public class CategoryController {
         );
     }
 
-    // Delete a category (Admin only)
-    // Performs validation before deletion (handled in service)
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> deleteCategory(
-            @PathVariable Long id) {
 
-        categoryService.deleteCategory(id);
-
-        // Return standardized success response
-        return ResponseEntity.ok(
-                new ApiResponse(
-                        "Category deleted successfully",
-                        true
-                )
-        );
-    }
 }

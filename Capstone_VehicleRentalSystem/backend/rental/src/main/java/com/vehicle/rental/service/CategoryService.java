@@ -66,14 +66,4 @@ public class CategoryService {
         return categoryMapper.toResponse(categoryRepository.save(existing));
     }
 
-    @Transactional
-    public void deleteCategory(Long id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Category not found");
-        }
-        if (vehicleRepository.existsByCategoryId(id)) {
-            throw new BadRequestException("Cannot delete category — linked to vehicles");
-        }
-        categoryRepository.deleteById(id);
-    }
 }

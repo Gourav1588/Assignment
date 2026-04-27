@@ -52,6 +52,7 @@ async function loadUserBookings() {
 }
 
 // 3. DYNAMIC UI RENDERING
+// 3. DYNAMIC UI RENDERING
 function renderBookings(bookings) {
     const container = document.getElementById('bookingsContainer');
 
@@ -64,9 +65,15 @@ function renderBookings(bookings) {
         return;
     }
 
-    // Maps BookingResponse fields: vehicleName, id, startDate, endDate, status, totalCost
     container.innerHTML = bookings.map(b => {
         const statusClass = b.status ? b.status.toLowerCase() : 'pending';
+
+
+        let actionButton = '';
+        if (b.status === 'PENDING' || b.status === 'ACTIVE') {
+            actionButton = `<button onclick="cancelBooking(${b.id})" style="background: transparent; color: #dc3545; border: 1px solid #dc3545; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: 600; width: 100%;">Cancel Booking</button>`;
+        }
+
 
         return `
             <div class="booking-card">
@@ -83,10 +90,10 @@ function renderBookings(bookings) {
                         <div class="dates">${b.startDate} ➔ ${b.endDate}</div>
                     </div>
                 </div>
-                <div class="booking-status">
+                <div class="booking-status" style="display: flex; flex-direction: column; align-items: flex-end;">
                     <div class="status-badge status-${statusClass}">${b.status}</div>
-                    <div class="booking-price">₹${b.totalCost.toLocaleString()}</div>
-                </div>
+                    <div class="booking-price" style="margin-bottom: 5px;">₹${b.totalCost.toLocaleString()}</div>
+                    ${actionButton} </div>
             </div>
         `;
     }).join('');
@@ -101,6 +108,32 @@ function switchTab(tabId) {
     // 2. Apply: Turn ON the active class for the specific button and tab
     document.getElementById('btn-' + tabId).classList.add('active');
     document.getElementById(tabId).classList.add('active');
+}
+
+// Cancel an active or pending booking
+async function cancelBooking(bookingId) {
+    if (!confirm("Are you sure you want to cancel this booking?")) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/cancel`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            alert("Booking successfully cancelled!");
+            loadUserBookings(); // Reload the list to show the updated status
+        } else {
+            const error = await response.json();
+            alert(error.message || "Failed to cancel the booking.");
+        }
+    } catch (err) {
+        console.error("Cancel Error:", err);
+        alert("Server connection failed.");
+    }
 }
 
 // 5. LOGOUT

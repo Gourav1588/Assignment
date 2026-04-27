@@ -68,15 +68,18 @@ public class VehicleService {
     @Transactional
     public VehicleResponse createVehicle(VehicleRequest request) {
         String normalizedName = request.getName().trim();
+        String normalizedPlate = request.getRegistrationNumber().trim();
 
-        // Prevent duplicate vehicle names
-        if (vehicleRepository.existsByNameIgnoreCase(normalizedName)) {
-            throw new BadRequestException("Vehicle already exists");
+
+        // Prevent duplicate Registration Numbers ---
+        if (vehicleRepository.existsByRegistrationNumberIgnoreCase(normalizedPlate)) {
+            throw new BadRequestException("A vehicle with registration number " + normalizedPlate + " already exists in the fleet.");
         }
 
         // Convert DTO → entity
         Vehicle vehicle = vehicleMapper.toEntity(request);
         vehicle.setName(normalizedName); // Ensure clean name
+        // (Note: vehicleMapper.toEntity already sets the registrationNumber)
 
         // Attach category if provided
         if (request.getCategoryId() != null) {
@@ -98,6 +101,17 @@ public class VehicleService {
         Vehicle existing = vehicleRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Vehicle not found"));
+
+        String newPlate = request.getRegistrationNumber().trim();
+
+        // --- NEW LOGIC: Check plate uniqueness during update ---
+        // Only check if they are actually changing the plate to something new
+        if (!existing.getRegistrationNumber().equalsIgnoreCase(newPlate)) {
+            if (vehicleRepository.existsByRegistrationNumberIgnoreCase(newPlate)) {
+                throw new BadRequestException("A vehicle with registration number " + newPlate + " already exists.");
+            }
+            existing.setRegistrationNumber(newPlate.toUpperCase());
+        }
 
         // Update fields
         existing.setName(request.getName().trim());
