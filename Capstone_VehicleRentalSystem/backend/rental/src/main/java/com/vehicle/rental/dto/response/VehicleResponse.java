@@ -13,6 +13,8 @@ public class VehicleResponse {
     // Name of the vehicle
     private String name;
 
+    private String registrationNumber;
+
     // Type of the vehicle (e.g., CAR, BIKE)
     private VehicleType type;
 

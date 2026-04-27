@@ -31,7 +31,8 @@ public class Vehicle {
     @Column(nullable = false)
     private VehicleType type;
 
-    // The Soft Delete.
+    @Column(name = "registration_number", unique = true, nullable = false)
+    private String registrationNumber;
 
     @Column(nullable = false)
     private boolean isActive = true;

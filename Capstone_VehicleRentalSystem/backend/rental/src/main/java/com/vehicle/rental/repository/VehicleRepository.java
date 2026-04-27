@@ -28,15 +28,13 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
             @Param("categoryId") Long categoryId,
             Pageable pageable);
 
-    // Check if any vehicle exists for a given category
-    // Useful before deleting a category to prevent orphan records
-    boolean existsByCategoryId(Long categoryId);
-
     // Check if a vehicle exists and is currently active
     // Commonly used before performing operations like soft delete
     boolean existsByIdAndIsActiveTrue(Long id);
 
     boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByRegistrationNumberIgnoreCase(String registrationNumber);
 
 
 }

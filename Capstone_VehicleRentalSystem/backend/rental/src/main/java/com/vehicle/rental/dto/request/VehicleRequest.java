@@ -9,6 +9,10 @@ import lombok.Data;
 @Data
 public class VehicleRequest {
 
+    // Unique license plate / registration number
+    @NotBlank(message = "Registration number is required")
+    private String registrationNumber;
+
     // Name of the vehicle
     // Must not be blank to ensure valid input
     @NotBlank(message = "Vehicle name is required")

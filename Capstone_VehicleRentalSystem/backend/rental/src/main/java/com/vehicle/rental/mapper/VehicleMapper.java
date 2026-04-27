@@ -13,6 +13,9 @@ public class VehicleMapper {
 
         Vehicle vehicle = new Vehicle(); // Create entity
 
+        if (request.getRegistrationNumber() != null) {
+            vehicle.setRegistrationNumber(request.getRegistrationNumber().trim().toUpperCase());
+        }
         vehicle.setName(request.getName().trim()); // Set name
         vehicle.setType(request.getType()); // Set type
         vehicle.setPricePerDay(request.getPricePerDay()); // Set price
@@ -29,6 +32,7 @@ public class VehicleMapper {
         VehicleResponse response = new VehicleResponse(); // Create DTO
 
         response.setId(vehicle.getId()); // Set id
+        response.setRegistrationNumber(vehicle.getRegistrationNumber());
         response.setName(vehicle.getName()); // Set name
         response.setType(vehicle.getType()); // Set type
         response.setDescription(vehicle.getDescription()); // Set description
