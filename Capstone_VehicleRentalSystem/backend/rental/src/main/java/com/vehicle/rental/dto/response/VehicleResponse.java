@@ -1,5 +1,6 @@
 package com.vehicle.rental.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vehicle.rental.entity.Vehicle.VehicleType;
 import lombok.Data;
 
@@ -24,7 +25,8 @@ public class VehicleResponse {
     // Name of the associated category (if any)
     private String categoryName;
 
-    // Note:
-    // Internal field 'isActive' is intentionally not exposed
-    // to keep implementation details hidden from API consumers
+    // Status flag
+    private boolean isActive;
+
+
 }
