@@ -5,52 +5,41 @@ import com.vehicle.rental.dto.response.VehicleResponse;
 import com.vehicle.rental.entity.Vehicle;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component // Marks as Spring component
 public class VehicleMapper {
 
-    // Convert VehicleRequest DTO to Vehicle entity
-    // Used while creating a new vehicle from client input
+    // Convert request DTO → entity
     public Vehicle toEntity(VehicleRequest request) {
 
-        // Create new entity object
-        Vehicle vehicle = new Vehicle();
+        Vehicle vehicle = new Vehicle(); // Create entity
 
-        // Map basic fields from request to entity
-        // Trim name to remove unnecessary spaces
-        vehicle.setName(request.getName().trim());
-        vehicle.setType(request.getType());
-        vehicle.setPricePerDay(request.getPricePerDay());
-        vehicle.setDescription(request.getDescription());
+        vehicle.setName(request.getName().trim()); // Set name
+        vehicle.setType(request.getType()); // Set type
+        vehicle.setPricePerDay(request.getPricePerDay()); // Set price
+        vehicle.setDescription(request.getDescription()); // Set description
 
-        // Set default status as active when creating a new vehicle
-        vehicle.setActive(true);
+        vehicle.setActive(true); // Default active
 
-        return vehicle;
+        return vehicle; // Return entity
     }
 
-    // Convert Vehicle entity to VehicleResponse DTO
-    // Used when sending data back to the client
+    // Convert entity → response DTO
     public VehicleResponse toResponse(Vehicle vehicle) {
 
-        // Create response object
-        VehicleResponse response = new VehicleResponse();
+        VehicleResponse response = new VehicleResponse(); // Create DTO
 
-        // Map basic fields from entity to DTO
-        response.setId(vehicle.getId());
-        response.setName(vehicle.getName());
-        response.setType(vehicle.getType());
-        response.setDescription(vehicle.getDescription());
-        response.setPricePerDay(vehicle.getPricePerDay());
+        response.setId(vehicle.getId()); // Set id
+        response.setName(vehicle.getName()); // Set name
+        response.setType(vehicle.getType()); // Set type
+        response.setDescription(vehicle.getDescription()); // Set description
+        response.setPricePerDay(vehicle.getPricePerDay()); // Set price
+        response.setActive(vehicle.isActive()); // Set status
 
-        // Map category name if category exists
-        // Prevents null pointer issues when category is not assigned
+        // Set category if exists
         if (vehicle.getCategory() != null) {
-            response.setCategoryName(
-                    vehicle.getCategory().getName()
-            );
+            response.setCategoryName(vehicle.getCategory().getName());
         }
 
-        // Return mapped response object
-        return response;
+        return response; // Return DTO
     }
 }
