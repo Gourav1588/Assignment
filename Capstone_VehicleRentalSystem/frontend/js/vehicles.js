@@ -77,6 +77,7 @@
                 <div class="vehicle-info">
                     <div class="vehicle-cat">${v.categoryName || 'Standard'}</div>
                     <div class="vehicle-name">${v.name}</div>
+                    <div class="vehicle-plate"># ${v.registrationNumber}</div>
                     <div class="vehicle-tags">
                         <span class="tag">${v.type}</span>
                     </div>

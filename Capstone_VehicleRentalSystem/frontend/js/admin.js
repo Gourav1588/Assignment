@@ -120,6 +120,7 @@ async function submitNewVehicle(e) {
         // Prepare vehicle data
         const vehicleData = {
             name: document.getElementById('vName').value,
+            registrationNumber: document.getElementById('regNumber').value,
             type: document.getElementById('vType').value,
             pricePerDay: parseFloat(document.getElementById('vPrice').value),
             description: document.getElementById('vDesc').value,
