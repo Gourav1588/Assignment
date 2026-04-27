@@ -31,10 +31,8 @@ public class Vehicle {
     @Column(nullable = false)
     private VehicleType type;
 
-    // The Soft Delete. I used @JsonIgnore because the frontend customer never
-    // needs to know if a car is "active" or "inactive"—the API should simply
-    // only ever send them the active ones anyway.
-    @JsonIgnore
+    // The Soft Delete.
+
     @Column(nullable = false)
     private boolean isActive = true;
 
