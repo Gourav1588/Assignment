@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
+<!--    <style>-->
+<!--        .animated-car { animation: floatCar 3s ease-in-out infinite; }-->
+<!--        @keyframes floatCar {-->
+<!--        0%, 100% { transform: translateY(0); }-->
+<!--        50% { transform: translateY(-8px); }-->
+<!--        }-->
+
+<!--        .wheel { animation: spinWheel 1.5s linear infinite; }-->
+<!--        .wheel-back { transform-origin: 220px 310px; }-->
+<!--        .wheel-front { transform-origin: 580px 310px; }-->
+<!--        @keyframes spinWheel {-->
+<!--        from { transform: rotate(0deg); }-->
+<!--        to { transform: rotate(360deg); }-->
+<!--        }-->
+
+<!--        .car-light { animation: pulseLight 2s ease-in-out infinite; }-->
+<!--        @keyframes pulseLight {-->
+<!--        0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 4px #F97316); }-->
+<!--        50% { opacity: 1; filter: drop-shadow(0 0 16px #F97316); }-->
+<!--        }-->
+
+<!--        .speed-line {-->
+<!--        stroke: rgba(255, 255, 255, 0.08);-->
+<!--        stroke-width: 3;-->
+<!--        stroke-linecap: round;-->
+<!--        animation: speedDash linear infinite;-->
+<!--        }-->
+<!--        @keyframes speedDash {-->
+<!--        0% { transform: translateX(200px); opacity: 0; }-->
+<!--        20% { opacity: 1; }-->
+<!--        80% { opacity: 1; }-->
+<!--        100% { transform: translateX(-900px); opacity: 0; }-->
+<!--        }-->
+
+<!--        .sl-1 { animation-duration: 1.2s; animation-delay: 0s; }-->
+<!--        .sl-2 { animation-duration: 1.8s; animation-delay: 0.4s; }-->
+<!--        .sl-3 { animation-duration: 1.5s; animation-delay: 0.2s; }-->
+<!--        .sl-4 { animation-duration: 2.1s; animation-delay: 0.7s; }-->
+<!--    </style>-->
+
+    <g>
+        <line x1="800" y1="360" x2="950" y2="360" class="speed-line sl-1"/>
+        <line x1="800" y1="200" x2="880" y2="200" class="speed-line sl-2"/>
+        <line x1="800" y1="280" x2="920" y2="280" class="speed-line sl-3"/>
+        <line x1="800" y1="120" x2="860" y2="120" class="speed-line sl-4"/>
+    </g>
+
+    <g class="animated-car">
+        <rect x="100" y="180" width="600" height="130" rx="20" fill="#131720" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+        <path d="M 220 180 L 280 100 L 520 100 L 580 180 Z" fill="#131720" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+
+        <path d="M 240 170 L 290 110 L 390 110 L 390 170 Z" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.05)"/>
+        <path d="M 400 170 L 400 110 L 510 110 L 560 170 Z" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.05)"/>
+
+        <g class="wheel wheel-back">
+            <circle cx="220" cy="310" r="45" fill="#0B0E14" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+            <circle cx="220" cy="310" r="15" fill="rgba(255,255,255,0.1)"/>
+            <line x1="220" y1="265" x2="220" y2="355" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+            <line x1="175" y1="310" x2="265" y2="310" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+        </g>
+
+        <g class="wheel wheel-front">
+            <circle cx="580" cy="310" r="45" fill="#0B0E14" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+            <circle cx="580" cy="310" r="15" fill="rgba(255,255,255,0.1)"/>
+            <line x1="580" y1="265" x2="580" y2="355" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+            <line x1="535" y1="310" x2="625" y2="310" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+        </g>
+
+        <rect x="95" y="240" width="30" height="15" rx="4" fill="#F97316" class="car-light"/>
+        <rect x="675" y="240" width="30" height="15" rx="4" fill="#F97316" class="car-light"/>
+    </g>
+</svg>

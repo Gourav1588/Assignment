@@ -1,0 +1,221 @@
+/* ===============================
+   1. CORE VARIABLES & RESET
+   =============================== */
+:root {
+  --bg: #0B0E14;
+  --panel: #131720;
+  --text: #F8FAFC;
+  --muted: #94A3B8;
+  --accent: #F97316;
+  --line: rgba(255, 255, 255, 0.08);
+  --white: #FFFFFF;
+  --red: #EF4444;
+}
+
+* {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+  background-image: radial-gradient(circle at top right, rgba(249, 115, 22, 0.05), transparent);
+}
+
+/* ===============================
+   2. NAVIGATION & GLOBAL BUTTONS
+   =============================== */
+nav {
+  position: fixed;
+  top: 0; width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 5%;
+  background: rgba(11, 14, 20, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  z-index: 1000;
+}
+
+.logo { font-size: 22px; font-weight: 700; color: var(--white); text-decoration: none; }
+.logo span { color: var(--accent); }
+
+.nav-cta { display: flex; gap: 12px; }
+.btn, .btn-hero, .btn-accent, .btn-outline, .btn-search, .btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s;
+
+  border: none;
+  font-family: inherit;
+}
+
+.btn-accent, .btn-hero, .btn-cta { background: var(--accent); color: var(--white); }
+.btn-outline { background: transparent; border: 1px solid var(--line); color: var(--text); }
+.btn-search { background: var(--white); color: var(--bg); }
+.btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+/* ===============================
+   3. DASHBOARD LAYOUT
+   =============================== */
+.dashboard-wrapper {
+  padding: 120px 5% 50px;
+  display: grid;
+  grid-template-columns: 280px 1fr; /* Fixed Sidebar Width */
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.dash-sidebar {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  position: sticky;
+  top: 100px;
+}
+
+.user-welcome {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dash-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-link {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: var(--muted);
+  text-align: left;
+  background: rgba(255,255,255,0.02);
+  cursor: pointer;
+}
+
+.dash-link.active {
+  background: var(--accent);
+  color: var(--white);
+}
+
+.logout-btn {
+  margin-top: 20px;
+  color: var(--red);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+/* ===============================
+   4. ACCOUNT SETTINGS FORM (The Fix)
+   =============================== */
+.settings-form {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 32px;
+  border-radius: 16px;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.settings-form input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: var(--white);
+  outline: none;
+  transition: 0.2s;
+}
+
+.settings-form input:focus { border-color: var(--accent); }
+
+.settings-form p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: -10px;
+}
+
+/* ===============================
+   5. BOOKING CARDS (List View)
+   =============================== */
+.tab-pane { display: none; }
+.tab-pane.active { display: block; animation: fadeIn 0.4s ease; }
+
+.booking-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.booking-card:hover { border-color: var(--accent); }
+
+.booking-details { display: flex; gap: 20px; align-items: center; }
+
+.booking-icon {
+  width: 55px; height: 55px;
+  background: var(--bg);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.booking-icon svg { width: 30px; stroke: var(--white); }
+
+.status-badge {
+  font-size: 10px; padding: 4px 10px; border-radius: 20px;
+  font-weight: 700; text-transform: uppercase;
+  background: rgba(16, 185, 129, 0.1); color: #10b981;
+}
+
+.booking-price { font-size: 20px; font-weight: 700; margin-top: 5px; }
+
+/* ===============================
+   6. UTILITIES & ANIMATIONS
+   =============================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--panel); border: 1px solid var(--accent);
+  padding: 12px 20px; border-radius: 8px; opacity: 0; transition: 0.3s;
+  z-index: 2000;
+}
+.toast.show { opacity: 1; }

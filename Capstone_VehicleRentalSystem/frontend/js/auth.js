@@ -1,184 +1,169 @@
-// Base URL of your Spring Boot backend
-const BASE_URL = 'http://localhost:8080';
+// =========================================
+// AUTH SCRIPT
+// =========================================
 
-// ─── UTILITY FUNCTIONS ───────────────────────────────────────
-
-// Show error message
-function showError(elementId, message) {
-    const el = document.getElementById(elementId);
-    el.textContent = message;
-    el.style.display = 'block';
-}
-
-// Hide message
-function hideMessage(elementId) {
-    const el = document.getElementById(elementId);
-    if (el) el.style.display = 'none';
-}
-
-// Show success message
-function showSuccess(elementId, message) {
-    const el = document.getElementById(elementId);
-    el.textContent = message;
-    el.style.display = 'block';
-}
-
-// Save JWT token to localStorage
-function saveToken(token) {
-    localStorage.setItem('token', token);
-}
-
-// Get JWT token from localStorage
-function getToken() {
-    return localStorage.getItem('token');
-}
-
-// Remove token on logout
-function removeToken() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userEmail');
-}
-
-// Check if user is already logged in
-function isLoggedIn() {
-    return getToken() !== null;
-}
-
-// Redirect if already logged in
-if (isLoggedIn() &&
-    (window.location.pathname.includes('index.html') ||
-     window.location.pathname.includes('register.html'))) {
-    window.location.href = 'vehicles.html';
-}
-
-// ─── LOGIN ───────────────────────────────────────────────────
-
+// ─── LOGIN ───
 const loginForm = document.getElementById('loginForm');
 
 if (loginForm) {
     loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+        e.preventDefault(); // Stop page reload
 
-        // hide previous errors
-        hideMessage('errorMsg');
+        // Get input values
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
 
-        const email    = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const loginBtn = document.getElementById('loginBtn');
-
-        // basic validation
-        if (!email || !password) {
-            showError('errorMsg', 'Please fill in all fields');
-            return;
+        // Show loading state
+        if (btn) {
+            btn.textContent = 'Authenticating...';
+            btn.disabled = true;
         }
 
-        // show loading state
-        loginBtn.textContent = 'Signing in...';
-        loginBtn.disabled = true;
-
         try {
-            const response = await fetch(`${BASE_URL}/api/auth/login`, {
+            // Send login request
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
 
-            const data = await response.json();
-
             if (response.ok) {
-                // save token to localStorage
-                saveToken(data.data);
-                localStorage.setItem('userEmail', email);
+                const data = await response.json();
 
-                // redirect to vehicles page
-                window.location.href = 'vehicles.html';
+                // Extract token safely
+                const token = data.data || data.token || data.jwt;
+
+                // Store token for future requests
+                if (window.localStorage) {
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('userEmail', email);
+                }
+
+                showToast('Login successful!');
+
+                // Decode role and redirect accordingly
+                const role = getRoleFromToken(token);
+
+                setTimeout(() => {
+                    if (role === 'ADMIN' || role === 'ROLE_ADMIN') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'vehicles.html';
+                    }
+                }, 1500);
 
             } else {
-                // show error from backend
-                showError('errorMsg', data.message || 'Login failed');
+                // Handle invalid credentials
+                showToast('Invalid email or password');
+
+                // Reset button
+                if (btn) {
+                    btn.textContent = 'Sign In';
+                    btn.disabled = false;
+                }
             }
 
         } catch (error) {
-            showError('errorMsg', 'Cannot connect to server. Please try again.');
-        } finally {
-            loginBtn.textContent = 'Sign In';
-            loginBtn.disabled = false;
+            // Handle network errors
+            console.error(error);
+            showToast('Server error');
+
+            // Reset button
+            if (btn) {
+                btn.textContent = 'Sign In';
+                btn.disabled = false;
+            }
         }
     });
 }
 
-// ─── REGISTER ────────────────────────────────────────────────
 
+// ─── REGISTER ───
 const registerForm = document.getElementById('registerForm');
 
 if (registerForm) {
     registerForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+        e.preventDefault(); // Stop reload
 
-        // hide previous messages
-        hideMessage('errorMsg');
-        hideMessage('successMsg');
+        // Get input values
+        const name = document.getElementById('regName').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const btn = document.getElementById('regBtn');
 
-        const name            = document.getElementById('name').value.trim();
-        const email           = document.getElementById('email').value.trim();
-        const password        = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const registerBtn     = document.getElementById('registerBtn');
-
-        // frontend validation
-        if (!name || !email || !password || !confirmPassword) {
-            showError('errorMsg', 'Please fill in all fields');
-            return;
+        // Show loading
+        if (btn) {
+            btn.textContent = 'Creating...';
+            btn.disabled = true;
         }
-
-        if (password.length < 6) {
-            showError('errorMsg', 'Password must be at least 6 characters');
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            showError('errorMsg', 'Passwords do not match');
-            return;
-        }
-
-        // show loading state
-        registerBtn.textContent = 'Creating account...';
-        registerBtn.disabled = true;
 
         try {
-            const response = await fetch(`${BASE_URL}/api/auth/register`, {
+            // Send register request
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })
             });
 
-            const data = await response.json();
-
             if (response.ok) {
-                // save token
-                saveToken(data.data);
-                localStorage.setItem('userEmail', email);
-
-                // show success then redirect
-                showSuccess('successMsg', 'Account created! Redirecting...');
-
-                setTimeout(() => {
-                    window.location.href = 'vehicles.html';
-                }, 1500);
+                // Success → go to login
+                showToast('Account created');
+                setTimeout(() => window.location.href = 'login.html', 1500);
 
             } else {
-                showError('errorMsg', data.message || 'Registration failed');
+                // Show error message
+                showToast('Registration failed');
+
+                // Reset button
+                if (btn) {
+                    btn.textContent = 'Create Account';
+                    btn.disabled = false;
+                }
             }
 
         } catch (error) {
-            showError('errorMsg', 'Cannot connect to server. Please try again.');
-        } finally {
-            registerBtn.textContent = 'Create Account';
-            registerBtn.disabled = false;
+            // Network failure
+            console.error(error);
+            showToast('Server error');
+
+            // Reset button
+            if (btn) {
+                btn.textContent = 'Create Account';
+                btn.disabled = false;
+            }
         }
     });
+}
+
+
+// ─── TOKEN ROLE EXTRACTOR ───
+function getRoleFromToken(token) {
+    if (!token) return 'USER'; // Default role
+
+    try {
+        // Decode JWT payload
+        const base64 = token.split('.')[1]
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+
+        const payload = JSON.parse(
+            decodeURIComponent(
+                atob(base64).split('').map(c =>
+                    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                ).join('')
+            )
+        );
+
+        // Extract role from payload
+        if (payload.role) return payload.role;
+        if (payload.roles) return payload.roles[0];
+        if (payload.authorities) return payload.authorities[0];
+
+        return 'USER';
+
+    } catch (error) {
+        console.error("Token decode error:", error);
+        return 'USER'; // Fallback
+    }
 }

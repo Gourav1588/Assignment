@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DriveEasy</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+            <h2>Drive<span>Easy</span> Admin</h2>
+        </div>
+        <div class="sidebar-nav">
+            <button class="nav-btn active" onclick="switchTab('tab-dashboard', this)">Dashboard Overview</button>
+            <button class="nav-btn" onclick="switchTab('tab-fleet', this)">Manage Fleet</button>
+            <button class="nav-btn" onclick="switchTab('tab-bookings', this)">All Bookings</button>
+            <button class="nav-btn" onclick="switchTab('tab-users', this)">Users</button>
+        </div>
+        <button class="nav-btn logout-btn" onclick="logout()">Logout</button>
+    </aside>
+
+    <main class="admin-content">
+        <header class="admin-header">
+            <div>
+                <h1 id="page-title">Dashboard Overview</h1>
+                <p>Welcome back, Admin. Manage your fleet and users here.</p>
+            </div>
+            <button class="btn-primary" onclick="openAddModal()">+ Add New Vehicle</button>
+        </header>
+
+        <div id="tab-dashboard" class="admin-tab-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <p>Total Fleet</p>
+                    <h3 id="stat-total-cars">0</h3>
+                </div>
+                <div class="stat-card">
+                    <p>Active Bookings</p>
+                    <h3 id="stat-active-bookings">0</h3>
+                </div>
+                <div class="stat-card">
+                    <p>Available</p>
+                    <h3 id="stat-available">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-fleet" class="admin-tab-section" style="display: none;">
+            <div class="admin-panel">
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="adminFleetTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-bookings" class="admin-tab-section" style="display: none;">
+            <div class="admin-panel">
+                <div class="panel-header"><h3>Customer Bookings</h3></div>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Vehicle Name</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody id="adminBookingsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-users" class="admin-tab-section" style="display: none;">
+            <div class="admin-panel">
+                <div class="panel-header"><h3>Registered Users</h3></div>
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                        </tr>
+                        </thead>
+                        <tbody id="adminUsersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="addVehicleModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeAddModal()">×</button>
+        <h3>Add New Vehicle</h3>
+        <form id="addVehicleForm" onsubmit="submitNewVehicle(event)">
+            <div class="form-grid">
+                <div class="field">
+                    <label>Vehicle Name</label>
+                    <input type="text" id="vName" placeholder="e.g. Kia Sonet" required>
+                </div>
+                <div class="field">
+                    <label>Type</label>
+                    <select id="vType" required>
+                        <option value="CAR">Car</option>
+                        <option value="BIKE">Bike</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Category</label>
+                    <select id="vCategory" required onchange="toggleCustomCategory()">
+                        <option value="" disabled selected>-- Select Category --</option>
+                        <option value="OTHER" style="font-weight:bold; color:var(--accent);">+ Add New Category</option>
+                    </select>
+                </div>
+                <div class="field" id="customCategoryDiv" style="display: none;">
+                    <label>New Category Name</label>
+                    <input type="text" id="vCustomCategory" placeholder="e.g. Compact SUV">
+                </div>
+                <div class="field">
+                    <label>Price/Day (₹)</label>
+                    <input type="number" id="vPrice" placeholder="0.00" required>
+                </div>
+                <div class="field">
+                    <label>Description</label>
+                    <input type="text" id="vDesc" placeholder="Brief vehicle details...">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-outline" onclick="closeAddModal()">Cancel</button>
+                <button type="submit" class="btn-accent" id="saveVehicleBtn">Save Vehicle</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="config/config.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard — DriveEasy</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="logo">Drive<span>Easy</span></a>
+    <ul>
+        <li><a href="vehicles.html">Vehicles</a></li>
+        <li><a href="index.html">How it works</a></li>
+    </ul>
+    <div class="nav-cta">
+        <a href="vehicles.html" class="btn-accent">Book a Ride</a>
+    </div>
+</nav>
+
+<div class="dashboard-wrapper">
+    <aside class="dash-sidebar">
+        <div class="user-welcome">
+            <p>Welcome back,</p>
+            <h3 id="userNameDisplay">Loading...</h3>
+        </div>
+
+        <div class="dash-nav">
+            <button class="dash-link active" id="btn-bookings" onclick="switchTab('bookings')">My Bookings</button>
+            <button class="dash-link" id="btn-settings" onclick="switchTab('settings')">Account Settings</button>
+            <button class="dash-link logout-btn" onclick="handleLogout()">Log Out</button>
+        </div>
+    </aside>
+
+    <main class="dash-content">
+        <section id="bookings" class="tab-pane active">
+            <div class="tab-header">
+                <h2>My Bookings</h2>
+                <p>View and manage your current and past rentals.</p>
+            </div>
+
+            <div class="bookings-list" id="bookingsContainer">
+                <div class="loading-state" style="text-align: center; padding: 40px; color: var(--muted);">
+                    <p>Fetching your bookings...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="settings" class="tab-pane">
+            <div class="tab-header">
+                <h2>Account Settings</h2>
+                <p>Update your personal details and security preferences.</p>
+            </div>
+
+            <form class="settings-form" id="profileForm" onsubmit="updateProfile(event)">
+                <div class="field">
+                    <label>Full Name</label>
+                    <input type="text" id="settingName" placeholder="Your Name" required>
+                </div>
+
+                <div class="field">
+                    <label>Email Address</label>
+                    <input type="email" id="settingEmail" readonly style="opacity: 0.7; cursor: not-allowed;">
+                    <small style="color: var(--muted); margin-top: 4px; display: block;">Email cannot be changed.</small>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="field">
+                    <label>Update Password</label>
+                    <input type="password" id="settingPassword" placeholder="Enter new password to change">
+                </div>
+
+                <button type="submit" class="btn-accent" id="saveProfileBtn" style="width: fit-content; margin-top: 16px;">Save Changes</button>
+            </form>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config/config.js"></script>
+<script src="js/profile.js"></script>
+
+</body>
+</html>

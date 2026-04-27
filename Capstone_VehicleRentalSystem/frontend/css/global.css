@@ -1,0 +1,205 @@
+/* ===============================
+   1. VARIABLES & RESET
+   =============================== */
+:root {
+  --bg: #0B0E14;
+  --panel: #131720;
+  --text: #F8FAFC;
+  --muted: #94A3B8;
+  --accent: #F97316;
+  --line: rgba(255, 255, 255, 0.08);
+  --white: #FFFFFF;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* The most important basic concept */
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* Simplified background: removed complex patterns for a clean look */
+  background-image: radial-gradient(circle at top, rgba(249, 115, 22, 0.1), transparent);
+}
+
+/* ===============================
+   2. BUTTON SYSTEM (Nominal)
+   =============================== */
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.btn-accent {
+  background: var(--white);
+  color: var(--bg);
+  border: none;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* ===============================
+   3. NAVIGATION (Flexbox Basics)
+   =============================== */
+nav {
+  position: fixed;
+  top: 0; width: 100%;
+  display: flex;
+  justify-content: space-between; /* Pushes Logo to left, Links to right */
+  align-items: center;
+  padding: 15px 5%;
+  background: rgba(11, 14, 20, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.logo span { color: var(--accent); }
+
+nav ul {
+  display: flex;
+  gap: 30px;
+  list-style: none;
+}
+
+nav ul a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+nav ul a:hover { color: var(--white); }
+
+/* ===============================
+   4. FOOTER (Basic Grid)
+   =============================== */
+footer {
+  background: var(--panel);
+  padding: 60px 5% 30px;
+  border-top: 1px solid var(--line);
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive columns */
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+.footer-links h4 {
+  color: var(--white);
+  margin-bottom: 15px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.footer-links ul {
+  list-style: none;
+}
+
+.footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ===============================
+   5. TOASTS & UTILITIES
+   =============================== */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  padding: 12px 24px;
+  border-radius: 8px;
+  opacity: 0;
+  transition: 0.3s;
+  z-index: 2000;
+}
+
+.toast.show { opacity: 1; }
+
+.cta-section {
+  padding: 80px 5%;
+  text-align: center;
+}
+
+.cta-card {
+  background: var(--panel);
+  padding: 50px;
+  border-radius: 15px;
+  border: 1px solid var(--line);
+}
+
+
+.btn, .btn-hero, .btn-accent, .btn-outline, .btn-ghost, .btn-search, .btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s;
+  border: none;
+  font-family: inherit;
+}
+
+/* Primary Orange Buttons */
+.btn-accent, .btn-hero, .btn-cta {
+  background-color: var(--accent);
+  color: var(--white);
+}
+
+/* White Search Button */
+.btn-search {
+  background-color: var(--white);
+  color: #0B0E14;
+}
+
+/* Transparent Outline Buttons */
+.btn-outline, .btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.btn:hover, .btn-hero:hover, .btn-accent:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}

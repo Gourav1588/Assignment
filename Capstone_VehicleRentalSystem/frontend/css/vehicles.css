@@ -1,0 +1,367 @@
+/* =========================================
+   FLEET PAGE (vehicles.css)
+   ========================================= */
+
+/* =========================================
+   HEADER & FILTERS
+   ========================================= */
+
+.fleet-header {
+  padding: 140px 64px 40px;
+  text-align: center;
+}
+
+.fleet-header h1 {
+  font-size: clamp(36px, 5vw, 56px);
+  color: var(--white);
+  margin-bottom: 16px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.fleet-header p {
+  max-width: 500px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.filters-bar {
+  padding: 0 64px 40px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.filter-input {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--white);
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 200px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.filter-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.filter-input option {
+  background: var(--panel);
+}
+
+
+/* =========================================
+   GRID LAYOUT
+   ========================================= */
+
+.fleet-section {
+  padding: 0 64px 80px;
+}
+
+.vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+
+/* =========================================
+   VEHICLE CARD
+   ========================================= */
+
+.vehicle-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+
+.vehicle-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--muted);
+  box-shadow: 0 12px 24px -10px rgba(0,0,0,0.5);
+}
+
+.vehicle-img {
+  background: var(--bg-color);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+
+.vehicle-img svg {
+  width: 80px;
+  height: 80px;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  fill: none;
+  transition: all 0.2s ease;
+}
+
+.vehicle-card:hover .vehicle-img svg {
+  transform: scale(1.05);
+  stroke: var(--accent);
+}
+
+.vehicle-info {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.vehicle-cat {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.vehicle-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--white);
+  font-family: 'Space Grotesk', sans-serif;
+  margin-bottom: 16px;
+}
+
+.vehicle-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.tag {
+  background: var(--bg-color);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.vehicle-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.vehicle-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.vehicle-price span {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+
+/* =========================================
+   STATUS (AVAILABLE / BOOKED)
+   ========================================= */
+
+.status-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+.status-available {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-booked {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.vehicle-card.unavailable {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+.vehicle-card.unavailable:hover {
+  transform: none;
+  border-color: var(--line);
+  box-shadow: none;
+}
+
+
+/* =========================================
+   PAGINATION
+   ========================================= */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+}
+
+
+/* =========================================
+   BOOKING MODAL
+   ========================================= */
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(11, 14, 20, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.modal-content {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  max-width: 480px;
+  width: 90%;
+  padding: 32px;
+  border-radius: 20px;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+  color: var(--white);
+}
+
+.modal-content h3 {
+  font-size: 24px;
+  color: var(--white);
+  margin: 0 0 8px 0;
+}
+
+.modal-content > p {
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-field label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.date-field input {
+  background: var(--bg-color);
+  border: 1px solid var(--line);
+  color: var(--white);
+  padding: 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  color-scheme: dark; /* Makes the calendar popup look dark */
+}
+
+.booking-summary {
+  background: var(--bg-color);
+  border: 1px solid var(--line);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.summary-row.total {
+  margin-bottom: 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 14px;
+  font-size: 15px;
+  text-align: center;
+}
