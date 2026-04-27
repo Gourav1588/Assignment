@@ -13,62 +13,44 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
-@RestController
-@RequestMapping("/api/vehicles")
-@CrossOrigin(origins = "*")
-@RequiredArgsConstructor
+@Slf4j // Enables logging
+@RestController // Marks class as REST API controller
+@RequestMapping("/api/vehicles") // Base URL mapping
+@CrossOrigin(origins = "*") // Allows cross-origin requests
+@RequiredArgsConstructor // Generates constructor for final fields
 public class VehicleController {
 
-    private final VehicleService vehicleService;
+    private final VehicleService vehicleService; // Service dependency
 
-    // Public: Anyone can see and search the fleet
+    // Fetch vehicles with optional filters and pagination
     @GetMapping
     public ResponseEntity<Page<VehicleResponse>> getVehicles(
-            @RequestParam(defaultValue = "0")   int page,
-            @RequestParam(defaultValue = "10")  int size,
-            @RequestParam(required = false)     VehicleType type,
-            @RequestParam(required = false)     Long categoryId,
-            @RequestParam(required = false)     String name) {
+            @RequestParam(defaultValue = "0") int page,       // Page number
+            @RequestParam(defaultValue = "10") int size,      // Page size
+            @RequestParam(required = false) VehicleType type,// Filter by type
+            @RequestParam(required = false) Long categoryId, // Filter by category
+            @RequestParam(required = false) String name) {   // Filter by name
 
-        // Notice we don't need the mapper here anymore,
-        // because your Service already returns Page<VehicleResponse>!
+        // Call service and return paginated response
         return ResponseEntity.ok(
                 vehicleService.getVehicles(page, size, type, categoryId, name)
         );
     }
 
-    // Public: Get details for a single vehicle
-    @GetMapping("/{id}")
-    public ResponseEntity<VehicleResponse> getVehicleById(@PathVariable Long id) {
-        return ResponseEntity.ok(vehicleService.getVehicleById(id));
-    }
-
-    // Admin Only: Create a new car using VehicleRequest DTO
+    // Create new vehicle (Admin only)
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')") // Restrict access to ADMIN
     public ResponseEntity<VehicleResponse> createVehicle(
-            @Valid @RequestBody VehicleRequest request) {
-        log.info("Admin creating new vehicle: {}", request.getName());
+            @Valid @RequestBody VehicleRequest request) { // Validate input
+        log.info("Creating vehicle: {}", request.getName()); // Log action
         return ResponseEntity.ok(vehicleService.createVehicle(request));
     }
 
-    // Admin Only: Edit car details using VehicleRequest DTO
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<VehicleResponse> updateVehicle(
-            @PathVariable Long id,
-            @Valid @RequestBody VehicleRequest request) {
-        return ResponseEntity.ok(vehicleService.updateVehicle(id, request));
-    }
-
-    // Admin Only: Deactivate car (Soft Delete)
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse> softDeleteVehicle(@PathVariable Long id) {
-        vehicleService.softDeleteVehicle(id);
-
-        // Uses your ApiResponse with the AllArgsConstructor
-        return ResponseEntity.ok(new ApiResponse("Vehicle deactivated successfully", true));
+    // Toggle vehicle availability/status (Admin only)
+    @PutMapping("/{id}/toggle-status")
+    @PreAuthorize("hasRole('ADMIN')") // Restrict access to ADMIN
+    public ResponseEntity<VehicleResponse> toggleVehicleStatus(@PathVariable Long id) {
+        log.info("Toggling status for vehicle id: {}", id); // Log action
+        return ResponseEntity.ok(vehicleService.toggleVehicleStatus(id));
     }
 }
