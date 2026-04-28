@@ -1,16 +1,21 @@
-// js/profile.js
+/* =========================================================================
+   DriveEasy - User Dashboard & Profile Management
+   ========================================================================= */
 
-// 1. DASHBOARD INITIALIZATION
+/**
+ * 1. INITIALIZATION
+ * Executes upon DOM load. Validates the user session and initializes the dashboard.
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
 
-    // Safety check: redirect if user is not logged in
+    // Redirect unauthenticated users to the login portal.
     if (!token) {
         window.location.href = 'login.html';
         return;
     }
 
-    // Set welcome name (extracting from JWT subject if possible)
+    // Extract user details from the JWT payload to populate the welcome message.
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         document.getElementById('userNameDisplay').textContent = payload.sub.split('@')[0];
@@ -18,32 +23,32 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('userNameDisplay').textContent = "User";
     }
 
+    // Initialize dashboard data
     loadUserBookings();
 });
 
-// 2. FETCH DATA FROM BOOKING SERVICE
-async function loadUserBookings() {
-    const token = localStorage.getItem('token');
-    const container = document.getElementById('bookingsContainer');
 
+/* =========================================================================
+   2. DATA FETCHING (API INTEGRATION)
+   ========================================================================= */
+
+/**
+ * Fetches the authenticated user's booking history from the backend.
+ * Requests paginated data and delegates to the rendering function upon success.
+ */
+async function loadUserBookings() {
     try {
-        // Targets /api/bookings/my as defined in your BookingController
-        const response = await fetch(`${API_BASE_URL}/bookings/my?page=0&size=10`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`, // Pass JWT for security
-                'Content-Type': 'application/json'
-            }
-        });
+        // Utilizing global apiFetch utility. Defaults to GET method and handles headers.
+        const response = await apiFetch('/bookings/my?page=0&size=10');
 
         if (response.ok) {
             const pageData = await response.json();
-            // Spring Data Page puts the list inside 'content'
+            // Extract the data array from the Spring Boot Pageable response structure
             const bookings = pageData.content || [];
             renderBookings(bookings);
         } else {
             console.error("Fetch Error:", response.status);
-            showToast("Failed to load your booking history.");
+            showToast("Failed to load booking history.");
         }
     } catch (error) {
         console.error("Dashboard Connection Error:", error);
@@ -51,11 +56,20 @@ async function loadUserBookings() {
     }
 }
 
-// 3. DYNAMIC UI RENDERING
-// 3. DYNAMIC UI RENDERING
+
+/* =========================================================================
+   3. UI RENDERING
+   ========================================================================= */
+
+/**
+ * Dynamically generates HTML for the user's booking history.
+ * Evaluates temporal business rules to manage UI states (e.g., cancellation locks).
+ * @param {Array} bookings - The list of booking objects retrieved from the API.
+ */
 function renderBookings(bookings) {
     const container = document.getElementById('bookingsContainer');
 
+    // Handle empty state
     if (bookings.length === 0) {
         container.innerHTML = `
             <div style="text-align:center; padding: 40px; color: var(--muted);">
@@ -65,15 +79,28 @@ function renderBookings(bookings) {
         return;
     }
 
+    // Capture the current date for time-based business logic
+    const today = new Date().toISOString().split('T')[0];
+
     container.innerHTML = bookings.map(b => {
         const statusClass = b.status ? b.status.toLowerCase() : 'pending';
 
+        // Evaluate business rules to determine cancellation eligibility
+        const isTripStarted = b.startDate <= today;
+        const isAlreadyCancelled = b.status === 'CANCELLED' || b.status === 'COMPLETED';
 
         let actionButton = '';
-        if (b.status === 'PENDING' || b.status === 'ACTIVE') {
-            actionButton = `<button onclick="cancelBooking(${b.id})" style="background: transparent; color: #dc3545; border: 1px solid #dc3545; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: 600; width: 100%;">Cancel Booking</button>`;
-        }
 
+        // Conditionally render action buttons based on booking status and date
+        if (!isAlreadyCancelled) {
+            if (isTripStarted) {
+                // Render disabled lock indicator if the cancellation window has expired
+                actionButton = `<button disabled style="background: transparent; color: #64748b; border: 1px solid #334155; padding: 6px 12px; border-radius: 4px; cursor: not-allowed; margin-top: 10px; font-weight: 600; width: 100%; opacity: 0.7;" title="Cannot cancel on or after pick-up day">Locked (Trip Started)</button>`;
+            } else {
+                // Render active cancellation button for upcoming trips
+                actionButton = `<button onclick="cancelBooking(${b.id})" style="background: transparent; color: #dc3545; border: 1px solid #dc3545; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: 600; width: 100%;">Cancel Booking</button>`;
+            }
+        }
 
         return `
             <div class="booking-card">
@@ -93,39 +120,47 @@ function renderBookings(bookings) {
                 <div class="booking-status" style="display: flex; flex-direction: column; align-items: flex-end;">
                     <div class="status-badge status-${statusClass}">${b.status}</div>
                     <div class="booking-price" style="margin-bottom: 5px;">₹${b.totalCost.toLocaleString()}</div>
-                    ${actionButton} </div>
+                    ${actionButton}
+                </div>
             </div>
         `;
     }).join('');
 }
 
-// 4. TAB NAVIGATION
+
+/* =========================================================================
+   4. USER ACTIONS & NAVIGATION
+   ========================================================================= */
+
+/**
+ * Manages tab navigation within the dashboard interface.
+ * @param {string} tabId - The DOM ID of the target tab pane to display.
+ */
 function switchTab(tabId) {
-    // 1. Reset: Turn OFF the active class on ALL buttons and tabs
+    // Remove active state from all navigation elements and content panes
     document.querySelectorAll('.dash-link').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
 
-    // 2. Apply: Turn ON the active class for the specific button and tab
+    // Apply active state to the selected navigation element and target pane
     document.getElementById('btn-' + tabId).classList.add('active');
     document.getElementById(tabId).classList.add('active');
 }
 
-// Cancel an active or pending booking
+/**
+ * Transmits a cancellation request to the backend for a specific booking.
+ * Utilizes a PUT request to update the status (Soft Delete) rather than a hard DB delete.
+ * @param {number} bookingId - The unique identifier of the booking to cancel.
+ */
 async function cancelBooking(bookingId) {
     if (!confirm("Are you sure you want to cancel this booking?")) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/cancel`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            }
-        });
+        // Utilizing global apiFetch utility with PUT method specified.
+        const response = await apiFetch(`/bookings/${bookingId}/cancel`, { method: 'PUT' });
 
         if (response.ok) {
             alert("Booking successfully cancelled!");
-            loadUserBookings(); // Reload the list to show the updated status
+            loadUserBookings(); // Refresh the dataset to reflect the updated status
         } else {
             const error = await response.json();
             alert(error.message || "Failed to cancel the booking.");
@@ -136,9 +171,71 @@ async function cancelBooking(bookingId) {
     }
 }
 
-// 5. LOGOUT
+
+/* =========================================================================
+   5. SESSION MANAGEMENT
+   ========================================================================= */
+
+/**
+ * Terminates the user session by clearing local storage and redirecting.
+ */
 function handleLogout() {
     localStorage.removeItem('token');
     showToast("Logging out...");
     setTimeout(() => window.location.href = 'index.html', 1000);
+}
+
+/* =========================================================================
+   6. ACCOUNT SETTINGS (PROFILE MANAGEMENT)
+   ========================================================================= */
+
+/**
+ * Handles the submission of the Account Settings form.
+ * Updates the user's name and optionally their password.
+ * @param {Event} event - The form submission event.
+ */
+async function updateProfile(event) {
+    event.preventDefault(); // Prevent the page from refreshing
+
+    const btn = document.getElementById('saveProfileBtn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    // Grab values from the form
+    const newName = document.getElementById('settingName').value;
+    const newPassword = document.getElementById('settingPassword').value;
+
+    // Build the payload (only include password if they typed a new one)
+    const updatePayload = { name: newName };
+    if (newPassword.trim() !== "") {
+        updatePayload.password = newPassword;
+    }
+
+    try {
+        // IMPORTANT: Verify this endpoint matches your Spring Boot Controller!
+        // Common endpoints are '/users/me', '/users/profile', or just '/users'
+        const response = await apiFetch('/users/profile', {
+            method: 'PUT',
+            body: JSON.stringify(updatePayload)
+        });
+
+        if (response.ok) {
+            showToast("Profile updated successfully!");
+
+            // Clear the password field so it doesn't sit there in plain text
+            document.getElementById('settingPassword').value = '';
+
+            // Update the Welcome message on the sidebar
+            document.getElementById('userNameDisplay').textContent = newName.split(' ')[0];
+        } else {
+            const errorData = await response.json();
+            showToast(errorData.message || "Failed to update profile.");
+        }
+    } catch (error) {
+        console.error("Profile Update Error:", error);
+        showToast("Network error while saving profile.");
+    } finally {
+        btn.textContent = 'Save Changes';
+        btn.disabled = false;
+    }
 }

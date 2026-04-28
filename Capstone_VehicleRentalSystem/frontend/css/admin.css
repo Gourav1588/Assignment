@@ -1,16 +1,21 @@
-/* =========================================
-   ADMIN DASHBOARD STYLES (admin.css)
-   ========================================= */
+/* =========================================================================
+   DriveEasy - Administrator Dashboard Styles (admin.css)
+   ========================================================================= */
 
-/* --- 1. GLOBAL VARIABLES & BASE --- */
+/* =========================================================================
+   1. GLOBAL VARIABLES & BASE TYPOGRAPHY
+   ========================================================================= */
 :root {
+    /* Color Palette */
     --bg-color: #0b0e14;
     --panel: #151a23;
     --line: #2a3140;
     --white: #ffffff;
     --text: #e2e8f0;
     --muted: #94a3b8;
-    --accent: #f97316;       /* DriveEasy Orange */
+
+    /* Brand & Status Colors */
+    --accent: #f97316;
     --accent-glow: rgba(249, 115, 22, 0.2);
     --red: #ef4444;
     --green: #10b981;
@@ -24,8 +29,14 @@ body {
     padding: 0;
 }
 
-/* --- 2. FORM ELEMENTS & BUTTONS --- */
-input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+/* =========================================================================
+   2. FORM ELEMENTS & INPUTS
+   ========================================================================= */
+
+/* Standardize input dimensions and behavior */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
     background: var(--bg-color);
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -39,11 +50,15 @@ input:not([type="checkbox"]):not([type="radio"]), select, textarea {
     width: 100%;
 }
 
-input:focus, select:focus, textarea:focus {
+/* Focus states for accessibility and UX */
+input:focus,
+select:focus,
+textarea:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+/* Form field containers */
 .field {
     display: flex;
     flex-direction: column;
@@ -60,7 +75,12 @@ input:focus, select:focus, textarea:focus {
     font-weight: 600;
 }
 
-.btn-primary, .btn-accent {
+/* =========================================================================
+   3. GLOBAL BUTTON STYLES
+   ========================================================================= */
+
+.btn-primary,
+.btn-accent {
     background: var(--accent);
     color: var(--white);
     border: none;
@@ -71,7 +91,8 @@ input:focus, select:focus, textarea:focus {
     transition: background 0.2s;
 }
 
-.btn-primary:hover, .btn-accent:hover {
+.btn-primary:hover,
+.btn-accent:hover {
     background: #ea580c;
 }
 
@@ -90,7 +111,11 @@ input:focus, select:focus, textarea:focus {
     background: var(--line);
 }
 
-/* --- 3. LAYOUT & SIDEBAR --- */
+/* =========================================================================
+   4. STRUCTURAL LAYOUT & NAVIGATION
+   ========================================================================= */
+
+/* Main CSS Grid defining the sidebar and content areas */
 .admin-layout {
     padding: 80px 48px;
     max-width: 1400px;
@@ -101,6 +126,7 @@ input:focus, select:focus, textarea:focus {
     align-items: start;
 }
 
+/* Persistent sticky sidebar */
 .admin-sidebar {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -131,6 +157,7 @@ input:focus, select:focus, textarea:focus {
     flex: 1;
 }
 
+/* Navigation Interactive States */
 .nav-btn {
     background: transparent;
     border: none;
@@ -145,7 +172,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .nav-btn:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--white);
 }
 
@@ -162,12 +189,16 @@ input:focus, select:focus, textarea:focus {
     border-radius: 0;
     padding-top: 24px;
 }
+
 .logout-btn:hover {
     color: #f87171;
     background: transparent;
 }
 
-/* --- 4. MAIN CONTENT & STATS --- */
+/* =========================================================================
+   5. DASHBOARD METRICS & HEADER
+   ========================================================================= */
+
 .admin-header {
     display: flex;
     justify-content: space-between;
@@ -186,6 +217,7 @@ input:focus, select:focus, textarea:focus {
     margin: 0;
 }
 
+/* KPI Card Grid */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -215,7 +247,10 @@ input:focus, select:focus, textarea:focus {
     margin: 0;
 }
 
-/* --- 5. TABLES & ACTION BUTTONS --- */
+/* =========================================================================
+   6. DATA TABLES & ROW ACTIONS
+   ========================================================================= */
+
 .admin-panel {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -246,7 +281,7 @@ input:focus, select:focus, textarea:focus {
 
 .admin-table th {
     padding: 16px 24px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     font-size: 11px;
     color: var(--muted);
     text-transform: uppercase;
@@ -266,12 +301,12 @@ input:focus, select:focus, textarea:focus {
     background: rgba(255, 255, 255, 0.03);
 }
 
-/* --- THE BULLETPROOF BUTTON FIX --- */
+/* Standardized Inline Action Buttons (Overrides applied for specificity) */
 .action-btn {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    background-color: #1e293b !important; /* Dark slate background */
+    background-color: #1e293b !important;
     color: #ffffff !important;
     border: 1px solid var(--line) !important;
     padding: 6px 14px !important;
@@ -290,9 +325,9 @@ input:focus, select:focus, textarea:focus {
     transform: translateY(-1px);
 }
 
-/* Red Style specifically for Retire */
+/* Destructive Action Override */
 .action-btn.delete {
-    color: #f87171 !important; /* Soft Red text */
+    color: #f87171 !important;
     border-color: rgba(239, 68, 68, 0.3) !important;
 }
 
@@ -301,7 +336,7 @@ input:focus, select:focus, textarea:focus {
     border-color: #ef4444 !important;
 }
 
-/* Status Badge logic */
+/* Shared Status Indicator */
 .status-badge {
     padding: 4px 10px;
     border-radius: 4px;
@@ -309,7 +344,11 @@ input:focus, select:focus, textarea:focus {
     font-weight: 700;
 }
 
-/* --- 6. MODAL OVERLAY --- */
+/* =========================================================================
+   7. MODAL DIALOG COMPONENTS
+   ========================================================================= */
+
+/* Background obscuration layer */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -328,6 +367,7 @@ input:focus, select:focus, textarea:focus {
     opacity: 1;
 }
 
+/* Modal structural container */
 .modal-content {
     background: var(--panel);
     border: 1px solid var(--line);
@@ -378,7 +418,10 @@ input:focus, select:focus, textarea:focus {
     font-size: 15px;
 }
 
-/* --- 7. TOAST NOTIFICATIONS --- */
+/* =========================================================================
+   8. FEEDBACK NOTIFICATIONS (TOAST)
+   ========================================================================= */
+
 .toast {
     position: fixed;
     bottom: 30px;
@@ -388,7 +431,7 @@ input:focus, select:focus, textarea:focus {
     padding: 16px 24px;
     border-radius: 8px;
     font-weight: 600;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     z-index: 3000;
     transform: translateY(100px);
     opacity: 0;

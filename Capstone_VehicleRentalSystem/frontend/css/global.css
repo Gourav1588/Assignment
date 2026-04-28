@@ -1,6 +1,10 @@
-/* ===============================
-   1. VARIABLES & RESET
-   =============================== */
+/* =========================================================================
+   DriveEasy - Global Design System & Utility Classes (global.css)
+   ========================================================================= */
+
+/* =========================================================================
+   1. GLOBAL VARIABLES & THEME
+   ========================================================================= */
 :root {
   --bg: #0B0E14;
   --panel: #131720;
@@ -11,10 +15,14 @@
   --white: #FFFFFF;
 }
 
+/* =========================================================================
+   2. CORE RESET & BASE TYPOGRAPHY
+   ========================================================================= */
+
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* The most important basic concept */
+  box-sizing: border-box;
 }
 
 body {
@@ -24,51 +32,115 @@ body {
   font-size: 14px;
   line-height: 1.6;
   overflow-x: hidden;
-  /* Simplified background: removed complex patterns for a clean look */
   background-image: radial-gradient(circle at top, rgba(249, 115, 22, 0.1), transparent);
 }
 
-/* ===============================
-   2. BUTTON SYSTEM (Nominal)
-   =============================== */
-.btn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
+/* =========================================================================
+   3. REUSABLE UI COMPONENTS
+   ========================================================================= */
+
+/* --- Button System --- */
+.btn,
+.btn-hero,
+.btn-accent,
+.btn-outline,
+.btn-ghost,
+.btn-search,
+.btn-cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
   text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
   font-family: inherit;
 }
 
-.btn-accent {
-  background: var(--white);
-  color: var(--bg);
-  border: none;
+/* Primary Brand Buttons */
+.btn-accent,
+.btn-hero,
+.btn-cta {
+  background-color: var(--accent);
+  color: var(--white);
 }
 
-.btn-outline {
+/* Alternative Utility Buttons */
+.btn-search {
+  background-color: var(--white);
+  color: var(--bg);
+}
+
+/* Transparent / Bordered Buttons */
+.btn-outline,
+.btn-ghost {
   background: transparent;
   border: 1px solid var(--line);
   color: var(--text);
 }
 
-.btn:hover {
-  transform: translateY(-2px);
+/* Shared Hover States */
+.btn:hover,
+.btn-hero:hover,
+.btn-accent:hover {
   opacity: 0.9;
+  transform: translateY(-2px);
 }
 
-/* ===============================
-   3. NAVIGATION (Flexbox Basics)
-   =============================== */
+/* --- Section Headers --- */
+.section-header {
+  text-align: center;
+  margin-bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.section-subtitle {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.section-header h2 {
+  font-size: clamp(28px, 4vw, 40px);
+  color: var(--white);
+  font-family: 'Space Grotesk', sans-serif;
+  margin: 0;
+}
+
+/* --- Call to Action Cards --- */
+.cta-section {
+  padding: 80px 5%;
+  text-align: center;
+}
+
+.cta-card {
+  background: var(--panel);
+  padding: 50px;
+  border-radius: 15px;
+  border: 1px solid var(--line);
+}
+
+/* =========================================================================
+   4. STRUCTURAL LAYOUTS
+   ========================================================================= */
+
+/* --- Navigation Bar --- */
 nav {
   position: fixed;
-  top: 0; width: 100%;
+  top: 0;
+  width: 100%;
   display: flex;
-  justify-content: space-between; /* Pushes Logo to left, Links to right */
+  justify-content: space-between;
   align-items: center;
   padding: 15px 5%;
   background: rgba(11, 14, 20, 0.8);
@@ -84,7 +156,9 @@ nav {
   text-decoration: none;
 }
 
-.logo span { color: var(--accent); }
+.logo span {
+  color: var(--accent);
+}
 
 nav ul {
   display: flex;
@@ -96,13 +170,14 @@ nav ul a {
   text-decoration: none;
   color: var(--muted);
   font-weight: 500;
+  transition: color 0.2s ease;
 }
 
-nav ul a:hover { color: var(--white); }
+nav ul a:hover {
+  color: var(--white);
+}
 
-/* ===============================
-   4. FOOTER (Basic Grid)
-   =============================== */
+/* --- Footer Area --- */
 footer {
   background: var(--panel);
   padding: 60px 5% 30px;
@@ -111,7 +186,7 @@ footer {
 
 .footer-top {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive columns */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 40px;
   margin-bottom: 50px;
 }
@@ -132,11 +207,18 @@ footer {
   text-decoration: none;
   display: block;
   margin-bottom: 8px;
+  transition: color 0.2s ease;
 }
 
-/* ===============================
-   5. TOASTS & UTILITIES
-   =============================== */
+.footer-links a:hover {
+  color: var(--white);
+}
+
+/* =========================================================================
+   5. INTERACTIVE UTILITIES
+   ========================================================================= */
+
+/* --- Toast Notifications --- */
 .toast {
   position: fixed;
   bottom: 20px;
@@ -146,85 +228,11 @@ footer {
   padding: 12px 24px;
   border-radius: 8px;
   opacity: 0;
-  transition: 0.3s;
+  transition: opacity 0.3s ease;
   z-index: 2000;
+  pointer-events: none;
 }
 
-.toast.show { opacity: 1; }
-
-.cta-section {
-  padding: 80px 5%;
-  text-align: center;
-}
-
-.cta-card {
-  background: var(--panel);
-  padding: 50px;
-  border-radius: 15px;
-  border: 1px solid var(--line);
-}
-
-
-.btn, .btn-hero, .btn-accent, .btn-outline, .btn-ghost, .btn-search, .btn-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: 0.2s;
-  border: none;
-  font-family: inherit;
-}
-
-/* Primary Orange Buttons */
-.btn-accent, .btn-hero, .btn-cta {
-  background-color: var(--accent);
-  color: var(--white);
-}
-
-/* White Search Button */
-.btn-search {
-  background-color: var(--white);
-  color: #0B0E14;
-}
-
-/* Transparent Outline Buttons */
-.btn-outline, .btn-ghost {
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--text);
-}
-
-.btn:hover, .btn-hero:hover, .btn-accent:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.section-subtitle {
-  color: var(--accent); /* This will use your orange color */
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 8px;
-}
-
-.section-header h2 {
-  font-size: clamp(28px, 4vw, 40px);
-  color: var(--white);
-  font-family: 'Space Grotesk', sans-serif;
-  margin: 0;
+.toast.show {
+  opacity: 1;
 }

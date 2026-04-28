@@ -1,15 +1,28 @@
-/* ===============================
-   1. AUTH LAYOUT (Flexbox Centering)
-   =============================== */
+/* =========================================================================
+   DriveEasy - Authentication Styles (auth.css)
+   ========================================================================= */
+
+/* =========================================================================
+   1. AUTHENTICATION LAYOUT
+   ========================================================================= */
+
+/**
+ * Centered container for authentication forms.
+ * Utilizes flexbox for viewport centering and a subtle radial gradient.
+ */
 .auth-wrapper {
   min-height: 100vh;
   display: flex;
-  justify-content: center; /* Horizontal Center */
-  align-items: center;     /* Vertical Center */
+  justify-content: center;
+  align-items: center;
   padding: 20px;
   background-image: radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.05), transparent);
 }
 
+/**
+ * The primary card component for login and registration forms.
+ * Includes entrance animations and elevation via box-shadow.
+ */
 .auth-card {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -17,20 +30,19 @@
   padding: 40px;
   width: 100%;
   max-width: 400px;
-  /* Nominal Shadow: Simple and clean */
   box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  /* Basic Animation: Easy to explain */
-  animation: fadeIn 0.5s ease-out;
+  animation: authFadeIn 0.5s ease-out;
 }
 
-@keyframes fadeIn {
+@keyframes authFadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===============================
-   2. HEADER & TEXT
-   =============================== */
+/* =========================================================================
+   2. TYPOGRAPHY & HEADERS
+   ========================================================================= */
+
 .auth-header {
   text-align: center;
   margin-bottom: 30px;
@@ -47,13 +59,14 @@
   font-size: 14px;
 }
 
-/* ===============================
-   3. FORM ELEMENTS (Box Model)
-   =============================== */
+/* =========================================================================
+   3. FORM ARCHITECTURE
+   ========================================================================= */
+
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Consistent spacing between fields */
+  gap: 15px;
 }
 
 .field {
@@ -69,6 +82,9 @@
   letter-spacing: 1px;
 }
 
+/**
+ * Input field styling with state transitions.
+ */
 .field input {
   background: var(--bg);
   border: 1px solid var(--line);
@@ -76,16 +92,20 @@
   border-radius: 6px;
   color: var(--white);
   outline: none;
-  transition: 0.2s;
+  transition: border-color 0.2s ease;
 }
 
 .field input:focus {
   border-color: var(--accent);
 }
 
-/* ===============================
-   4. AUTH FOOTER & NAVIGATION
-   =============================== */
+/* =========================================================================
+   4. NAVIGATION & FOOTER
+   ========================================================================= */
+
+/**
+ * Footer section for secondary navigation (e.g., "Create Account" link).
+ */
 .auth-footer {
   margin-top: 25px;
   padding-top: 20px;
@@ -100,11 +120,19 @@
   font-weight: 600;
 }
 
+/**
+ * Absolute positioned link to allow navigation back to the landing page.
+ */
 .back-home {
-  position: absolute; /* Kept for placement, but simplified */
+  position: absolute;
   top: 20px;
   left: 20px;
   color: var(--muted);
   text-decoration: none;
   font-size: 13px;
+  transition: color 0.2s ease;
+}
+
+.back-home:hover {
+  color: var(--white);
 }

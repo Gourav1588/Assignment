@@ -1,82 +1,82 @@
-// ===============================
-// INDEX PAGE SCRIPT (index.js)
-// ===============================
+/* =========================================================================
+   DriveEasy - Landing Page Logic
+   ========================================================================= */
 
-// 1. Date Constraints Setup
-// Handles minimum date selection logic for booking inputs
-const startDateInput = document.getElementById('startDate');
-const endDateInput = document.getElementById('endDate');
+/**
+ * Initializes chronological constraints on DOM load to prevent past-date selections.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
 
-if (startDateInput && endDateInput) {
+    if (startDateInput && endDateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.min = today;
+        endDateInput.min = today;
 
-  // Set today's date as minimum selectable date
-  const today = new Date().toISOString().split('T')[0];
-  startDateInput.min = today;
-  endDateInput.min = today;
+        startDateInput.addEventListener('change', function() {
+            endDateInput.min = this.value;
+        });
+    }
+});
 
-  // Update return date minimum when pickup date changes
-  startDateInput.addEventListener('change', function() {
-    endDateInput.min = this.value;
-  });
-}
+/* =========================================================================
+   USER ACTIONS & REDIRECTIONS
+   ========================================================================= */
 
-// 2. Button Actions
-
-// Handle search button click
-// Validates input and redirects to vehicles page
+/**
+ * Validates search inputs from the hero section and redirects the user
+ * to the fleet inventory page.
+ */
 function handleSearch() {
-  const start = document.getElementById('startDate').value;
-  const end = document.getElementById('endDate').value;
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
 
-  // Validate dates are selected
-  if (!start || !end) {
-    showToast('Please select your pickup and return dates');
-    return;
-  }
+    if (!start || !end) {
+        showToast('Both pickup and return dates are required.');
+        return;
+    }
 
-  // Validate return date is after pickup date
-  if (new Date(end) <= new Date(start)) {
-    showToast('Return date must be after pickup date');
-    return;
-  }
+    if (new Date(end) <= new Date(start)) {
+        showToast('Return date must follow the pickup date.');
+        return;
+    }
 
-  // Show feedback and navigate to vehicles page
-  showToast('Searching available vehicles...');
-  setTimeout(() => {
-    window.location.href = 'vehicles.html';
-  }, 1000);
+    showToast('Locating available fleet...');
+    setTimeout(() => {
+        window.location.href = 'vehicles.html';
+    }, 1000);
 }
 
-// Handle booking action
-// Checks if user is authenticated before allowing booking
+/**
+ * Verifies session authorization prior to executing a booking request.
+ * Redirects unauthenticated users to the login portal.
+ *
+ * @param {string} name - The identifier of the vehicle being requested.
+ */
 function handleBook(name) {
+    const token = localStorage.getItem('token');
 
-  // Retrieve authentication token from local storage
-  const token = localStorage.getItem('token');
+    if (!token) {
+        showToast(`Authentication required for ${name}.`);
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return;
+    }
 
-  // If user is not logged in, redirect to login page
-  if (!token) {
-    showToast('Please sign in to book ' + name);
+    window.location.href = 'vehicles.html';
+}
+
+/**
+ * Simulates category filtering and redirects to the main inventory page.
+ *
+ * @param {string} category - The specific vehicle classification to filter.
+ */
+function filterCategory(category) {
+    showToast(`Applying ${category} filters...`);
 
     setTimeout(() => {
-      window.location.href = 'login.html';
-    }, 1500);
-
-    return;
-  }
-
-  // If authenticated, proceed to vehicles page
-  window.location.href = 'vehicles.html';
+        window.location.href = 'vehicles.html';
+    }, 800);
 }
-
-// Filter vehicles by category
-// Shows feedback and redirects to filtered view
-function filterCategory(cat) {
-  showToast('Filtering by ' + cat + '...');
-
-  setTimeout(() => {
-    window.location.href = 'vehicles.html';
-  }, 800);
-}
-
-});
