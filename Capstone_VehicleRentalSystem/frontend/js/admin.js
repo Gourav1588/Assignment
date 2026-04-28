@@ -72,10 +72,12 @@ async function loadCategories() {
 
 /**
  * Fetches the entire vehicle fleet and updates overview statistics.
+ * CRITICAL FIX: Now points to the secure /admin endpoint to fetch both Active and Retired vehicles.
  */
 async function loadAdminFleet() {
     try {
-        const res = await apiFetch('/vehicles?page=0&size=100');
+        // Points to the "Admin Door" we built in the backend
+        const res = await apiFetch('/vehicles/admin?page=0&size=100');
 
         if (res.ok) {
             const data = await res.json();

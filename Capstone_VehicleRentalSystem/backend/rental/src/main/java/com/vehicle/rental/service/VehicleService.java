@@ -19,11 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Service layer handling fleet inventory management.
- * Controls the creation, modification, and status toggling of vehicles, enforcing
- * strict uniqueness on registration plates and safeguarding active bookings.
- */
+/* =========================================================================
+   VEHICLE SERVICE
+   Core business logic for fleet management. Enforces business rules,
+   handles pagination, and routes data requests based on user authority.
+   ========================================================================= */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,18 +34,34 @@ public class VehicleService {
     private final CategoryService categoryService;
     private final VehicleMapper vehicleMapper;
 
+    /* =========================================================================
+       1. DATA RETRIEVAL (READ OPERATIONS)
+       ========================================================================= */
+
     /**
-     * Retrieves a paginated and filtered list of vehicles for the catalog.
+     * Retrieves a paginated and filtered list of vehicles.
+     * CRITICAL: Routes traffic to different database queries based on the isAdmin flag.
+     * * @param isAdmin If true, returns all vehicles. If false, returns only active vehicles.
      */
-    public Page<VehicleResponse> getVehicles(int page, int size, VehicleType type, Long categoryId, String name) {
+    public Page<VehicleResponse> getVehicles(int page, int size, VehicleType type, Long categoryId, String name, boolean isAdmin) {
         if (page < 0) throw new BadRequestException("Pagination index cannot be negative");
         if (size <= 0) throw new BadRequestException("Pagination size must be strictly positive");
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        String searchName = (name != null && !name.isBlank()) ? name : "";
 
-        return vehicleRepository
-                .findAllWithFilters(name != null && !name.isBlank() ? name : "", type, categoryId, pageable)
-                .map(vehicleMapper::toResponse);
+        // The "Dual-Door" Routing Logic
+        if (isAdmin) {
+            log.debug("Admin requesting full fleet catalog.");
+            return vehicleRepository
+                    .findAllWithFilters(searchName, type, categoryId, pageable)
+                    .map(vehicleMapper::toResponse);
+        } else {
+            log.debug("Public user requesting active fleet catalog.");
+            return vehicleRepository
+                    .findAllActiveWithFilters(searchName, type, categoryId, pageable)
+                    .map(vehicleMapper::toResponse);
+        }
     }
 
     public VehicleResponse getVehicleById(Long id) {
@@ -54,9 +70,23 @@ public class VehicleService {
         return vehicleMapper.toResponse(vehicle);
     }
 
+    public List<VehicleResponse> findAvailableVehicles(LocalDate startDate, LocalDate endDate) {
+        List<Vehicle> allVehicles = vehicleRepository.findAll();
+
+        return allVehicles.stream()
+                .filter(Vehicle::isActive)
+                .filter(vehicle -> bookingRepository.isVehicleAvailable(vehicle.getId(), startDate, endDate))
+                .map(vehicleMapper::toResponse)
+                .toList();
+    }
+
+    /* =========================================================================
+       2. FLEET MUTATION (WRITE OPERATIONS)
+       ========================================================================= */
+
     /**
      * Integrates a new vehicle into the fleet.
-     * Validates that the legal registration number is not already registered in the system.
+     * Validates that the legal registration number is unique system-wide.
      */
     @Transactional
     public VehicleResponse createVehicle(VehicleRequest request) {
@@ -108,16 +138,21 @@ public class VehicleService {
         return vehicleMapper.toResponse(vehicleRepository.save(existing));
     }
 
+    /* =========================================================================
+       3. OPERATIONAL STATUS MANAGEMENT
+       ========================================================================= */
+
     /**
      * Flips the operational status of a vehicle (Active <-> Inactive).
      * Acts as a soft-delete mechanism. Prevents deactivation if the vehicle is tied
-     * to future or ongoing reservations to prevent system conflicts.
+     * to future or ongoing reservations.
      */
     @Transactional
     public VehicleResponse toggleVehicleStatus(Long id) {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle record not found"));
 
+        // Safety Check: Do not retire a car if someone is scheduled to drive it
         if (vehicle.isActive()) {
             boolean hasBookings = bookingRepository.existsActiveOrFutureBookingsForVehicle(id);
             if (hasBookings) {
@@ -126,19 +161,8 @@ public class VehicleService {
         }
 
         vehicle.setActive(!vehicle.isActive());
-        log.info("Vehicle ID {} status toggled to Active: {}", id, vehicle.isActive());
+        log.info("Vehicle ID {} status toggled. Is Active: {}", id, vehicle.isActive());
 
         return vehicleMapper.toResponse(vehicleRepository.save(vehicle));
     }
-
-    public List<VehicleResponse> findAvailableVehicles(LocalDate startDate, LocalDate endDate) {
-        List<Vehicle> allVehicles = vehicleRepository.findAll();
-
-        return allVehicles.stream()
-                .filter(Vehicle::isActive)
-                .filter(vehicle -> bookingRepository.isVehicleAvailable(vehicle.getId(), startDate, endDate))
-                .map(vehicleMapper::toResponse)
-                .toList();
-    }
 }
-
