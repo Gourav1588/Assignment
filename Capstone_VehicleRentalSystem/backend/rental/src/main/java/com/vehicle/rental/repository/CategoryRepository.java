@@ -9,13 +9,9 @@ import java.util.Optional;
 @Repository
 public interface CategoryRepository extends JpaRepository<VehicleCategory, Long> {
 
-    // Check if a category with the given name already exists
-    // Used to prevent duplicate category creation or updates
     boolean existsByName(String name);
 
-    // Retrieve a category based on its name
-    // Returns Optional to safely handle cases where category may not exist
     Optional<VehicleCategory> findByName(String name);
-    Optional<VehicleCategory> findByNameIgnoreCase(String name);
 
+    Optional<VehicleCategory> findByNameIgnoreCase(String name);
 }

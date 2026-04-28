@@ -1,14 +1,14 @@
 package com.vehicle.rental.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
-
-//  The @ManyToOne link to the Category table (preventing duplicate data).
-//  The 'isActive' soft-delete flag. Instead of physically deleting retired cars
-//    and destroying our historical booking records, we just toggle them off.
+/**
+ * JPA Entity representing a vehicle in the rental fleet.
+ * Utilizes soft-deletion (isActive flag) to preserve historical booking records
+ * while dynamically managing catalog availability.
+ */
 @Data
 @Entity
 @Table(name = "vehicles")
@@ -18,8 +18,10 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    //  It saves a simple foreign key (category_id) instead of duplicating text strings.
+    /**
+     * The category classification of the vehicle.
+     * Mapped as a foreign key to normalize the database and prevent duplicate text strings.
+     */
     @ManyToOne
     @JoinColumn(name = "category_id")
     private VehicleCategory category;
@@ -31,18 +33,27 @@ public class Vehicle {
     @Column(nullable = false)
     private VehicleType type;
 
+    /**
+     * Unique legal identifier for the vehicle.
+     */
     @Column(name = "registration_number", unique = true, nullable = false)
     private String registrationNumber;
 
+    /**
+     * Soft-delete flag. Instead of physically deleting retired cars (which would sever
+     * historical booking foreign keys), this flag removes them from active user queries.
+     */
     @Column(nullable = false)
     private boolean isActive = true;
 
     private String description;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // The current daily rental rate for this specific vehicle.
+    /**
+     * The current baseline daily rental rate for this specific vehicle.
+     */
     @Column(name = "price_per_day", nullable = false)
     private Double pricePerDay;
 

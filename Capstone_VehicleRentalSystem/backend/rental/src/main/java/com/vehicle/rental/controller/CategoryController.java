@@ -6,57 +6,71 @@ import com.vehicle.rental.dto.response.CategoryResponse;
 import com.vehicle.rental.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST Controller managing vehicle categories.
+ * Provides public endpoints for viewing categories and secured endpoints for administrative management.
+ */
+@Slf4j
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class CategoryController {
 
-    // Service layer to handle business logic
     private final CategoryService categoryService;
 
-    // Fetch all categories
-    // Public endpoint used for listing or dropdowns
+    /**
+     * Retrieves a list of all vehicle categories.
+     * This is a public endpoint typically used for populating UI dropdowns and filters.
+     *
+     * @return A list of CategoryResponse objects.
+     */
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
 
-        // Service already returns DTO list, no mapping required here
-        return ResponseEntity.ok(
-                categoryService.getAllCategories()
-        );
+        log.info("Fetching all vehicle categories");
+
+        return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
-    // Create a new category (Admin only)
-    // Accepts validated request DTO and returns response DTO
+    /**
+     * Creates a new vehicle category.
+     * Restricted to users with the ADMIN authority.
+     *
+     * @param request The validated payload containing the new category's details.
+     * @return The created CategoryResponse object.
+     */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CategoryResponse> createCategory(
-            @Valid @RequestBody CategoryRequest request) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request) {
 
-        // Delegate creation to service layer
-        return ResponseEntity.ok(
-                categoryService.createCategory(request)
-        );
+        log.info("Admin request to create new category: {}", request.getName());
+
+        return ResponseEntity.ok(categoryService.createCategory(request));
     }
 
-    // Update an existing category (Admin only)
-    // Uses DTO for safe and controlled updates
+    /**
+     * Updates an existing vehicle category.
+     * Restricted to users with the ADMIN authority.
+     *
+     * @param id      The unique identifier of the category to update.
+     * @param request The validated payload containing the updated details.
+     * @return The updated CategoryResponse object.
+     */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody CategoryRequest request) {
 
-        return ResponseEntity.ok(
-                categoryService.updateCategory(id, request)
-        );
+        log.info("Admin request to update category ID: {} with new name: {}", id, request.getName());
+
+        return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
-
-
 }

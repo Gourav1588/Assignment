@@ -17,81 +17,65 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * Core security interceptor that runs on every incoming HTTP request.
+ * Extracts the JWT from the Authorization header, validates its signature and expiration,
+ * and sets the authenticated user context for the duration of the request.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    // Service to handle JWT operations (validate, extract data)
     private final JwtService jwtService;
-
-    // Repository to fetch user from database
     private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+            FilterChain filterChain) throws ServletException, IOException {
 
-        // Read Authorization header from request
         String authHeader = request.getHeader("Authorization");
 
-        // If header is missing or not Bearer type, skip authentication
+        // Bypass filter if no Bearer token is present
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extract JWT token (remove "Bearer " prefix)
         String token = authHeader.substring(7);
 
-        // Validate token (checks signature and expiration)
+        // Terminate authentication if token is forged or expired
         if (!jwtService.isTokenValid(token)) {
-            log.error("Invalid or expired JWT token");
+            log.error("Invalid or expired JWT token encountered.");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extract user identity (email) from token
         String email = jwtService.extractEmail(token);
-
-        // Fetch user from database using email
         Optional<User> userOptional = userRepository.findByEmail(email);
 
-        // If user not found, continue without authentication
         if (userOptional.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Convert User entity into Spring Security compatible object
-        CustomUserDetails userDetails =
-                new CustomUserDetails(userOptional.get());
+        CustomUserDetails userDetails = new CustomUserDetails(userOptional.get());
 
-        // Create authentication object with user details and roles
+        // Establish the security context for the current thread
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(
-                        userDetails,                   // principal (who user is)
-                        null,                          // credentials (not needed here)
-                        userDetails.getAuthorities()   // roles/permissions
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
                 );
 
-        // Attach request-specific details (IP, session, etc.)
-        authToken.setDetails(
-                new WebAuthenticationDetailsSource()
-                        .buildDetails(request)
-        );
+        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authToken);
 
-        // Store authentication in SecurityContext
-        // After this, Spring Security treats the user as authenticated
-        SecurityContextHolder.getContext()
-                .setAuthentication(authToken);
+        log.debug("Successfully authenticated request for user: {}", email);
 
-        log.debug("Authenticated user: {}", email);
-
-        // Continue request processing (next filter or controller)
         filterChain.doFilter(request, response);
     }
 }

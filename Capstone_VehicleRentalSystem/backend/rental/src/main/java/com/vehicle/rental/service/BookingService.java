@@ -26,194 +26,130 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Service layer orchestrating the core rental workflow.
+ * Manages the lifecycle of a booking from creation (PENDING) through confirmation,
+ * completion, or cancellation, enforcing strict temporal and financial business rules.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
 
-    // Repository for booking operations
     private final BookingRepository bookingRepository;
-
-    // Repository for vehicle validation
     private final VehicleRepository vehicleRepository;
-
-    // Repository to fetch user details
     private final UserRepository userRepository;
-
-    // Mapper for converting entity ↔ DTO
     private final BookingMapper bookingMapper;
 
-    // Create a new booking (initial status = PENDING)
+    /**
+     * Initializes a new vehicle rental request.
+     * Enforces a maximum rental duration of 30 days and verifies the vehicle is completely
+     * free during the requested timeframe before capturing a snapshot of the total cost.
+     */
     @Transactional
     public BookingResponse createBooking(Long userId, BookingRequest request) {
+        log.debug("Initiating booking creation for user ID: {}, vehicle ID: {}", userId, request.getVehicleId());
 
-        log.debug("Creating booking for user {} vehicle {}", userId, request.getVehicleId());
-
-        // Validate date range (end date must not be before start date)
         if (request.getEndDate().isBefore(request.getStartDate())) {
-            throw new BadRequestException("End date cannot be before start date");
+            throw new BadRequestException("End date cannot precede start date");
         }
 
-        // Validate booking duration (max 30 days)
-        long totalDays = ChronoUnit.DAYS.between(
-                request.getStartDate(),
-                request.getEndDate()
-        ) + 1;
-
+        long totalDays = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
         if (totalDays > 30) {
-            throw new BadRequestException("Booking duration cannot exceed 30 days");
+            throw new BadRequestException("Booking duration exceeds the 30-day maximum limit");
         }
 
-        // Fetch vehicle or throw exception
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Requested vehicle not found"));
 
-        // Ensure vehicle is active
         if (!vehicle.isActive()) {
-            throw new BadRequestException("Vehicle is not available for booking");
+            throw new BadRequestException("Vehicle is currently retired or suspended from the fleet");
         }
 
-        // Check availability (no overlapping bookings)
         boolean available = bookingRepository.isVehicleAvailable(
-                request.getVehicleId(),
-                request.getStartDate(),
-                request.getEndDate()
+                request.getVehicleId(), request.getStartDate(), request.getEndDate()
         );
 
         if (!available) {
-            throw new VehicleNotAvailableException(
-                    "Vehicle is already booked for the selected dates");
+            throw new VehicleNotAvailableException("Vehicle is already reserved for the selected dates");
         }
 
-        // Fetch user or throw exception
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User identity could not be verified"));
 
-        // Calculate total cost
-        double totalCost = totalDays * vehicle.getPricePerDay();
-
-        // Create booking entity
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setVehicle(vehicle);
         booking.setStartDate(request.getStartDate());
         booking.setEndDate(request.getEndDate());
-        booking.setTotalCost(totalCost);
+        booking.setTotalCost(totalDays * vehicle.getPricePerDay());
         booking.setStatus(BookingStatus.PENDING);
 
-        log.debug("Booking created with PENDING status");
-
-        // Save and return response
-        return bookingMapper.toResponse(
-                bookingRepository.save(booking)
-        );
+        return bookingMapper.toResponse(bookingRepository.save(booking));
     }
 
-    // Confirm booking (PENDING → ACTIVE)
+    /**
+     * Transitions a pending booking into an active, confirmed rental.
+     * Secures the endpoint by ensuring the requester is the original owner of the booking.
+     */
     @Transactional
     public BookingResponse confirmBooking(Long bookingId, Long userId) {
-
-        log.debug("Confirming booking id: {}", bookingId);
-
-        // Fetch booking
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking record not found"));
 
-        // Ensure booking belongs to the user
         if (!booking.getUser().getId().equals(userId)) {
-            throw new UnauthorizedAccessException(
-                    "You can only confirm your own bookings");
+            throw new UnauthorizedAccessException("Cannot confirm bookings belonging to other accounts");
         }
 
-        // Only pending bookings can be confirmed
         if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new BadRequestException(
-                    "Only pending bookings can be confirmed");
+            throw new BadRequestException("Only PENDING bookings are eligible for confirmation");
         }
 
-        // Update status
         booking.setStatus(BookingStatus.ACTIVE);
+        log.info("Booking ID {} confirmed by user ID {}", bookingId, userId);
 
-        log.debug("Booking {} confirmed successfully", bookingId);
-
-        return bookingMapper.toResponse(
-                bookingRepository.save(booking)
-        );
+        return bookingMapper.toResponse(bookingRepository.save(booking));
     }
 
-    // Cancel booking (PENDING/ACTIVE → CANCELLED)
+    /**
+     * Cancels an existing booking.
+     * Prevents cancellation if the rental period has already officially begun.
+     */
     @Transactional
     public BookingResponse cancelBooking(Long bookingId, Long userId) {
-
-        log.debug("Cancelling booking id: {}", bookingId);
-
-        // Fetch booking
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking record not found"));
 
-        // Ensure booking belongs to the user
         if (!booking.getUser().getId().equals(userId)) {
-            throw new UnauthorizedAccessException(
-                    "You can only cancel your own bookings");
+            throw new UnauthorizedAccessException("Cannot cancel bookings belonging to other accounts");
         }
 
-        // Only pending or active bookings can be cancelled
-        if (booking.getStatus() != BookingStatus.PENDING &&
-                booking.getStatus() != BookingStatus.ACTIVE) {
-            throw new BadRequestException(
-                    "Only pending or active bookings can be cancelled");
+        if (booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.ACTIVE) {
+            throw new BadRequestException("Only PENDING or ACTIVE bookings can be cancelled");
         }
 
-        // Prevent cancellation if booking has already started
         if (booking.getStartDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException(
-                    "Cannot cancel a booking that has already started");
+            throw new BadRequestException("Cancellations are not permitted after the rental start date");
         }
 
-        // Update status
         booking.setStatus(BookingStatus.CANCELLED);
+        log.info("Booking ID {} cancelled by user ID {}", bookingId, userId);
 
-        log.debug("Booking {} cancelled successfully", bookingId);
-
-        return bookingMapper.toResponse(
-                bookingRepository.save(booking)
-        );
+        return bookingMapper.toResponse(bookingRepository.save(booking));
     }
 
-    // Fetch bookings of a specific user (with pagination)
     public Page<BookingResponse> getUserBookings(Long userId, int page, int size) {
-
-        Pageable pageable = PageRequest.of(
-                page, size, Sort.by("createdAt").descending()
-        );
-
-        return bookingRepository
-                .findByUserId(userId, pageable)
-                .map(bookingMapper::toResponse);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return bookingRepository.findByUserId(userId, pageable).map(bookingMapper::toResponse);
     }
 
-    // Fetch all bookings (admin use)
     public Page<BookingResponse> getAllBookings(int page, int size) {
-
-        Pageable pageable = PageRequest.of(
-                page, size, Sort.by("createdAt").descending()
-        );
-
-        return bookingRepository
-                .findAll(pageable)
-                .map(bookingMapper::toResponse);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return bookingRepository.findAll(pageable).map(bookingMapper::toResponse);
     }
 
-    // Fetch bookings filtered by status (admin use)
-    public Page<BookingResponse> getBookingsByStatus(
-            BookingStatus status, int page, int size) {
-
-        Pageable pageable = PageRequest.of(
-                page, size, Sort.by("createdAt").descending()
-        );
-
-        return bookingRepository
-                .findByStatus(status, pageable)
-                .map(bookingMapper::toResponse);
+    public Page<BookingResponse> getBookingsByStatus(BookingStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return bookingRepository.findByStatus(status, pageable).map(bookingMapper::toResponse);
     }
 }

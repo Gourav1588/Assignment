@@ -4,6 +4,7 @@ import com.vehicle.rental.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,46 +14,58 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration  // Marks this class as a configuration class
-@EnableWebSecurity  // Enables Spring Security
-@EnableMethodSecurity  // Enables annotations like @PreAuthorize
+/**
+ * Core security configuration for the application.
+ * Manages CORS, CSRF, session policy, and endpoint authorization rules.
+ */
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // Custom JWT filter that validates token on each request
     private final JwtAuthenticationFilter jwtAuthFilter;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
+                // 1. Enable CORS using global configuration (CorsConfig.java)
+                .cors(org.springframework.security.config.Customizer.withDefaults())
 
-                // Disable CSRF because we are using JWT (stateless API)
+                // 2. Disable CSRF for stateless JWT APIs
                 .csrf(csrf -> csrf.disable())
 
-                // Configure session management as stateless (no HTTP session)
+                // 3. Enforce stateless session management
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Define which endpoints are public and which require authentication
+                // 4. Define endpoint authorization rules
                 .authorizeHttpRequests(auth -> auth
+                        // CRITICAL: Allow browser CORS preflight checks (OPTIONS) to bypass authentication
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Public Endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/vehicles/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/vehicles/**", "/api/categories/**").permitAll()
+
+                        // All other endpoints require a valid JWT
                         .anyRequest().authenticated()
                 )
 
-                // Add custom JWT filter before Spring's default auth filter
+                // 5. Register the custom JWT filter before standard authentication
                 .addFilterBefore(
                         jwtAuthFilter,
                         UsernamePasswordAuthenticationFilter.class
                 );
 
-        // Build and return the security filter chain
         return http.build();
     }
 
-    // Password encoder bean used to hash passwords (e.g., during registration)
+    /**
+     * Provides the password hashing algorithm for the application.
+     * @return BCryptPasswordEncoder instance.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

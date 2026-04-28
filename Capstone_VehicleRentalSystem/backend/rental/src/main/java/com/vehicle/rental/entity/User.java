@@ -3,53 +3,72 @@ package com.vehicle.rental.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
-// I used Lombok's @Data to keep this file clean. I don't want to clutter
-// my core database entity with dozens of lines of boilerplate getters and setters.
+/**
+ * JPA Entity representing a registered user in the system.
+ * Maps to the "users" table to avoid conflicts with PostgreSQL reserved keywords.
+ * Manages core identity, authentication credentials, and authorization roles.
+ */
 @Data
-// I specifically set the table name to "users" because "user" is a reserved
-// keyword in PostgreSQL. Doing this prevents unexpected SQL syntax errors
-// when Hibernate tries to auto-generate our tables.
 @Entity
 @Table(name = "users")
 public class User {
 
+    /**
+     * The unique primary key for the user record.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * The display name of the user.
+     */
     @Column(nullable = false)
     private String name;
 
-    // I made the email strictly unique at the database level because
-    // I am using it as the primary identifier for our JWT login process.
-    // This stops duplicate accounts right at the data layer.
+    /**
+     * The user's email address.
+     * Enforced as strictly unique at the database level, as it serves as the
+     * primary identifier for JWT authentication and login.
+     */
     @Column(nullable = false, unique = true)
     private String email;
 
-    // I added @JsonIgnore here as a strict security failsafe. Even though I plan
-    // to use DTOs to format API responses, if this raw entity ever accidentally
-    // leaks out through a controller, Jackson will completely drop the hashed
-    // password before converting it to JSON.
+    /**
+     * The securely hashed password.
+     * Annotated with @JsonIgnore as a strict security failsafe to ensure the
+     * hash is never accidentally serialized and leaked in an API response.
+     */
     @JsonIgnore
     @Column(nullable = false)
     private String password;
 
-    // I'm using EnumType.STRING instead of the default ordinal (numeric) type.
-    // If I just used numbers and later added a "MANAGER" role in the middle of the enum,
-    // it would completely corrupt the existing database records. Saving it as raw text
-    // makes the database much safer and easier to read.
+    /**
+     * The authorization tier of the user (e.g., USER, ADMIN).
+     * Stored as a plain string (EnumType.STRING) rather than a numeric ordinal
+     * to prevent database corruption if new roles are added to the enum later.
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    // I set this to default to the exact moment the object is instantiated.
-    // It's a simple way to maintain an audit trail of when accounts are created.
-    @Column(name = "created_at")
+    /**
+     * The exact timestamp when the user account was created.
+     * Provides a foundational audit trail for account generation.
+     */
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    /**
+     * Enumeration of system-recognized authorization roles.
+     */
     public enum Role {
-        USER, ADMIN
+        /** Standard customer with booking privileges. */
+        USER,
+        /** Administrator with full system and fleet management capabilities. */
+        ADMIN
     }
 }

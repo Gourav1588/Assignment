@@ -9,15 +9,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-
+/**
+ * Data Access Object for Vehicle entities.
+ * Includes dynamic filtering logic to power the frontend catalog search.
+ */
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
-    // Fetch vehicles with dynamic filtering
-    // Supports optional filters like name, type, and category
-    // If any parameter is null, that filter is ignored automatically
-    // Only active vehicles are returned
+    /**
+     * Dynamically filters the fleet based on user input.
+     * If a parameter is null or empty, that specific filter is automatically bypassed.
+     */
     @Query("SELECT v FROM Vehicle v WHERE " +
             "(:name = '' OR LOWER(v.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
             "(:type IS NULL OR v.type = :type) AND " +
@@ -28,13 +30,9 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
             @Param("categoryId") Long categoryId,
             Pageable pageable);
 
-    // Check if a vehicle exists and is currently active
-    // Commonly used before performing operations like soft delete
     boolean existsByIdAndIsActiveTrue(Long id);
 
     boolean existsByNameIgnoreCase(String name);
 
     boolean existsByRegistrationNumberIgnoreCase(String registrationNumber);
-
-
 }

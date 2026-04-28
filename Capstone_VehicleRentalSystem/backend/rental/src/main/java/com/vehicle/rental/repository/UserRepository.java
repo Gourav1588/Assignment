@@ -6,13 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository  // Marks this as a Spring Data repository (DAO layer)
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Fetch user by email (used during login)
-    // Returns Optional to safely handle "user not found"
     Optional<User> findByEmail(String email);
 
-    // Check if a user already exists with given email (used during registration)
     boolean existsByEmail(String email);
 }

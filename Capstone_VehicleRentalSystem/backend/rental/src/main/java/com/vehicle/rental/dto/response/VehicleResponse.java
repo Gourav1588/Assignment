@@ -1,34 +1,54 @@
 package com.vehicle.rental.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vehicle.rental.entity.Vehicle.VehicleType;
 import lombok.Data;
 
+/**
+ * Data Transfer Object representing vehicle details.
+ * Sent to the client in response to catalog queries, abstracting away
+ * internal database models and exposing only safe, relevant information.
+ */
 @Data
 public class VehicleResponse {
 
-    // Unique identifier of the vehicle
+    /**
+     * The unique database identifier of the vehicle.
+     */
     private Long id;
 
-    // Name of the vehicle
+    /**
+     * The display name or model of the vehicle (e.g., "Toyota Camry").
+     */
     private String name;
 
+    /**
+     * The unique license plate or registration number of the vehicle.
+     */
     private String registrationNumber;
 
-    // Type of the vehicle (e.g., CAR, BIKE)
+    /**
+     * The overarching classification type of the vehicle (e.g., CAR, BIKE).
+     */
     private VehicleType type;
 
-    // Description providing additional details about the vehicle
+    /**
+     * Additional details providing context about the vehicle's features or condition.
+     */
     private String description;
 
-    // Rental price per day
+    /**
+     * The current daily rental rate for the vehicle.
+     */
     private Double pricePerDay;
 
-    // Name of the associated category (if any)
+    /**
+     * The display name of the category this vehicle belongs to (if assigned).
+     */
     private String categoryName;
 
-    // Status flag
+    /**
+     * Flag indicating whether the vehicle is currently active in the system
+     * (e.g., true if it is operational and part of the fleet, false if it is retired or suspended).
+     */
     private boolean isActive;
-
-
 }

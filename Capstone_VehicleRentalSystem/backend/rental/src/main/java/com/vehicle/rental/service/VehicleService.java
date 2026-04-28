@@ -19,174 +19,120 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-@Slf4j // Logging support
-@Service // Service layer
+/**
+ * Service layer handling fleet inventory management.
+ * Controls the creation, modification, and status toggling of vehicles, enforcing
+ * strict uniqueness on registration plates and safeguarding active bookings.
+ */
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class VehicleService {
 
-    private final VehicleRepository vehicleRepository; // DB access
-    private final BookingRepository bookingRepository; // Booking checks
-    private final CategoryService categoryService; // Category fetch
-    private final VehicleMapper vehicleMapper; // DTO mapper
+    private final VehicleRepository vehicleRepository;
+    private final BookingRepository bookingRepository;
+    private final CategoryService categoryService;
+    private final VehicleMapper vehicleMapper;
 
-    // Fetch vehicles with filters + pagination
-    public Page<VehicleResponse> getVehicles(
-            int page, int size,
-            VehicleType type,
-            Long categoryId,
-            String name) {
+    /**
+     * Retrieves a paginated and filtered list of vehicles for the catalog.
+     */
+    public Page<VehicleResponse> getVehicles(int page, int size, VehicleType type, Long categoryId, String name) {
+        if (page < 0) throw new BadRequestException("Pagination index cannot be negative");
+        if (size <= 0) throw new BadRequestException("Pagination size must be strictly positive");
 
-        // Validate pagination inputs
-        if (page < 0) throw new BadRequestException("Page cannot be negative");
-        if (size <= 0) throw new BadRequestException("Size must be > 0");
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        // Create pageable (latest first)
-        Pageable pageable = PageRequest.of(
-                page, size, Sort.by("createdAt").descending()
-        );
-
-        // Apply filters (ignore null/blank values)
         return vehicleRepository
-                .findAllWithFilters(
-                        name != null && !name.isBlank() ? name : "",
-                        type,
-                        categoryId,
-                        pageable
-                )
-                .map(vehicleMapper::toResponse); // Convert to DTO
+                .findAllWithFilters(name != null && !name.isBlank() ? name : "", type, categoryId, pageable)
+                .map(vehicleMapper::toResponse);
     }
 
-    // Get single vehicle by id
     public VehicleResponse getVehicleById(Long id) {
         Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Vehicle not found"));
-
-        return vehicleMapper.toResponse(vehicle); // Map to DTO
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle record not found"));
+        return vehicleMapper.toResponse(vehicle);
     }
 
-    // Create new vehicle
+    /**
+     * Integrates a new vehicle into the fleet.
+     * Validates that the legal registration number is not already registered in the system.
+     */
     @Transactional
     public VehicleResponse createVehicle(VehicleRequest request) {
         String normalizedName = request.getName().trim();
         String normalizedPlate = request.getRegistrationNumber().trim();
 
-
-        // Prevent duplicate Registration Numbers ---
         if (vehicleRepository.existsByRegistrationNumberIgnoreCase(normalizedPlate)) {
-            throw new BadRequestException("A vehicle with registration number " + normalizedPlate + " already exists in the fleet.");
+            throw new BadRequestException("Registration number " + normalizedPlate + " already exists in the fleet.");
         }
 
-        // Convert DTO → entity
         Vehicle vehicle = vehicleMapper.toEntity(request);
-        vehicle.setName(normalizedName); // Ensure clean name
-        // (Note: vehicleMapper.toEntity already sets the registrationNumber)
+        vehicle.setName(normalizedName);
 
-        // Attach category if provided
         if (request.getCategoryId() != null) {
-            vehicle.setCategory(
-                    categoryService.getCategoryById(request.getCategoryId())
-            );
+            vehicle.setCategory(categoryService.getCategoryById(request.getCategoryId()));
         }
 
-        // Save and return response
-        return vehicleMapper.toResponse(
-                vehicleRepository.save(vehicle));
+        log.info("Fleet expanded with new vehicle: {} [{}]", normalizedName, normalizedPlate);
+        return vehicleMapper.toResponse(vehicleRepository.save(vehicle));
     }
 
-    // Update existing vehicle
+    /**
+     * Updates an existing vehicle's attributes.
+     * Safely checks for registration number collisions if the plate is being modified.
+     */
     @Transactional
     public VehicleResponse updateVehicle(Long id, VehicleRequest request) {
-
-        // Fetch existing vehicle
         Vehicle existing = vehicleRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Vehicle not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle record not found"));
 
         String newPlate = request.getRegistrationNumber().trim();
 
-
         if (!existing.getRegistrationNumber().equalsIgnoreCase(newPlate)) {
             if (vehicleRepository.existsByRegistrationNumberIgnoreCase(newPlate)) {
-                throw new BadRequestException("A vehicle with registration number " + newPlate + " already exists.");
+                throw new BadRequestException("Registration number " + newPlate + " is mapped to another vehicle.");
             }
             existing.setRegistrationNumber(newPlate.toUpperCase());
         }
 
-        // Update fields
         existing.setName(request.getName().trim());
         existing.setType(request.getType());
         existing.setPricePerDay(request.getPricePerDay());
         existing.setDescription(request.getDescription());
 
-        // Update category if provided
         if (request.getCategoryId() != null) {
-            existing.setCategory(
-                    categoryService.getCategoryById(request.getCategoryId())
-            );
+            existing.setCategory(categoryService.getCategoryById(request.getCategoryId()));
         }
 
-        // Save updated data
-        return vehicleMapper.toResponse(
-                vehicleRepository.save(existing));
+        return vehicleMapper.toResponse(vehicleRepository.save(existing));
     }
 
-    // Soft delete (mark inactive instead of removing)
-    @Transactional
-    public void softDeleteVehicle(Long id) {
-
-        // Fetch vehicle
-        Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Vehicle not found"));
-
-        // Block delete if active/pending bookings exist
-        boolean hasActiveBookings = bookingRepository
-                .existsByVehicleIdAndStatusIn(
-                        id,
-                        List.of(BookingStatus.ACTIVE, BookingStatus.PENDING)
-                );
-
-        if (hasActiveBookings) {
-            throw new BadRequestException("Vehicle has active bookings");
-        }
-
-        vehicle.setActive(false); // Mark inactive
-        vehicleRepository.save(vehicle);
-    }
-
-    // Toggle active/inactive status
+    /**
+     * Flips the operational status of a vehicle (Active <-> Inactive).
+     * Acts as a soft-delete mechanism. Prevents deactivation if the vehicle is tied
+     * to future or ongoing reservations to prevent system conflicts.
+     */
     @Transactional
     public VehicleResponse toggleVehicleStatus(Long id) {
-
-        // Fetch vehicle
         Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Vehicle not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle record not found"));
 
-        // If disabling, ensure no future bookings
         if (vehicle.isActive()) {
-            boolean hasBookings = bookingRepository
-                    .existsActiveOrFutureBookingsForVehicle(id);
-
+            boolean hasBookings = bookingRepository.existsActiveOrFutureBookingsForVehicle(id);
             if (hasBookings) {
-                throw new BadRequestException(
-                        "Cannot deactivate: future bookings exist");
+                throw new BadRequestException("Cannot deactivate vehicle: Future or active bookings exist.");
             }
         }
 
-        vehicle.setActive(!vehicle.isActive()); // Flip status
+        vehicle.setActive(!vehicle.isActive());
+        log.info("Vehicle ID {} status toggled to Active: {}", id, vehicle.isActive());
 
-        return vehicleMapper.toResponse(
-                vehicleRepository.save(vehicle));
+        return vehicleMapper.toResponse(vehicleRepository.save(vehicle));
     }
 
-    // Search for available vehicles by date range
     public List<VehicleResponse> findAvailableVehicles(LocalDate startDate, LocalDate endDate) {
-
-
         List<Vehicle> allVehicles = vehicleRepository.findAll();
-
 
         return allVehicles.stream()
                 .filter(Vehicle::isActive)

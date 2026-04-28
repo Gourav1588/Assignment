@@ -3,68 +3,96 @@ package com.vehicle.rental.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-
-// It connects a User to a specific Vehicle for a specific period. By making this a dedicated entity
-// rather than a simple join table, we can track vital business data like 
-// the final price and current lifecycle status.
+/**
+ * JPA Entity representing a vehicle rental booking transaction.
+ * Connects a User to a specific Vehicle for a designated time period.
+ * Designed as a dedicated entity rather than a simple join table to track
+ * business-critical data like finalized pricing and lifecycle status.
+ */
 @Data
 @Entity
 @Table(name = "bookings")
 public class Booking {
 
+    /**
+     * The unique primary key for the booking record.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // We link the User here using @ManyToOne. I used @JsonIgnoreProperties
-    // because while the frontend needs to know 'who' booked the car (name/email),
-    // it should never receive the user's hashed password or their list of other 
-    // bookings, which would cause a circular reference crash.
+    /**
+     * The user who initiated the booking.
+     * Sensitive and relational fields (password, role, and the user's other bookings)
+     * are ignored during JSON serialization to ensure data security and prevent
+     * infinite recursion (circular references).
+     */
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnoreProperties({"bookings", "password", "role"})
     private User user;
 
-    // Standard relationship to the Vehicle. We ignore the 'isActive' flag and
-    // the vehicle's own booking history here to keep the JSON response clean 
-    // and focused strictly on the car's details (Name, Model, Type).
+    /**
+     * The vehicle reserved for this booking.
+     * Internal vehicle state flags and back-references are ignored during JSON serialization
+     * to keep the API payload clean and focused on essential vehicle details.
+     */
     @ManyToOne
     @JoinColumn(name = "vehicle_id", nullable = false)
     @JsonIgnoreProperties({"bookings", "isActive"})
     private Vehicle vehicle;
 
+    /**
+     * The approved start date of the rental period.
+     */
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
+    /**
+     * The approved end date of the rental period.
+     */
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    // We 'snapshot' the total  price here (Days * PricePerDay) at the exact moment of creation.
-    // This ensures that if the Admin raises rental prices next month, 
-    // the user's historical receipts remain accurate and unchanged.
+    /**
+     * The finalized total cost of the booking (Duration in Days * PricePerDay).
+     * This acts as a financial 'snapshot' at the exact moment of creation, ensuring historical
+     * receipts remain accurate even if vehicle rental rates fluctuate in the future.
+     */
     @Column(name = "total_cost", nullable = false)
     private Double totalCost;
 
-    // Every booking starts as PENDING. This allows the user to see the 
-    // calculated summary on the frontend before they 'Confirm' the rental.
-    // It's the foundation for  mock payment/confirmation flow.
+    /**
+     * The current lifecycle status of the transaction.
+     * Defaults to PENDING, allowing the user to review the calculated financial summary
+     * on the frontend before officially confirming the rental.
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BookingStatus status = BookingStatus.PENDING;
 
-    @Column(name = "created_at")
+    /**
+     * The exact timestamp when this record was generated in the database.
+     */
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // I designed this Enum to support a full historical audit trail. 
-    // Even after a trip is finished or cancelled, we keep the record 
-    // so the user can see their 'Booking History' in their dashboard.
+    /**
+     * Enumeration of valid booking lifecycle states.
+     * Supports a full historical audit trail for user dashboards and admin reporting.
+     */
     public enum BookingStatus {
-        PENDING,   // Created but waiting for user confirmation
-        ACTIVE,    // Confirmed and currently in progress
-        CANCELLED, // Terminated by user (retains financial record)
-        COMPLETED  // Trip finished successfully; vehicle is now free
+        /** Created but awaiting final user confirmation. */
+        PENDING,
+        /** Confirmed and currently within the active rental period. */
+        ACTIVE,
+        /** Terminated by the user prior to completion (retains the financial record). */
+        CANCELLED,
+        /** Trip finished successfully; the vehicle is returned and available for the next user. */
+        COMPLETED
     }
 }

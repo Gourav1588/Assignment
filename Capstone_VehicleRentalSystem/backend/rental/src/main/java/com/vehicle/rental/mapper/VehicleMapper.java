@@ -5,45 +5,59 @@ import com.vehicle.rental.dto.response.VehicleResponse;
 import com.vehicle.rental.entity.Vehicle;
 import org.springframework.stereotype.Component;
 
-@Component // Marks as Spring component
+/**
+ * Mapper component for translating between Vehicle DTOs and internal Entities.
+ */
+@Component
 public class VehicleMapper {
 
-    // Convert request DTO → entity
+    /**
+     * Converts an incoming VehicleRequest DTO into a persistent Vehicle entity.
+     * Ensures critical strings like registration numbers are trimmed and standardized.
+     *
+     * @param request The data transfer object containing vehicle input.
+     * @return The populated Vehicle entity.
+     */
     public Vehicle toEntity(VehicleRequest request) {
-
-        Vehicle vehicle = new Vehicle(); // Create entity
+        Vehicle vehicle = new Vehicle();
 
         if (request.getRegistrationNumber() != null) {
             vehicle.setRegistrationNumber(request.getRegistrationNumber().trim().toUpperCase());
         }
-        vehicle.setName(request.getName().trim()); // Set name
-        vehicle.setType(request.getType()); // Set type
-        vehicle.setPricePerDay(request.getPricePerDay()); // Set price
-        vehicle.setDescription(request.getDescription()); // Set description
 
-        vehicle.setActive(true); // Default active
+        vehicle.setName(request.getName().trim());
+        vehicle.setType(request.getType());
+        vehicle.setPricePerDay(request.getPricePerDay());
+        vehicle.setDescription(request.getDescription());
 
-        return vehicle; // Return entity
+        // Defaults to true upon creation
+        vehicle.setActive(true);
+
+        return vehicle;
     }
 
-    // Convert entity → response DTO
+    /**
+     * Converts a Vehicle entity into a flat VehicleResponse DTO.
+     * Safely extracts related category names without exposing full nested objects.
+     *
+     * @param vehicle The source Vehicle entity.
+     * @return The formatted VehicleResponse DTO.
+     */
     public VehicleResponse toResponse(Vehicle vehicle) {
+        VehicleResponse response = new VehicleResponse();
 
-        VehicleResponse response = new VehicleResponse(); // Create DTO
-
-        response.setId(vehicle.getId()); // Set id
+        response.setId(vehicle.getId());
         response.setRegistrationNumber(vehicle.getRegistrationNumber());
-        response.setName(vehicle.getName()); // Set name
-        response.setType(vehicle.getType()); // Set type
-        response.setDescription(vehicle.getDescription()); // Set description
-        response.setPricePerDay(vehicle.getPricePerDay()); // Set price
-        response.setActive(vehicle.isActive()); // Set status
+        response.setName(vehicle.getName());
+        response.setType(vehicle.getType());
+        response.setDescription(vehicle.getDescription());
+        response.setPricePerDay(vehicle.getPricePerDay());
+        response.setActive(vehicle.isActive());
 
-        // Set category if exists
         if (vehicle.getCategory() != null) {
             response.setCategoryName(vehicle.getCategory().getName());
         }
 
-        return response; // Return DTO
+        return response;
     }
 }
