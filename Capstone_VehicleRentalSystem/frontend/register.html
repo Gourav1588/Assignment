@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Basic meta configuration -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page title -->
+    <title>Create Account — DriveEasy</title>
+
+    <!-- External fonts for styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+    <!-- Global and authentication-specific styles -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+
+<!-- Navigation link to return to homepage -->
+<a href="index.html" class="back-home">← Back to Home</a>
+
+<!-- Main wrapper to center the registration card -->
+<div class="auth-wrapper">
+
+    <!-- Registration card container -->
+    <div class="auth-card">
+
+        <!-- Header section (title + subtitle) -->
+        <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Join DriveEasy to book your first vehicle.</p>
+        </div>
+
+        <!-- Registration form -->
+        <form class="auth-form" id="registerForm">
+
+            <!-- Full name input -->
+            <div class="field">
+                <label>Full Name</label>
+                <input
+                        type="text"
+                        id="regName"
+                        placeholder="John Doe"
+                        required>
+            </div>
+
+            <!-- Email input -->
+            <div class="field">
+                <label>Email Address</label>
+                <input
+                        type="email"
+                        id="regEmail"
+                        placeholder="name@company.com"
+                        required>
+            </div>
+
+            <!-- Password input -->
+            <div class="field">
+                <label>Password</label>
+                <input
+                        type="password"
+                        id="regPassword"
+                        placeholder="Create a secure password"
+                        required>
+            </div>
+
+            <!-- Submit button -->
+            <button
+                    type="submit"
+                    class="btn-accent"
+                    id="regBtn">
+                Create Account
+            </button>
+        </form>
+
+        <!-- Footer with redirect to login page -->
+        <div class="auth-footer">
+            Already have an account?
+            <a href="login.html">Sign in here</a>
+        </div>
+
+    </div>
+</div>
+
+<!-- Toast notification container (for success/error messages) -->
+<div class="toast" id="toast"></div>
+
+<!-- Configuration script (API base URL, etc.) -->
+<script src="config/config.js"></script>
+
+<!-- Authentication logic (register handling, API calls, validation) -->
+<script src="js/auth.js"></script>
+
+</body>
+</html>

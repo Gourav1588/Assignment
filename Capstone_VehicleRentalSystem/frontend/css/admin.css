@@ -1,0 +1,444 @@
+/* =========================================================================
+   DriveEasy - Administrator Dashboard Styles (admin.css)
+   ========================================================================= */
+
+/* =========================================================================
+   1. GLOBAL VARIABLES & BASE TYPOGRAPHY
+   ========================================================================= */
+:root {
+    /* Color Palette */
+    --bg-color: #0b0e14;
+    --panel: #151a23;
+    --line: #2a3140;
+    --white: #ffffff;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+
+    /* Brand & Status Colors */
+    --accent: #f97316;
+    --accent-glow: rgba(249, 115, 22, 0.2);
+    --red: #ef4444;
+    --green: #10b981;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================================================================
+   2. FORM ELEMENTS & INPUTS
+   ========================================================================= */
+
+/* Standardize input dimensions and behavior */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    background: var(--bg-color);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--white);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Focus states for accessibility and UX */
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* Form field containers */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.field label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* =========================================================================
+   3. GLOBAL BUTTON STYLES
+   ========================================================================= */
+
+.btn-primary,
+.btn-accent {
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover,
+.btn-accent:hover {
+    background: #ea580c;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--white);
+    border: 1px solid var(--line);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background: var(--line);
+}
+
+/* =========================================================================
+   4. STRUCTURAL LAYOUT & NAVIGATION
+   ========================================================================= */
+
+/* Main CSS Grid defining the sidebar and content areas */
+.admin-layout {
+    padding: 80px 48px;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 48px;
+    align-items: start;
+}
+
+/* Persistent sticky sidebar */
+.admin-sidebar {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 80px;
+    min-height: calc(100vh - 160px);
+    box-sizing: border-box;
+}
+
+.sidebar-brand h2 {
+    color: var(--white);
+    margin: 0 0 48px 0;
+    font-size: 24px;
+}
+
+.sidebar-brand span {
+    color: var(--accent);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+/* Navigation Interactive States */
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 14px 16px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--white);
+}
+
+.nav-btn.active {
+    background: var(--accent);
+    color: var(--white);
+    font-weight: 600;
+}
+
+.logout-btn {
+    color: var(--red);
+    margin-top: auto;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    padding-top: 24px;
+}
+
+.logout-btn:hover {
+    color: #f87171;
+    background: transparent;
+}
+
+/* =========================================================================
+   5. DASHBOARD METRICS & HEADER
+   ========================================================================= */
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+}
+
+.admin-header h1 {
+    font-size: 32px;
+    margin: 0 0 8px 0;
+    color: var(--white);
+}
+
+.admin-header p {
+    color: var(--muted);
+    margin: 0;
+}
+
+/* KPI Card Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.stat-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.stat-card p {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+}
+
+.stat-card h3 {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--white);
+    margin: 0;
+}
+
+/* =========================================================================
+   6. DATA TABLES & ROW ACTIONS
+   ========================================================================= */
+
+.admin-panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.panel-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--line);
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--white);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-table th {
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.3);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--line);
+}
+
+.admin-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--line);
+    color: var(--text);
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Standardized Inline Action Buttons (Overrides applied for specificity) */
+.action-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border: 1px solid var(--line) !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+    min-width: 85px;
+}
+
+.action-btn:hover {
+    background-color: #334155 !important;
+    border-color: var(--muted) !important;
+    transform: translateY(-1px);
+}
+
+/* Destructive Action Override */
+.action-btn.delete {
+    color: #f87171 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.action-btn.delete:hover {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    border-color: #ef4444 !important;
+}
+
+/* Shared Status Indicator */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* =========================================================================
+   7. MODAL DIALOG COMPONENTS
+   ========================================================================= */
+
+/* Background obscuration layer */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(11, 14, 20, 0.85);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* Modal structural container */
+.modal-content {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 500px;
+    padding: 32px;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+    color: var(--white);
+}
+
+.modal-content h3 {
+    font-size: 24px;
+    color: var(--white);
+    margin: 0 0 24px 0;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 14px;
+    font-size: 15px;
+}
+
+/* =========================================================================
+   8. FEEDBACK NOTIFICATIONS (TOAST)
+   ========================================================================= */
+
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--white);
+    color: var(--bg-color);
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    z-index: 3000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}

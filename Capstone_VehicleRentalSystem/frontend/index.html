@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveEasy — Vehicle Rental</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/index.css">
+    <style>
+        /* This ensures smooth scrolling when clicking nav links */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="logo">Drive<span>Easy</span></a>
+    <ul>
+        <li><a href="vehicles.html">Vehicles</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#about">About</a></li>
+    </ul>
+    <div class="nav-cta">
+        <a href="login.html" class="btn-outline">Sign In</a>
+        <a href="register.html" class="btn-accent">Get Started</a>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-tag reveal-1">Now available in your city</div>
+    <h1 class="reveal-2">Rent Any Vehicle.<br><em>Anytime</em>, Anywhere.</h1>
+    <p class="hero-sub reveal-3">Browse cars and bikes, pick your dates, and hit the road — all in under 2 minutes. No hidden fees, no hassle.</p>
+
+    <div class="hero-actions reveal-4">
+        <a href="vehicles.html" class="btn-hero">Browse Vehicles</a>
+        <a href="register.html" class="btn-ghost">Create Account →</a>
+    </div>
+
+    <div class="hero-stats reveal-4">
+        <div><div class="stat-num">50<span>+</span></div><div class="stat-label">Vehicles Available</div></div>
+        <div><div class="stat-num">4<span>+</span></div><div class="stat-label">Categories</div></div>
+        <div><div class="stat-num">24<span>/7</span></div><div class="stat-label">Support</div></div>
+        <div><div class="stat-num">₹0</div><div class="stat-label">Hidden Fees</div></div>
+    </div>
+
+    <img src="resources/car.svg" alt="Static Car" class="hero-visual reveal-3">
+</section>
+
+<section class="search-section scroll-reveal">
+    <div class="search-card">
+        <div class="search-field">
+            <label>Vehicle Type</label>
+            <select id="typeFilter">
+                <option value="">All Types</option>
+                <option value="CAR">Car</option>
+                <option value="BIKE">Bike</option>
+            </select>
+        </div>
+        <div class="search-field">
+            <label>Category</label>
+            <select id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="sedan">Sedan</option>
+                <option value="suv">SUV</option>
+                <option value="bike">Sports Bike</option>
+                <option value="scooter">Scooter</option>
+            </select>
+        </div>
+        <div class="search-field">
+            <label>Pick Up Date</label>
+            <input type="date" id="startDate">
+        </div>
+        <div class="search-field">
+            <label>Return Date</label>
+            <input type="date" id="endDate">
+        </div>
+        <button class="btn-search" onclick="handleSearch()">Search Fleet</button>
+    </div>
+</section>
+
+<section class="vehicles-section scroll-reveal">
+    <div class="section-header">
+        <span class="section-subtitle">Featured Fleet</span>
+        <h2>Popular Vehicles</h2>
+    </div>
+    <div class="vehicles-grid">
+
+        <div class="vehicle-card" onclick="window.location.href='vehicles.html'">
+            <div class="vehicle-img">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+                    <circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>
+                </svg>
+                <div class="vehicle-badge">Available</div>
+            </div>
+            <div class="vehicle-info">
+                <div class="vehicle-cat">Sedan</div><div class="vehicle-name">Swift Dzire</div>
+                <div class="vehicle-tags"><span class="tag">5 Seats</span><span class="tag">Manual</span><span class="tag">Petrol</span></div>
+                <div class="vehicle-footer"><div class="vehicle-price">₹1,500 <span>/ day</span></div><button class="btn-accent">Book Now</button></div>
+            </div>
+        </div>
+
+        <div class="vehicle-card" onclick="window.location.href='vehicles.html'">
+            <div class="vehicle-img">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-1.4 3.1A1.5 1.5 0 0 0 2 12v4h3"/>
+                    <circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/>
+                </svg>
+                <div class="vehicle-badge">Available</div>
+            </div>
+            <div class="vehicle-info">
+                <div class="vehicle-cat">SUV</div><div class="vehicle-name">Toyota Innova</div>
+                <div class="vehicle-tags"><span class="tag">7 Seats</span><span class="tag">Automatic</span><span class="tag">Diesel</span></div>
+                <div class="vehicle-footer"><div class="vehicle-price">₹3,200 <span>/ day</span></div><button class="btn-accent">Book Now</button></div>
+            </div>
+        </div>
+
+        <div class="vehicle-card" onclick="window.location.href='vehicles.html'">
+            <div class="vehicle-img">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/>
+                    <path d="M15 6h3.5L22 12v3M9 16.5h6M11 11.5l3 5M8.5 11.5 5 13M15 6a3.5 3.5 0 1 0-7 0"/>
+                </svg>
+                <div class="vehicle-badge">Available</div>
+            </div>
+            <div class="vehicle-info">
+                <div class="vehicle-cat">Sports Bike</div><div class="vehicle-name">Royal Enfield</div>
+                <div class="vehicle-tags"><span class="tag">350cc</span><span class="tag">Manual</span><span class="tag">Petrol</span></div>
+                <div class="vehicle-footer"><div class="vehicle-price">₹1,200 <span>/ day</span></div><button class="btn-accent">Book Now</button></div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section id="how" class="how-section scroll-reveal">
+    <div class="section-header">
+        <span class="section-subtitle">Simple Process</span>
+        <h2>How It Works</h2>
+    </div>
+    <div class="steps-grid">
+        <div class="step"><div class="step-num">01</div><span class="step-icon">👤</span><div class="step-title">Create Account</div><div class="step-desc">Sign up in seconds with just your name, email and password.</div></div>
+        <div class="step"><span class="step-icon">🔍</span><div class="step-num">02</div><div class="step-title">Browse Vehicles</div><div class="step-desc">Filter by type, category, or search by name. Find your perfect ride.</div></div>
+        <div class="step"><span class="step-icon">📅</span><div class="step-num">03</div><div class="step-title">Pick Your Dates</div><div class="step-desc">Select start and end dates. Review total cost before confirming.</div></div>
+        <div class="step"><span class="step-icon">🚀</span><div class="step-num">04</div><div class="step-title">Hit The Road</div><div class="step-desc">Confirm your booking and you are ready to go. That simple.</div></div>
+    </div>
+</section>
+
+<section id="categories" class="categories-section scroll-reveal">
+    <div class="section-header">
+        <span class="section-subtitle">Browse By Type</span>
+        <h2>Vehicle Categories</h2>
+    </div>
+    <div class="categories-grid">
+        <div class="cat-card" onclick="window.location.href='vehicles.html'">
+            <div class="cat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></div>
+            <div class="cat-name">Sedan</div><div class="cat-count">Comfortable family cars</div>
+        </div>
+        <div class="cat-card" onclick="window.location.href='vehicles.html'">
+            <div class="cat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-1.4 3.1A1.5 1.5 0 0 0 2 12v4h3"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg></div>
+            <div class="cat-name">SUV</div><div class="cat-count">Spacious utility vehicles</div>
+        </div>
+        <div class="cat-card" onclick="window.location.href='vehicles.html'">
+            <div class="cat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M15 6h3.5L22 12v3M9 16.5h6M11 11.5l3 5M8.5 11.5 5 13M15 6a3.5 3.5 0 1 0-7 0"/></svg></div>
+            <div class="cat-name">Sports Bike</div><div class="cat-count">High performance rides</div>
+        </div>
+        <div class="cat-card" onclick="window.location.href='vehicles.html'">
+            <div class="cat-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M9 16h6M14 6h4v4M14 6l-3 10M6 13v-3a2 2 0 0 1 2-2h1"/></svg></div>
+            <div class="cat-name">Scooter</div><div class="cat-count">Perfect for city commutes</div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section scroll-reveal">
+    <div class="cta-card">
+        <h2>Ready to Hit the Road?</h2>
+        <p>Create your free account today and get access to our full fleet of vehicles. No hidden charges, no complicated process.</p>
+        <a href="register.html" class="btn-cta">Get Started for Free</a>
+    </div>
+</section>
+
+<footer id="about" class="scroll-reveal">
+    <div class="footer-top">
+        <div class="footer-brand">
+            <div class="logo">Drive<span>Easy</span></div>
+            <p>Your trusted vehicle rental platform. Affordable rates, premium vehicles, zero hassle.</p>
+        </div>
+        <div class="footer-links">
+            <h4>Platform</h4>
+            <ul>
+                <li><a href="vehicles.html">Browse Vehicles</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="profile.html">My Bookings</a></li>
+                <li><a href="admin.html">Admin Panel</a></li>
+            </ul>
+        </div>
+        <div class="footer-links">
+            <h4>Account</h4>
+            <ul>
+                <li><a href="login.html">Sign In</a></li>
+                <li><a href="register.html">Register</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+        </div>
+        <div class="footer-links">
+            <h4>Support</h4>
+            <ul><li><a href="#">Help Center</a></li><li><a href="#">Contact Us</a></li><li><a href="#">Privacy Policy</a></li></ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 DriveEasy. Built with Spring Boot + PostgreSQL.</p>
+        <p>Capstone Project — Vehicle Rental System</p>
+    </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="config/config.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

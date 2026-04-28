@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Basic meta configuration -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Page title -->
+  <title>Sign In — DriveEasy</title>
+
+  <!-- External fonts for styling -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+  <!-- Global and authentication-specific styles -->
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+
+<!-- Navigation link to return to homepage -->
+<a href="index.html" class="back-home">← Back to Home</a>
+
+<!-- Main wrapper to center the login card -->
+<div class="auth-wrapper">
+
+  <!-- Login card container -->
+  <div class="auth-card">
+
+    <!-- Header section (title + subtitle) -->
+    <div class="auth-header">
+      <h2>Welcome Back</h2>
+      <p>Sign in to manage your rentals.</p>
+    </div>
+
+    <!-- Login form -->
+    <form class="auth-form" id="loginForm">
+
+      <!-- Email input field -->
+      <div class="field">
+        <label>Email Address</label>
+        <input
+                type="email"
+                id="loginEmail"
+                placeholder="name@company.com"
+                required>
+      </div>
+
+      <!-- Password input field -->
+      <div class="field">
+        <label>Password</label>
+        <input
+                type="password"
+                id="loginPassword"
+                placeholder="••••••••"
+                required>
+      </div>
+
+      <!-- Submit button -->
+      <button
+              type="submit"
+              class="btn-accent"
+              id="loginBtn">
+        Sign In
+      </button>
+    </form>
+
+    <!-- Footer with redirect to registration page -->
+    <div class="auth-footer">
+      Don't have an account?
+      <a href="register.html">Create one here</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast notification container (used for showing messages) -->
+<div class="toast" id="toast"></div>
+
+<!-- JavaScript configuration (API base URL, etc.) -->
+<script src="config/config.js"></script>
+
+<!-- Authentication logic (login handling, validation, API calls) -->
+<script src="js/auth.js"></script>
+
+</body>
+</html>
