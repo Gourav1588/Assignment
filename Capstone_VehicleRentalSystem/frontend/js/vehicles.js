@@ -39,9 +39,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('bookStart')?.addEventListener('change', updateSummary);
     document.getElementById('bookEnd')?.addEventListener('change', updateSummary);
 
-    // Hydrate fleet grid on load
+    // =====================================================================
+    //  Check for dates passed from the Landing Page
+    // =====================================================================
     if (document.getElementById('fleetGrid')) {
-        loadFleet();
+        const urlParams = new URLSearchParams(window.location.search);
+        const passedStart = urlParams.get('start');
+        const passedEnd = urlParams.get('end');
+
+        if (passedStart && passedEnd && startInput && endInput) {
+            // 1. Fill the inputs with the passed dates
+            startInput.value = passedStart;
+            endInput.value = passedEnd;
+
+            // 2. Automatically trigger the availability search
+            searchVehicles();
+        } else {
+            // Otherwise, load the default entire fleet
+            loadFleet();
+        }
     }
 });
 

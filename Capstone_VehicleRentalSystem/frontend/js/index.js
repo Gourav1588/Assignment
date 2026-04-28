@@ -44,10 +44,10 @@ function handleSearch() {
 
     showToast('Locating available fleet...');
     setTimeout(() => {
-        window.location.href = 'vehicles.html';
+        // CHANGED: Append start and end dates as URL parameters
+        window.location.href = `vehicles.html?start=${start}&end=${end}`;
     }, 1000);
 }
-
 /**
  * Verifies session authorization prior to executing a booking request.
  * Redirects unauthenticated users to the login portal.
