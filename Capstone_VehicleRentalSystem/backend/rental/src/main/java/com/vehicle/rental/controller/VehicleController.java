@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Slf4j // Enables logging
 @RestController // Marks class as REST API controller
 @RequestMapping("/api/vehicles") // Base URL mapping
@@ -37,6 +40,15 @@ public class VehicleController {
         );
     }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<List<VehicleResponse>> searchAvailableVehicles(
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+
+        log.info("Searching for vehicles between {} and {}", startDate, endDate);
+        return ResponseEntity.ok(vehicleService.findAvailableVehicles(startDate, endDate));
+    }
     @GetMapping("/{id}")
     public ResponseEntity<VehicleResponse> getVehicleById(@PathVariable Long id) {
         log.info("Fetching vehicle id: {}", id);
@@ -70,4 +82,7 @@ public class VehicleController {
         log.info("Toggling status for vehicle id: {}", id); // Log action
         return ResponseEntity.ok(vehicleService.toggleVehicleStatus(id));
     }
+
+
+
 }

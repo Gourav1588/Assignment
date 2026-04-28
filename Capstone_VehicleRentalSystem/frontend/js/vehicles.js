@@ -267,6 +267,20 @@
 
     // 7. EVENT LISTENERS
     document.addEventListener('DOMContentLoaded', () => {
+
+    const today = new Date().toISOString().split('T')[0];
+
+        const startInput = document.getElementById('searchStart');
+        const endInput = document.getElementById('searchEnd');
+
+        if(startInput && endInput) {
+            startInput.setAttribute('min', today);
+
+            // When start date changes, force end date to be after it
+            startInput.addEventListener('change', function() {
+                endInput.setAttribute('min', this.value);
+            });
+        }
         if (document.getElementById('fleetGrid')) {
             loadFleet();
         }
@@ -277,3 +291,32 @@
         document.getElementById('bookStart')?.addEventListener('change', updateSummary);
         document.getElementById('bookEnd')?.addEventListener('change', updateSummary);
     });
+
+    async function searchVehicles() {
+        const startDate = document.getElementById('searchStart').value;
+        const endDate = document.getElementById('searchEnd').value;
+
+        if (!startDate || !endDate) {
+            alert("Please select both a Pick-up and Drop-off date!");
+            return;
+        }
+
+        try {
+            // Send dates to the new Spring Boot endpoint
+            const response = await fetch(`${API_BASE_URL}/vehicles/search?startDate=${startDate}&endDate=${endDate}`);
+
+            if (response.ok) {
+                const availableCars = await response.json();
+
+                filteredFleet = availableCars;
+                currentPage = 1;
+                renderGrid();
+
+                if (availableCars.length === 0) {
+                    document.getElementById('vehicleGrid').innerHTML = "<h3 style='grid-column: 1/-1; text-align: center; color: #dc3545;'>Sorry, all our vehicles are fully booked for these dates!</h3>";
+                }
+            }
+        } catch (error) {
+            console.error("Search failed:", error);
+        }
+    }

@@ -24,6 +24,6 @@ public class BookingRequest {
     // End date of the booking
     // Must be provided and should also be a future date
     @NotNull(message = "End date is required")
-    @Future(message = "End date must be in the future")
+    @FutureOrPresent(message = "End date must be today or in the future")
     private LocalDate endDate;
 }

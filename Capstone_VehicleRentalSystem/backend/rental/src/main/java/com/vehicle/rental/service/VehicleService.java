@@ -16,6 +16,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j // Logging support
@@ -104,8 +105,7 @@ public class VehicleService {
 
         String newPlate = request.getRegistrationNumber().trim();
 
-        // --- NEW LOGIC: Check plate uniqueness during update ---
-        // Only check if they are actually changing the plate to something new
+
         if (!existing.getRegistrationNumber().equalsIgnoreCase(newPlate)) {
             if (vehicleRepository.existsByRegistrationNumberIgnoreCase(newPlate)) {
                 throw new BadRequestException("A vehicle with registration number " + newPlate + " already exists.");
@@ -180,4 +180,19 @@ public class VehicleService {
         return vehicleMapper.toResponse(
                 vehicleRepository.save(vehicle));
     }
+
+    // Search for available vehicles by date range
+    public List<VehicleResponse> findAvailableVehicles(LocalDate startDate, LocalDate endDate) {
+
+
+        List<Vehicle> allVehicles = vehicleRepository.findAll();
+
+
+        return allVehicles.stream()
+                .filter(Vehicle::isActive)
+                .filter(vehicle -> bookingRepository.isVehicleAvailable(vehicle.getId(), startDate, endDate))
+                .map(vehicleMapper::toResponse)
+                .toList();
+    }
 }
+

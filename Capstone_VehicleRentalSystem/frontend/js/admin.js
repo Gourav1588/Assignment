@@ -148,8 +148,16 @@ async function submitNewVehicle(e) {
             loadCategories();
 
         } else {
-            showToast("Failed to add vehicle");
-        }
+
+                      const errorData = await res.json();
+                      console.log("Raw Add Vehicle Error:", errorData);
+
+                      // Extract the message
+                      const realMessage = errorData.message
+                                       || "Failed to add vehicle";
+
+                      showToast(realMessage);
+                  }
 
     } catch (err) {
         showToast("Server connection failed.");
@@ -401,6 +409,7 @@ async function submitEditVehicle(e) {
             loadAdminFleet(); // Refresh the table
         } else {
             const errorData = await res.json();
+            console.log(errorData)
             showToast(errorData.message || "Failed to update vehicle");
         }
     } catch (err) {
