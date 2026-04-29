@@ -16,7 +16,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /* =========================================================================
@@ -40,8 +40,8 @@ public class VehicleService {
 
     /**
      * Retrieves a paginated and filtered list of vehicles.
-     * CRITICAL: Routes traffic to different database queries based on the isAdmin flag.
-     * * @param isAdmin If true, returns all vehicles. If false, returns only active vehicles.
+     * Routes traffic to different database queries based on the isAdmin flag.
+     * @param isAdmin If true, returns all vehicles. If false, returns only active vehicles.
      */
     public Page<VehicleResponse> getVehicles(int page, int size, VehicleType type, Long categoryId, String name, boolean isAdmin) {
         if (page < 0) throw new BadRequestException("Pagination index cannot be negative");
@@ -70,12 +70,20 @@ public class VehicleService {
         return vehicleMapper.toResponse(vehicle);
     }
 
-    public List<VehicleResponse> findAvailableVehicles(LocalDate startDate, LocalDate endDate) {
+    /**
+     * Searches for available vehicles within a specific exact-time window.
+     * Validates temporal bounds before querying the database to prevent logical errors.
+     */
+    public List<VehicleResponse> findAvailableVehicles(LocalDateTime startTime, LocalDateTime endTime) {
+        if (endTime.isBefore(startTime)) {
+            throw new BadRequestException("Search end time cannot precede start time");
+        }
+
         List<Vehicle> allVehicles = vehicleRepository.findAll();
 
         return allVehicles.stream()
                 .filter(Vehicle::isActive)
-                .filter(vehicle -> bookingRepository.isVehicleAvailable(vehicle.getId(), startDate, endDate))
+                .filter(vehicle -> bookingRepository.isVehicleAvailable(vehicle.getId(), startTime, endTime))
                 .map(vehicleMapper::toResponse)
                 .toList();
     }

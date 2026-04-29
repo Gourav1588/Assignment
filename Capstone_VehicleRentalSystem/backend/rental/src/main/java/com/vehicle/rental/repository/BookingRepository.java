@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime; // <-- CHANGED: Now imports exact time
 import java.util.List;
 
 /**
@@ -25,22 +25,25 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     boolean existsByVehicleIdAndStatusIn(Long vehicleId, List<BookingStatus> statuses);
 
+    /* =========================================================================
+       TIME-BASED OVERLAP QUERY
+       ========================================================================= */
     /**
-     * Checks if a vehicle is completely free during a specific date range.
-     * Ensures no overlapping PENDING or ACTIVE bookings exist for the requested dates.
+     * Checks if a vehicle is completely free during a specific exact-time range.
+     * Uses exclusive bounds (< and >) to allow back-to-back same-day bookings.
      */
     @Query("""
         SELECT COUNT(b) = 0 
         FROM Booking b 
         WHERE b.vehicle.id = :vehicleId 
         AND b.status IN ('PENDING', 'ACTIVE') 
-        AND b.startDate <= :endDate 
-        AND b.endDate >= :startDate
+        AND b.startTime < :endTime 
+        AND b.endTime > :startTime
         """)
     boolean isVehicleAvailable(
             @Param("vehicleId") Long vehicleId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime
     );
 
     /**
@@ -49,6 +52,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      */
     @Query("SELECT COUNT(b) > 0 FROM Booking b WHERE b.vehicle.id = :vehicleId " +
             "AND b.status IN ('ACTIVE', 'CONFIRMED', 'PENDING') " +
-            "AND b.endDate >= CURRENT_DATE")
+            "AND b.endTime >= CURRENT_TIMESTAMP")
     boolean existsActiveOrFutureBookingsForVehicle(@Param("vehicleId") Long vehicleId);
 }

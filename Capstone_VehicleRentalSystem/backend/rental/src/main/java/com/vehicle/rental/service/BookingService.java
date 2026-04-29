@@ -23,7 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -43,19 +43,23 @@ public class BookingService {
 
     /**
      * Initializes a new vehicle rental request.
-     * Enforces a maximum rental duration of 30 days and verifies the vehicle is completely
-     * free during the requested timeframe before capturing a snapshot of the total cost.
+     * Enforces a maximum rental duration of 720 hours (30 days) and verifies the vehicle
+     * is completely free during the requested timeframe.
      */
     @Transactional
     public BookingResponse createBooking(Long userId, BookingRequest request) {
         log.debug("Initiating booking creation for user ID: {}, vehicle ID: {}", userId, request.getVehicleId());
 
-        if (request.getEndDate().isBefore(request.getStartDate())) {
-            throw new BadRequestException("End date cannot precede start date");
+        if (request.getEndTime().isBefore(request.getStartTime())) {
+            throw new BadRequestException("End time cannot precede start time");
         }
 
-        long totalDays = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
-        if (totalDays > 30) {
+        // Calculate total hours, ensuring a minimum 1-hour block
+        long totalHours = ChronoUnit.HOURS.between(request.getStartTime(), request.getEndTime());
+        if (totalHours < 1) totalHours = 1;
+
+        // 720 hours = 30 days
+        if (totalHours > 720) {
             throw new BadRequestException("Booking duration exceeds the 30-day maximum limit");
         }
 
@@ -67,30 +71,36 @@ public class BookingService {
         }
 
         boolean available = bookingRepository.isVehicleAvailable(
-                request.getVehicleId(), request.getStartDate(), request.getEndDate()
+                request.getVehicleId(), request.getStartTime(), request.getEndTime()
         );
 
         if (!available) {
-            throw new VehicleNotAvailableException("Vehicle is already reserved for the selected dates");
+            throw new VehicleNotAvailableException("Vehicle is already reserved for the selected times");
         }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User identity could not be verified"));
 
+        /* =========================================================================
+           PRICING MATH
+           Calculates how many 24-hour blocks the user is touching and rounds up.
+           E.g., 26 hours = 2 days billed.
+           ========================================================================= */
+        long billedDays = (long) Math.ceil((double) totalHours / 24.0);
+
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setVehicle(vehicle);
-        booking.setStartDate(request.getStartDate());
-        booking.setEndDate(request.getEndDate());
-        booking.setTotalCost(totalDays * vehicle.getPricePerDay());
-        booking.setStatus(BookingStatus.PENDING);
+        booking.setStartTime(request.getStartTime());
+        booking.setEndTime(request.getEndTime());
+        booking.setTotalCost(billedDays * vehicle.getPricePerDay());
+        booking.setStatus(BookingStatus.PENDING); // Change to ACTIVE if bypassing confirmation
 
         return bookingMapper.toResponse(bookingRepository.save(booking));
     }
 
     /**
      * Transitions a pending booking into an active, confirmed rental.
-     * Secures the endpoint by ensuring the requester is the original owner of the booking.
      */
     @Transactional
     public BookingResponse confirmBooking(Long bookingId, Long userId) {
@@ -113,7 +123,7 @@ public class BookingService {
 
     /**
      * Cancels an existing booking.
-     * Prevents cancellation if the rental period has already officially begun.
+     * Prevents cancellation if the current exact time is past the start time.
      */
     @Transactional
     public BookingResponse cancelBooking(Long bookingId, Long userId) {
@@ -128,8 +138,9 @@ public class BookingService {
             throw new BadRequestException("Only PENDING or ACTIVE bookings can be cancelled");
         }
 
-        if (booking.getStartDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException("Cancellations are not permitted after the rental start date");
+        // Updated to check exact time against LocalDateTime.now()
+        if (booking.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Cancellations are not permitted after the rental start time");
         }
 
         booking.setStatus(BookingStatus.CANCELLED);

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.vehicle.rental.entity.Booking.BookingStatus;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -22,63 +21,46 @@ public class BookingResponse {
 
     // --- Vehicle Details ---
 
-    /**
-     * The unique identifier of the booked vehicle.
-     */
     private Long vehicleId;
-
-    /**
-     * The display name of the booked vehicle.
-     */
     private String vehicleName;
-
-    /**
-     * The classification type of the vehicle (e.g., CAR, BIKE).
-     */
     private String vehicleType;
-
-    /**
-     * The daily rental rate of the vehicle at the time of booking.
-     */
     private Double pricePerDay;
 
     // --- Booking Details ---
 
     /**
-     * The approved starting date of the rental period.
+     * The approved starting time of the rental period.
+     * Formatted for direct frontend display without timezone parsing issues.
      */
-    private LocalDate startDate;
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
+    private LocalDateTime startTime;
 
     /**
-     * The approved ending date of the rental period.
+     * The approved ending time of the rental period.
+     * Formatted for direct frontend display.
      */
-    private LocalDate endDate;
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
+    private LocalDateTime endTime;
 
     /**
-     * The total number of days the vehicle is booked for.
+     * The total number of hours the vehicle is booked for.
+     * Replaces 'totalDays' to support granular, time-based billing.
      */
-    private Long totalDays;
+    private Long totalHours;
 
     /**
-     * The calculated total cost of the booking (pricePerDay * totalDays).
+     * The calculated total cost of the booking.
      */
     private Double totalCost;
 
     /**
-     * The current operational status of the booking (e.g., PENDING, ACTIVE, COMPLETED, CANCELLED).
+     * The current operational status of the booking.
      */
     private BookingStatus status;
 
     // --- User Details ---
 
-    /**
-     * The unique identifier of the user who made the booking.
-     */
     private Long userId;
-
-    /**
-     * The name of the user who made the booking.
-     */
     private String userName;
 
     /**

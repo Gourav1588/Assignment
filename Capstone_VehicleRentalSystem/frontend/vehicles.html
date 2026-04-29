@@ -29,13 +29,13 @@
 
 <div class="availability-search">
   <div class="date-field">
-    <label for="searchStart">Pick-up Date</label>
-    <input type="date" id="searchStart">
+    <label for="searchStart">Pick-up Time</label>
+    <input type="datetime-local" id="searchStart">
   </div>
 
   <div class="date-field">
-    <label for="searchEnd">Drop-off Date</label>
-    <input type="date" id="searchEnd">
+    <label for="searchEnd">Drop-off Time</label>
+    <input type="datetime-local" id="searchEnd">
   </div>
 
   <div class="search-actions">
@@ -86,12 +86,12 @@
 
     <div class="date-grid">
       <div class="date-field">
-        <label>Pick Up Date</label>
-        <input type="date" id="bookStart">
+        <label>Pick-up Time</label>
+        <input type="datetime-local" id="bookStart">
       </div>
       <div class="date-field">
-        <label>Return Date</label>
-        <input type="date" id="bookEnd">
+        <label>Return Time</label>
+        <input type="datetime-local" id="bookEnd">
       </div>
     </div>
 
@@ -102,7 +102,7 @@
       </div>
       <div class="summary-row">
         <span>Duration</span>
-        <span id="summaryDays">0 days</span>
+        <span id="summaryDuration">0 hours</span>
       </div>
       <div class="summary-row total">
         <span>Total Cost</span>

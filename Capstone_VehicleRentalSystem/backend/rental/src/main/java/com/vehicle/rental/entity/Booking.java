@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -46,20 +45,28 @@ public class Booking {
     @JsonIgnoreProperties({"bookings", "isActive"})
     private Vehicle vehicle;
 
-    /**
-     * The approved start date of the rental period.
-     */
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
+    /* =========================================================================
+       TIME-BASED SCHEDULING UPGRADE
+       ========================================================================= */
 
     /**
-     * The approved end date of the rental period.
+     * The exact approved start time (date and exact minute) of the rental period.
+     * Upgraded to LocalDateTime to support granular, hourly bookings.
      */
-    @Column(name = "end_date", nullable = false)
-    private LocalDate endDate;
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
 
     /**
-     * The finalized total cost of the booking (Duration in Days * PricePerDay).
+     * The exact approved end time (date and exact minute) of the rental period.
+     * Upgraded to LocalDateTime to support same-day turnarounds and precise availability.
+     */
+    @Column(name = "end_time", nullable = false)
+    private LocalDateTime endTime;
+
+    /* ========================================================================= */
+
+    /**
+     * The finalized total cost of the booking.
      * This acts as a financial 'snapshot' at the exact moment of creation, ensuring historical
      * receipts remain accurate even if vehicle rental rates fluctuate in the future.
      */

@@ -9,11 +9,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /* =========================================================================
@@ -49,20 +50,23 @@ public class VehicleController {
         log.info("Public fetch vehicles - Page: {}, Size: {}, Type: {}, CategoryId: {}, Name: {}",
                 page, size, type, categoryId, name);
 
-        // isAdmin flag set to false
         return ResponseEntity.ok(vehicleService.getVehicles(page, size, type, categoryId, name, false));
     }
 
+    /* =========================================================================
+       TIME-BASED SEARCH UPGRADE
+       ========================================================================= */
     /**
-     * Searches for available vehicles based on a specific date range.
+     * Searches for available vehicles based on an exact time range.
+     * Uses @DateTimeFormat so Spring can parse the "YYYY-MM-DDTHH:mm" string from JS.
      */
     @GetMapping("/search")
     public ResponseEntity<List<VehicleResponse>> searchAvailableVehicles(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
 
-        log.info("Searching for available vehicles between {} and {}", startDate, endDate);
-        return ResponseEntity.ok(vehicleService.findAvailableVehicles(startDate, endDate));
+        log.info("Searching for available vehicles between {} and {}", startTime, endTime);
+        return ResponseEntity.ok(vehicleService.findAvailableVehicles(startTime, endTime));
     }
 
     /**
@@ -83,8 +87,9 @@ public class VehicleController {
      * Retrieves a paginated list of the entire fleet (Active + Retired).
      * Protected by PreAuthorize to ensure only authorized administrators can access.
      */
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Page<VehicleResponse>> getAdminVehicles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -95,7 +100,6 @@ public class VehicleController {
         log.info("Admin fetch full fleet - Page: {}, Size: {}, Type: {}, CategoryId: {}, Name: {}",
                 page, size, type, categoryId, name);
 
-        // isAdmin flag set to true
         return ResponseEntity.ok(vehicleService.getVehicles(page, size, type, categoryId, name, true));
     }
 

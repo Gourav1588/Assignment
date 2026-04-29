@@ -4,11 +4,12 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Data Transfer Object for handling vehicle booking requests.
  * Captures and validates the required parameters from the client to initiate a new rental.
+ * Upgraded to support exact-time scheduling.
  */
 @Data
 public class BookingRequest {
@@ -20,17 +21,17 @@ public class BookingRequest {
     private Long vehicleId;
 
     /**
-     * The requested start date for the rental period.
-     * Ensures the user cannot book a vehicle for a date that has already passed.
+     * The requested start time (date and minute) for the rental period.
+     * Ensures the user cannot book a vehicle for a time that has already passed.
      */
-    @NotNull(message = "Start date is required")
-    @FutureOrPresent(message = "Start date cannot be in the past")
-    private LocalDate startDate;
+    @NotNull(message = "Start time is required")
+    @FutureOrPresent(message = "Start time cannot be in the past")
+    private LocalDateTime startTime;
 
     /**
-     * The requested end date for the rental period.
+     * The requested end time (date and minute) for the rental period.
      */
-    @NotNull(message = "End date is required")
-    @FutureOrPresent(message = "End date must be today or in the future")
-    private LocalDate endDate;
+    @NotNull(message = "End time is required")
+    @FutureOrPresent(message = "End time must be right now or in the future")
+    private LocalDateTime endTime;
 }

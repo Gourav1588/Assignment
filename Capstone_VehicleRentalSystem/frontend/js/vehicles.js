@@ -18,17 +18,20 @@ let activeVehicle = null;
  * Initializes DOM elements, applies date constraints, and triggers initial data fetch.
  */
 document.addEventListener('DOMContentLoaded', () => {
-    const today = new Date().toISOString().split('T')[0];
-    const startInput = document.getElementById('searchStart');
-    const endInput = document.getElementById('searchEnd');
+  const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      const currentDateTime = now.toISOString().slice(0, 16);
 
-    // Apply strict chronological constraints to date pickers
-    if (startInput && endInput) {
-        startInput.setAttribute('min', today);
-        startInput.addEventListener('change', function() {
-            endInput.setAttribute('min', this.value);
-        });
-    }
+      const startInput = document.getElementById('searchStart');
+      const endInput = document.getElementById('searchEnd');
+
+      // Apply strict chronological constraints to time pickers
+      if (startInput && endInput) {
+          startInput.setAttribute('min', currentDateTime);
+          startInput.addEventListener('change', function() {
+              endInput.setAttribute('min', this.value);
+          });
+      }
 
     // Bind filter event listeners
     document.getElementById('searchName')?.addEventListener('input', applyFilters);
@@ -107,7 +110,8 @@ async function searchVehicles() {
     }
 
     try {
-        const response = await apiFetch(`/vehicles/search?startDate=${startDate}&endDate=${endDate}`);
+
+        const response = await apiFetch(`/vehicles/search?startTime=${startDate}&endTime=${endDate}`);
 
         if (response.ok) {
             const availableCars = await response.json();
@@ -234,6 +238,10 @@ function loadMore() {
  *
  * @param {Object} vehicle - The vehicle object selected from the grid.
  */
+/**
+ * Opens the booking modal and populates it with the selected vehicle's data.
+ * Validates active session presence before allowing interaction.
+ */
 function openModal(vehicle) {
     if (!localStorage.getItem('token')) {
         showToast('Authentication required to process booking.');
@@ -243,16 +251,25 @@ function openModal(vehicle) {
 
     activeVehicle = vehicle;
     document.getElementById('modalVehicleName').textContent = vehicle.name;
-    document.getElementById('modalPricePerDay').textContent = `₹${vehicle.pricePerDay} / day`;
 
-    // Reset fields
+    // Updated to show the price of the clicked vehicle
+    document.getElementById('modalPricePerDay').textContent = `₹${vehicle.pricePerDay.toLocaleString()} / day`;
+
+    // Reset fields for the new selection
     document.getElementById('bookStart').value = '';
     document.getElementById('bookEnd').value = '';
-    document.getElementById('summaryDays').textContent = '0 days';
+
+    // Match the IDs in your HTML
+    if (document.getElementById('summaryDuration')) {
+        document.getElementById('summaryDuration').textContent = '0 hours';
+    }
     document.getElementById('summaryTotal').textContent = '₹0';
 
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('bookStart').min = today;
+    // Set the minimum pick-up time to 'now'
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('bookStart').min = now.toISOString().slice(0, 16);
+
     document.getElementById('bookingModal').classList.add('active');
 }
 
@@ -266,6 +283,7 @@ function closeModal() {
 
 /**
  * Dynamically calculates and updates the total duration and cost in the UI.
+ * Mirrors the backend Math.ceil(hours / 24) pricing logic.
  */
 function updateSummary() {
     const startStr = document.getElementById('bookStart').value;
@@ -279,13 +297,30 @@ function updateSummary() {
         const start = new Date(startStr);
         const end = new Date(endStr);
 
-        if (end >= start) {
+        if (end > start) {
             const diffTime = Math.abs(end - start);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            const totalCost = diffDays * activeVehicle.pricePerDay;
 
-            document.getElementById('summaryDays').textContent = `${diffDays} day${diffDays > 1 ? 's' : ''}`;
+            // Calculate total hours
+            let totalHours = Math.floor(diffTime / (1000 * 60 * 60));
+            if (totalHours < 1) totalHours = 1;
+
+            // Calculate billable 24-hour blocks
+            const billedDays = Math.ceil(totalHours / 24.0);
+            const totalCost = billedDays * activeVehicle.pricePerDay;
+
+            // Update the UI elements
+            const durationEl = document.getElementById('summaryDuration');
+            if (durationEl) {
+                durationEl.textContent = `${totalHours} hr${totalHours > 1 ? 's' : ''} (${billedDays} day${billedDays > 1 ? 's' : ''} billed)`;
+            }
+
             document.getElementById('summaryTotal').textContent = `₹${totalCost.toLocaleString()}`;
+        } else {
+            // Reset if dates are invalid
+            if (document.getElementById('summaryDuration')) {
+                document.getElementById('summaryDuration').textContent = '0 hours';
+            }
+            document.getElementById('summaryTotal').textContent = '₹0';
         }
     }
 }
@@ -309,13 +344,13 @@ async function confirmBooking() {
 
     try {
         const createResponse = await apiFetch('/bookings', {
-            method: 'POST',
-            body: JSON.stringify({
-                vehicleId: activeVehicle.id,
-                startDate: start,
-                endDate: end
-            })
-        });
+                    method: 'POST',
+                    body: JSON.stringify({
+                        vehicleId: activeVehicle.id,
+                        startTime: start,
+                        endTime: end
+                    })
+                });
 
         if (createResponse.ok) {
             const newBooking = await createResponse.json();
