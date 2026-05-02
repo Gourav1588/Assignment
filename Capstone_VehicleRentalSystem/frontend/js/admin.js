@@ -139,6 +139,7 @@ async function loadAdminUsers() {
 /**
  * Fetches global transaction history and active booking statistics.
  */
+
 async function loadAdminBookings() {
     try {
         const res = await apiFetch('/bookings');
@@ -151,8 +152,10 @@ async function loadAdminBookings() {
                 `<tr>
                     <td>#${b.id}</td>
                     <td>${b.vehicleName || `Car #${b.vehicleId}`}</td>
-                    <td>${b.startDate}</td>
-                    <td>${b.endDate}</td>
+
+                    <td>${b.startTime}</td>
+                    <td>${b.endTime}</td>
+
                     <td>${b.status}</td>
                 </tr>`
             ).join('');
