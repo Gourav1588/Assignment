@@ -1,17 +1,29 @@
-/**
- * =========================================================================
- * DriveEasy - Fleet Management & Booking Engine
- * =========================================================================
- */
+// =========================================================================
+// DriveEasy - Fleet Management & Booking Engine
+// =========================================================================
 
+// Stores the ID of the currently pending booking slot
+let activeBookingId = null;
+
+// The complete, unfiltered catalog of all vehicles from the server
 let allVehicles = [];
+
+// The current subset of vehicles matching active search or filter criteria
 let filteredFleet = [];
+
+// Tracks the current page for grid pagination
 let currentPage = 1;
+
+// The maximum number of vehicle cards to display per page load
 const itemsPerPage = 6;
+
+// The specific vehicle currently selected by the user for booking
 let activeVehicle = null;
 
+// Initializes dashboard routing, date constraints, and filter listeners upon DOM load
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Dynamically route the dashboard button based on role
+
+    // Dynamically route the dashboard button based on the user's role
     const currentRole = getUserRole();
     const dashboardBtn = document.getElementById('dashboardBtn');
 
@@ -27,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Set up date pickers constraints
+    // Set up date pickers constraints to prevent selecting past dates
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     const currentDateTime = now.toISOString().slice(0, 16);
@@ -42,16 +54,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Bind events for filtering
+    // Bind events for filtering the fleet grid
     document.getElementById('searchName')?.addEventListener('input', applyFilters);
     document.getElementById('filterType')?.addEventListener('change', applyFilters);
     document.getElementById('filterCat')?.addEventListener('change', applyFilters);
 
-    // Bind events for booking calculation
+    // Bind events for booking summary calculation in the modal
     document.getElementById('bookStart')?.addEventListener('change', updateSummary);
     document.getElementById('bookEnd')?.addEventListener('change', updateSummary);
 
-    // 4. Initial load logic
+    // ─────────────────────────────────────────────────────────────────────
+    // FIX: Smart overlay click handler
+    //
+    // PROBLEM BEFORE:
+    // Clicking anywhere on the dark overlay area closed the modal
+    // immediately — even after the user selected dates and a PENDING
+    // booking was already created in the database. This caused the slot
+    // to be silently cancelled and confused the user.
+    //
+    // ROOT CAUSE:
+    // The modal overlay div was either:
+    // 1. Listening to all clicks and calling closeModal()
+    // 2. Clicks inside the card were bubbling up to the overlay
+    //
+    // FIX IN JS:
+    // We attach a click listener only on the overlay itself.
+    // e.target === modalOverlay makes sure we only react when the
+    // dark background is clicked directly — not when inner card
+    // elements bubble up.
+    //
+    // FIX IN HTML:
+    // modal-content has onclick="event.stopPropagation()" which
+    // stops ANY click inside the white card from reaching the overlay.
+    //
+    // TWO CASES HANDLED:
+    // 1. activeBookingId = null  → no slot reserved → safe to close
+    // 2. activeBookingId is SET  → PENDING booking exists in DB →
+    //    show toast, block close, force user to click Cancel or Confirm
+    // ─────────────────────────────────────────────────────────────────────
+    const modalOverlay = document.getElementById('bookingModal');
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                if (activeBookingId) {
+                    showToast('Please confirm or cancel your booking first.');
+                } else {
+                    closeModal();
+                }
+            }
+        });
+    }
+
+    // Check URL parameters for dates passed from the landing page
     if (document.getElementById('fleetGrid')) {
         const urlParams = new URLSearchParams(window.location.search);
         const passedStart = urlParams.get('start');
@@ -67,9 +121,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Fetches the entire vehicle catalog from the API and renders the initial grid
 async function loadFleet() {
     const searchStart = document.getElementById('searchStart');
     if (searchStart) searchStart.value = '';
+
     const searchEnd = document.getElementById('searchEnd');
     if (searchEnd) searchEnd.value = '';
 
@@ -91,6 +147,7 @@ async function loadFleet() {
     }
 }
 
+// Queries the backend for vehicles available strictly between the selected dates
 async function searchVehicles() {
     const startDate = document.getElementById('searchStart').value;
     const endDate = document.getElementById('searchEnd').value;
@@ -120,6 +177,7 @@ async function searchVehicles() {
     }
 }
 
+// Applies local text and dropdown filters to the global vehicle array
 function applyFilters() {
     const searchTerm = document.getElementById('searchName')?.value.toLowerCase() || "";
     const typeFilter = document.getElementById('filterType')?.value || "";
@@ -137,6 +195,7 @@ function applyFilters() {
     renderGrid();
 }
 
+// Clears the grid container and builds DOM elements for the currently visible vehicles
 function renderGrid() {
     const grid = document.getElementById('fleetGrid');
     if (!grid) return;
@@ -196,55 +255,72 @@ function renderGrid() {
     }
 }
 
+// Increments the pagination counter and renders the next set of vehicles
 function loadMore() {
     currentPage++;
     renderGrid();
 }
 
-function openModal(vehicle) {
+// Opens the booking modal, enforces role rules, and pre-fills vehicle data
+async function openModal(vehicle) {
     const token = localStorage.getItem('token');
     if (!token) {
-        showToast('Authentication required to process booking.');
+        showToast('Authentication required.');
         setTimeout(() => window.location.href = 'login.html', 1500);
         return;
     }
 
-    // Secondary protection: Admins shouldn't make consumer bookings
     const role = getUserRole();
     if (role === 'ADMIN' || role === 'ROLE_ADMIN') {
-        showToast('Admins cannot make customer bookings. Please use the Admin Panel.');
+        showToast('Admins cannot make customer bookings.');
         return;
     }
 
-    activeVehicle = vehicle;
     document.getElementById('modalVehicleName').textContent = vehicle.name;
-    document.getElementById('modalPricePerDay').textContent = `₹${vehicle.pricePerDay.toLocaleString()} / day`;
 
-    document.getElementById('bookStart').value = '';
-    document.getElementById('bookEnd').value = '';
+    if (document.getElementById('modalPricePerDay')) {
+        document.getElementById('modalPricePerDay').textContent = `₹${vehicle.pricePerDay.toLocaleString()} / day`;
+    }
 
     if (document.getElementById('summaryDuration')) {
         document.getElementById('summaryDuration').textContent = '0 hours';
     }
-    document.getElementById('summaryTotal').textContent = '₹0';
+    if (document.getElementById('summaryTotal')) {
+        document.getElementById('summaryTotal').textContent = '₹0';
+    }
 
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    document.getElementById('bookStart').min = now.toISOString().slice(0, 16);
+    // Reset date inputs every time modal opens fresh
+    const bookStart = document.getElementById('bookStart');
+    const bookEnd = document.getElementById('bookEnd');
+    if (bookStart) bookStart.value = '';
+    if (bookEnd) bookEnd.value = '';
+
+    activeVehicle = vehicle;
+    activeBookingId = null;
 
     document.getElementById('bookingModal').classList.add('active');
 }
 
-function closeModal() {
+// Closes the booking modal and cancels any unconfirmed PENDING booking
+// Only called by X button or Cancel button — never triggered by overlay
+// click when a PENDING booking exists
+async function closeModal() {
+    if (activeBookingId) {
+        await apiFetch(`/bookings/${activeBookingId}/cancel`, { method: 'PUT' });
+        activeBookingId = null;
+    }
+
     document.getElementById('bookingModal').classList.remove('active');
     activeVehicle = null;
 }
 
-function updateSummary() {
+// Dynamically calculates duration and total cost when the user selects dates
+// Also triggers PENDING booking creation to reserve the slot immediately
+async function updateSummary() {
     const startStr = document.getElementById('bookStart').value;
     const endStr = document.getElementById('bookEnd').value;
 
-    if(startStr) {
+    if (startStr) {
         document.getElementById('bookEnd').min = startStr;
     }
 
@@ -254,43 +330,32 @@ function updateSummary() {
 
         if (end > start) {
             const diffTime = Math.abs(end - start);
-
             let totalHours = Math.floor(diffTime / (1000 * 60 * 60));
             if (totalHours < 1) totalHours = 1;
-
             const billedDays = Math.ceil(totalHours / 24.0);
             const totalCost = billedDays * activeVehicle.pricePerDay;
 
-            const durationEl = document.getElementById('summaryDuration');
-            if (durationEl) {
-                durationEl.textContent = `${totalHours} hr${totalHours > 1 ? 's' : ''} (${billedDays} day${billedDays > 1 ? 's' : ''} billed)`;
-            }
+            document.getElementById('summaryDuration').textContent =
+                `${totalHours} hr${totalHours > 1 ? 's' : ''} (${billedDays} day${billedDays > 1 ? 's' : ''} billed)`;
+            document.getElementById('summaryTotal').textContent =
+                `₹${totalCost.toLocaleString()}`;
 
-            document.getElementById('summaryTotal').textContent = `₹${totalCost.toLocaleString()}`;
-        } else {
-            if (document.getElementById('summaryDuration')) {
-                document.getElementById('summaryDuration').textContent = '0 hours';
-            }
-            document.getElementById('summaryTotal').textContent = '₹0';
+            await createPendingBooking(startStr, endStr);
         }
     }
 }
 
-async function confirmBooking() {
-    const start = document.getElementById('bookStart').value;
-    const end = document.getElementById('bookEnd').value;
+// Creates a PENDING booking to lock the time slot as soon as dates are selected
+async function createPendingBooking(start, end) {
 
-    if (!start || !end) {
-        showToast("Date parameters are required.");
-        return;
+    // If user changed dates, cancel the previous PENDING booking first
+    if (activeBookingId) {
+        await apiFetch(`/bookings/${activeBookingId}/cancel`, { method: 'PUT' });
+        activeBookingId = null;
     }
 
-    const btn = document.getElementById('confirmBtn');
-    btn.textContent = 'Processing...';
-    btn.disabled = true;
-
     try {
-        const createResponse = await apiFetch('/bookings', {
+        const response = await apiFetch('/bookings', {
             method: 'POST',
             body: JSON.stringify({
                 vehicleId: activeVehicle.id,
@@ -299,32 +364,57 @@ async function confirmBooking() {
             })
         });
 
-        if (createResponse.ok) {
-            const newBooking = await createResponse.json();
-
-            const confirmResponse = await apiFetch(`/bookings/${newBooking.id}/confirm`, {
-                method: 'PUT'
-            });
-
-            if (confirmResponse.ok) {
-                showToast(`Transaction successful.`);
-                closeModal();
-                setTimeout(() => window.location.href = 'profile.html', 1500);
-            } else {
-                showToast('Booking created but failed to activate.');
-            }
+        if (response.ok) {
+            const booking = await response.json();
+            activeBookingId = booking.id;
+            showToast('Slot reserved. Click confirm to finalize.');
         } else {
-            const errorData = await createResponse.json();
-            showToast(errorData.message || 'Transaction failed.');
+            const err = await response.json();
+            showToast(err.message || 'Slot not available.');
+            closeModal();
         }
     } catch (error) {
-        showToast('Network error during transaction processing.');
+        showToast('Network error reserving slot.');
+    }
+}
+
+// Finalizes the booking by promoting the PENDING status to ACTIVE
+async function confirmBooking() {
+    if (!activeBookingId) {
+        showToast('Please select dates first.');
+        return;
+    }
+
+    const btn = document.getElementById('confirmBtn');
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
+
+    try {
+        const confirmResponse = await apiFetch(
+            `/bookings/${activeBookingId}/confirm`,
+            { method: 'PUT' }
+        );
+
+        if (confirmResponse.ok) {
+            showToast('Transaction successful.');
+
+            // Clear ID before closeModal so confirmed booking is NOT cancelled
+            activeBookingId = null;
+
+            closeModal();
+            setTimeout(() => window.location.href = 'profile.html', 1500);
+        } else {
+            showToast('Failed to confirm booking.');
+        }
+    } catch (error) {
+        showToast('Network error.');
     } finally {
         btn.textContent = 'Confirm Booking';
         btn.disabled = false;
     }
 }
 
+// Decodes the stored JWT to extract and return the user's role
 function getUserRole() {
     const token = localStorage.getItem('token');
     if (!token || token === 'undefined') return null;
@@ -332,11 +422,9 @@ function getUserRole() {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const roleData = payload.role || 'USER';
-
-        // Force uppercase to catch 'Admin', 'admin', or 'ADMIN'
         const normalizedRole = String(roleData).toUpperCase();
 
-        if (normalizedRole === 'ADMIN' || normalizedRole === 'ROLE_ADMIN') {
+        if (normalizedRole === 'ADMIN') {
             return 'ADMIN';
         }
 
