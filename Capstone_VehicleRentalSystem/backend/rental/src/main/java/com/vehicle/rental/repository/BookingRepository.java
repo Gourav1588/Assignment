@@ -51,7 +51,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      * Used as a safeguard before allowing a vehicle to be soft-deleted or deactivated.
      */
     @Query("SELECT COUNT(b) > 0 FROM Booking b WHERE b.vehicle.id = :vehicleId " +
-            "AND b.status IN ('ACTIVE', 'CONFIRMED', 'PENDING') " +
+            "AND b.status IN ('ACTIVE',  'PENDING') " +
             "AND b.endTime >= CURRENT_TIMESTAMP")
     boolean existsActiveOrFutureBookingsForVehicle(@Param("vehicleId") Long vehicleId);
 }
