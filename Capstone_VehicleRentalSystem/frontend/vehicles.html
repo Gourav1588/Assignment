@@ -18,7 +18,6 @@
     <li><a href="index.html">How it works</a></li>
   </ul>
   <div class="nav-cta">
-    <!-- Added id="dashboardBtn" so JS can control where it goes -->
     <a href="profile.html" id="dashboardBtn" class="btn-outline">My Dashboard</a>
   </div>
 </nav>
@@ -78,8 +77,15 @@
   </div>
 </footer>
 
+<!--
+  FIX APPLIED HERE:
+  - Removed any onclick="closeModal()" from this overlay div
+  - The overlay click is now handled smartly in vehicles.js
+  - modal-content has onclick="event.stopPropagation()" so clicking
+    INSIDE the white card does NOT bubble up to the overlay
+-->
 <div class="modal-overlay" id="bookingModal">
-  <div class="modal-content">
+  <div class="modal-content" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal()">✕</button>
 
     <div class="modal-header">
