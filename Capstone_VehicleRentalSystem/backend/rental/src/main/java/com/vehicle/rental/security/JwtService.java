@@ -31,6 +31,8 @@ public class JwtService {
     public String generateToken(User user) {
         log.debug("Minting new JWT for user: {}", user.getEmail());
 
+        String cleanRole = user.getRole().name().replace("ROLE_", "");
+
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("role", user.getRole().name())
