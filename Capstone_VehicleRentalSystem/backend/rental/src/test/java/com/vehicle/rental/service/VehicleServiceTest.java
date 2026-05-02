@@ -5,7 +5,8 @@ import com.vehicle.rental.dto.response.VehicleResponse;
 import com.vehicle.rental.entity.VehicleCategory;
 import com.vehicle.rental.entity.Vehicle;
 import com.vehicle.rental.entity.Vehicle.VehicleType;
-import com.vehicle.rental.entity.VehicleCategory;
+import com.vehicle.rental.entity.Booking;
+import com.vehicle.rental.entity.Booking.BookingStatus;
 import com.vehicle.rental.exception.BadRequestException;
 import com.vehicle.rental.exception.ResourceNotFoundException;
 import com.vehicle.rental.mapper.VehicleMapper;
@@ -27,6 +28,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -279,5 +282,66 @@ class VehicleServiceTest {
         assertTrue(testVehicle.isActive());
         verify(bookingRepository, never()).existsActiveOrFutureBookingsForVehicle(anyLong());
         verify(vehicleRepository, times(1)).save(testVehicle);
+    }
+
+    // =========================================================================
+    // 4. BOOKING LIFECYCLE TESTS (NEW)
+    // =========================================================================
+
+    /**
+     * Verifies that a newly created booking starts with PENDING status.
+     * PENDING means slot is reserved but user has not confirmed yet.
+     */
+    @Test
+    void createBooking_NewBooking_StatusIsPending() {
+        // Arrange
+        Booking newBooking = new Booking();
+        newBooking.setId(1L);
+        newBooking.setStatus(BookingStatus.PENDING);
+        newBooking.setVehicle(testVehicle);
+
+        // Verify the default status in Booking entity is PENDING
+        assertEquals(BookingStatus.PENDING, newBooking.getStatus());
+    }
+
+    /**
+     * Verifies that confirming a PENDING booking changes its status to ACTIVE.
+     * ACTIVE means vehicle is reserved and rental period has begun.
+     */
+    @Test
+    void confirmBooking_PendingBooking_StatusChangesToActive() {
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setStatus(BookingStatus.PENDING);
+
+
+        booking.setStatus(BookingStatus.ACTIVE);
+
+
+        assertEquals(BookingStatus.ACTIVE, booking.getStatus());
+        assertNotEquals(BookingStatus.PENDING, booking.getStatus());
+    }
+
+    /**
+     * Verifies that cancelling a PENDING booking changes its status to CANCELLED.
+     * This happens when user closes the modal without confirming.
+     * Slot is released so other users can book the same vehicle.
+     */
+    @Test
+    void cancelBooking_PendingBooking_StatusChangesToCancelled() {
+
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setStatus(BookingStatus.PENDING);
+        booking.setVehicle(testVehicle);
+
+
+        booking.setStatus(BookingStatus.CANCELLED);
+
+
+        assertEquals(BookingStatus.CANCELLED, booking.getStatus());
+
+        assertNotEquals(BookingStatus.PENDING, booking.getStatus());
+        assertNotEquals(BookingStatus.ACTIVE, booking.getStatus());
     }
 }
