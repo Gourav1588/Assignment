@@ -32,7 +32,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      * Checks if a vehicle is completely free during a specific exact-time range.
      * Uses exclusive bounds (< and >) to allow back-to-back same-day bookings.
      */
-
+    @Query("""
+        SELECT COUNT(b) = 0 
+        FROM Booking b 
+        WHERE b.vehicle.id = :vehicleId 
+        AND b.status IN ('PENDING', 'ACTIVE') 
+        AND b.startTime < :endTime 
+        AND b.endTime > :startTime
+        """)
     boolean isVehicleAvailable(
             @Param("vehicleId") Long vehicleId,
             @Param("startTime") LocalDateTime startTime,
