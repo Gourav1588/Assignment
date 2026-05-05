@@ -59,9 +59,5 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
        3. VALIDATION UTILITIES
        ========================================================================= */
 
-    boolean existsByIdAndIsActiveTrue(Long id);
-
-    boolean existsByNameIgnoreCase(String name);
-
     boolean existsByRegistrationNumberIgnoreCase(String registrationNumber);
 }
