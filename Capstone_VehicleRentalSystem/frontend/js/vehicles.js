@@ -143,6 +143,11 @@ async function searchVehicles() {
                     "<h3 style='grid-column: 1/-1; text-align: center; color: var(--red); padding: 40px;'>No vehicles available for these dates.</h3>";
             }
         }
+        else {
+
+                    const err = await response.json();
+                    showToast(err.message || "Invalid date range.");
+                }
     } catch (error) {
         console.error("Search failed:", error);
         showToast("Error executing availability search.");
