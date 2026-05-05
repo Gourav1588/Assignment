@@ -47,7 +47,7 @@ public class CategoryController {
      * @return The created CategoryResponse object.
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CategoryRequest request) {
 
         log.info("Admin request to create new category: {}", request.getName());
@@ -64,7 +64,7 @@ public class CategoryController {
      * @return The updated CategoryResponse object.
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody CategoryRequest request) {
