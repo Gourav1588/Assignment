@@ -3,6 +3,7 @@ package com.vehicle.rental.service;
 import com.vehicle.rental.dto.request.UserProfileUpdateRequest;
 import com.vehicle.rental.dto.response.UserResponse;
 import com.vehicle.rental.entity.User;
+import com.vehicle.rental.exception.ResourceNotFoundException;
 import com.vehicle.rental.mapper.UserMapper;
 import com.vehicle.rental.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class UserService {
 
         // 1. Validate entity existence
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // 2. Apply partial update: Name
         if (request.getName() != null && !request.getName().trim().isEmpty()) {
