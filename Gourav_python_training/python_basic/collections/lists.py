@@ -29,7 +29,7 @@ def count_even_odd():
 
 
 def reverse_list():
-    """Reverse a list manually without using the built-in reverse() method."""
+    """Reverseing  a list manually without using the built-in reverse() method."""
     numbers = [10, 20, 30, 40, 50]
     reversed_list = []
 
