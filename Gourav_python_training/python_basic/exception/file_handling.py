@@ -2,21 +2,30 @@
 
 import os
 
+# Constants - no hardcoded values in functions
+FILE_NAME = "gourav.txt"
+COPY_FILE_NAME = "gourav_copy.txt"
+OWNER_NAME = "Gourav"
+APPEND_LINE_1 = "Python Training 2025\n"
+APPEND_LINE_2 = "Data Engineering Batch\n"
+SEARCH_WORD_1 = "Gourav"
+SEARCH_WORD_2 = "Python"
+
 OUTPUT_DIR = "file_outputs"
-os.makedirs(OUTPUT_DIR, exist_ok=True)  # create folder if it doesn't exist
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def write_name():
     """Create a file and write a name into it."""
-    path = f"{OUTPUT_DIR}/gourav.txt"
+    path = os.path.join(OUTPUT_DIR, FILE_NAME)
     with open(path, "w") as f:
-        f.write("Gourav\n")
+        f.write(OWNER_NAME + "\n")
     print(f"File created: {path}")
 
 
 def analyse_file():
     """Read a file and count its words, lines and characters."""
-    path = f"{OUTPUT_DIR}/gourav.txt"
+    path = os.path.join(OUTPUT_DIR, FILE_NAME)
     with open(path, "r") as f:
         content = f.read()
     print(f"Lines:      {len(content.splitlines())}")
@@ -26,17 +35,17 @@ def analyse_file():
 
 def append_to_file():
     """Append new lines to an existing file without overwriting it."""
-    path = f"{OUTPUT_DIR}/gourav.txt"
-    with open(path, "a") as f:  # 'a' mode keeps existing content
-        f.write("Python Training 2026\n")
-        f.write("Data Engineering Batch\n")
+    path = os.path.join(OUTPUT_DIR, FILE_NAME)
+    with open(path, "a") as f:
+        f.write(APPEND_LINE_1)
+        f.write(APPEND_LINE_2)
     print("Data appended successfully")
 
 
 def copy_file():
     """Copy all content from one file into another file."""
-    source = f"{OUTPUT_DIR}/gourav.txt"
-    destination = f"{OUTPUT_DIR}/gourav_copy.txt"
+    source = os.path.join(OUTPUT_DIR, FILE_NAME)
+    destination = os.path.join(OUTPUT_DIR, COPY_FILE_NAME)
     with open(source, "r") as src:
         content = src.read()
     with open(destination, "w") as dst:
@@ -46,7 +55,7 @@ def copy_file():
 
 def search_word(word):
     """Search for a word in a file and print the matching lines."""
-    path = f"{OUTPUT_DIR}/gourav.txt"
+    path = os.path.join(OUTPUT_DIR, FILE_NAME)
     found = False
     with open(path, "r") as f:
         for line_num, line in enumerate(f, start=1):
@@ -56,13 +65,14 @@ def search_word(word):
     if not found:
         print(f"'{word}' not found in file")
 
-
-write_name()
-append_to_file()
-print()
-analyse_file()
-print()
-copy_file()
-print()
-search_word("Gourav")
-search_word("Python")
+ 
+if __name__ == "__main__":
+    write_name()
+    append_to_file()
+    print()
+    analyse_file()
+    print()
+    copy_file()
+    print()
+    search_word(SEARCH_WORD_1)  
+    search_word(SEARCH_WORD_2)

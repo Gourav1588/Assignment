@@ -1,13 +1,18 @@
 # Q32, Q33, Q34 - Dictionaries
 
+STUDENT_NAME = "Gourav"
+STUDENT_ROLL = 101
+STUDENT_SUBJECT = "Data Engineering"
+STUDENT_MARKS = 92.5
+FREQUENCY_TEXT = "programming"
 
-def student_dictionary():
+def student_dictionary() -> None:
     """Create a student dictionary and access its values by key."""
     student = {
-        "name": "Gourav",
-        "roll_no": 101,
-        "subject": "Data Engineering",
-        "marks": 92.5
+        "name": STUDENT_NAME,
+        "roll_no": STUDENT_ROLL,
+        "subject": STUDENT_SUBJECT,
+        "marks": STUDENT_MARKS
     }
 
     print(f"Name:    {student['name']}")
@@ -16,9 +21,9 @@ def student_dictionary():
     print(f"Marks:   {student['marks']}")
 
 
-def character_frequency():
+def character_frequency() -> None:
     """Count how many times each character appears in a string."""
-    text = "programming"
+    text = FREQUENCY_TEXT
     freq = {}
 
     for char in text:
@@ -29,7 +34,7 @@ def character_frequency():
         print(f"  '{char}': {count}")
 
 
-def merge_dicts():
+def merge_dicts() -> None:
     """Merge two dictionaries into one using ** unpacking."""
     dict1 = {"name": "Gourav", "city": "Indore"}
     dict2 = {"course": "Python", "year": 2025}
@@ -39,9 +44,10 @@ def merge_dicts():
     print(f"Dict 2:  {dict2}")
     print(f"Merged:  {merged}")
 
-
-student_dictionary()
-print()
-character_frequency()
-print()
-merge_dicts()
+ 
+if __name__ == "__main__":
+    student_dictionary()
+    print()
+    character_frequency()
+    print()
+    merge_dicts()

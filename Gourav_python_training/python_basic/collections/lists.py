@@ -1,9 +1,12 @@
 # Q25, Q26, Q27 - Lists
 
+NUMBERS_WITH_DUPLICATE = [4, 7, 2, 9, 1, 5, 3, 8, 6, 2]
+NUMBERS_ONE_TO_TEN = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+NUMBERS_FOR_REVERSE = [10, 20, 30, 40, 50]
 
-def analyse_list():
+def analyse_list() -> None:
     """Find sum, max, sorted order and unique values from a list of 10 numbers."""
-    numbers = [4, 7, 2, 9, 1, 5, 3, 8, 6, 2]  # has one duplicate: 2
+    numbers =NUMBERS_WITH_DUPLICATE  # has one duplicate: 2
 
     print(f"Original list:  {numbers}")
     print(f"Sum:            {sum(numbers)}")
@@ -12,9 +15,9 @@ def analyse_list():
     print(f"No duplicates:  {sorted(set(numbers))}")  # set removes duplicates
 
 
-def count_even_odd():
+def count_even_odd() -> None:
     """Count how many numbers in a list are even and how many are odd."""
-    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    numbers = NUMBERS_ONE_TO_TEN
     even_count = 0
     odd_count = 0
 
@@ -28,9 +31,9 @@ def count_even_odd():
     print(f"Odd count:  {odd_count}")
 
 
-def reverse_list():
+def reverse_list() ->None:
     """Reverseing  a list manually without using the built-in reverse() method."""
-    numbers = [10, 20, 30, 40, 50]
+    numbers = NUMBERS_FOR_REVERSE
     reversed_list = []
 
     # Loop from the last index down to 0
@@ -40,9 +43,10 @@ def reverse_list():
     print(f"Original: {numbers}")
     print(f"Reversed: {reversed_list}")
 
-
-analyse_list()
-print()
-count_even_odd()
-print()
-reverse_list()
+ 
+if __name__ == "__main__":
+    analyse_list()
+    print()
+    count_even_odd()
+    print()
+    reverse_list()

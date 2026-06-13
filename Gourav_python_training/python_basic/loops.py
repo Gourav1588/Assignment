@@ -1,21 +1,25 @@
 # Q12, Q13, Q14, Q15, Q16 - Loops
 
+TABLE_NUMBER = 5
+FACTORIAL_NUMBER = 6
+REVERSE_NUMBER = 12345
+PRIME_NUMBER = 29
 
-def print_one_to_hundred():
+def print_one_to_hundred() -> None:
     """Print all numbers from 1 to 100 in a single line."""
     for i in range(1, 101):
         print(i, end=" ")
     print()
 
 
-def multiplication_table(number):
+def multiplication_table(number) -> None:
     """Print the multiplication table of a given number up to 10."""
     print(f"\nMultiplication table of {number}:")
     for i in range(1, 11):
         print(f"{number} x {i} = {number * i}")
 
 
-def factorial(n):
+def factorial(n) -> None:
     """Calculate factorial of n using a loop."""
     result = 1
     for i in range(2, n + 1):
@@ -23,7 +27,7 @@ def factorial(n):
     print(f"Factorial of {n} = {result}")
 
 
-def reverse_number(number):
+def reverse_number(number) -> None:
     """Reverse the digits of a number using a loop."""
     reversed_num = 0
     temp = abs(number)  # handle negatives
@@ -34,7 +38,7 @@ def reverse_number(number):
     print(f"Reverse of {number} = {reversed_num}")
 
 
-def check_prime(number):
+def check_prime(number) -> None:
     """Check if a number is prime by testing divisors up to its square root."""
     if number < 2:
         print(f"{number} is NOT prime")
@@ -45,9 +49,10 @@ def check_prime(number):
             return
     print(f"{number} IS prime")
 
-
-print_one_to_hundred()
-multiplication_table(5)
-factorial(6)
-reverse_number(12345)
-check_prime(29)
+ 
+if __name__ == "__main__":
+    print_one_to_hundred()
+    multiplication_table(TABLE_NUMBER)
+    factorial(FACTORIAL_NUMBER)
+    reverse_number(REVERSE_NUMBER)
+    check_prime(PRIME_NUMBER)
