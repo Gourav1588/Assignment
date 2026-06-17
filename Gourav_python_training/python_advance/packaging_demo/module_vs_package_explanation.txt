@@ -1,0 +1,12 @@
+Q2 - Explain the difference between a module and a package with an example.
+
+Module:
+A single .py file containing functions, classes or variables.
+Example: utility_functions_module.py in this same folder.
+
+Package:
+A folder containing multiple modules plus an __init__.py file
+that tells Python to treat the folder as importable.
+Example: the 'packaging_demo' folder itself is a package,
+and it contains modules like utility_functions_module.py
+and math_operation.py inside it.
