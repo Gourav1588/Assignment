@@ -1,0 +1,10 @@
+Advantages of Using an IDE Debugger Over Print Statements
+
+* Allows step-by-step execution of code.
+* Helps inspect variable values without modifying the program.
+* Supports breakpoints to pause execution at specific lines.
+* Makes it easier to locate and fix bugs.
+* Keeps the code clean by avoiding extra print statements.
+* More efficient for debugging large and complex programs.
+
+Overall, an IDE debugger is faster, cleaner, and more powerful than using print statements for debugging.
