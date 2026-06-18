@@ -1,10 +1,11 @@
 # Q4 - Use pdb breakpoints inside a loop and inspect variable values.
+# Q4 - Use pdb breakpoints inside a loop and inspect variable values.
 
 SAMPLE_NUMBERS = [4, 8, 15, 16, 23, 42]
 
 
 def inspect_loop_with_pdb(numbers) -> int:
-    """Use pdb breakpoints inside a loop and inspect variable values."""
+    """Calculate cumulative sum to demonstrate interactive loop debugging."""
     total: int = 0
     for index, number in enumerate(numbers):
         total += number
@@ -15,7 +16,6 @@ if __name__ == "__main__":
     print("Uncomment the breakpoint() line inside inspect_loop_with_pdb() to try it.")
     total: int = inspect_loop_with_pdb(SAMPLE_NUMBERS)
     print(f"Total calculated: {total}")
-    
 # ==============================================================================
 # PDB DEBUGGING TERMINAL SESSION LOG
 # ==============================================================================
