@@ -4,6 +4,7 @@ This module defines our user database models and request/response validation sch
 Contains:
 - User         → Beanie Document mapped to the MongoDB 'users' collection
 - UserCreate   → Validates incoming payload when Admin creates a new user
+- UserUpdate         → Validates payload when Admin updates a user
 - UserResponse → Safe outbound shape — never exposes password field
 - PasswordResetRequest → Validates payload for first-login password reset
 """
@@ -27,6 +28,7 @@ class User(Document):
     role: UserRole                             
     full_name: str
     is_password_reset_pending: bool = True     
+    is_active: bool = True
 
     class Settings:
         name = "users"                         
@@ -76,6 +78,17 @@ class UserCreate(BaseModel):
                 "at least one special character (@$!%*#?&)."
             )
         return v
+    
+
+
+class UserUpdate(BaseModel):
+    """
+    Request schema for Admin updating an existing user account.
+    All fields are optional — only provided fields are updated.
+    Email and password cannot be changed via this endpoint.
+    """
+    full_name: str | None = Field(default=None, min_length=2)
+    role: UserRole | None = None
 
 
 class UserResponse(BaseModel):
@@ -90,6 +103,7 @@ class UserResponse(BaseModel):
     role: UserRole
     full_name: str
     is_password_reset_pending: bool
+    is_active: bool
 
     model_config = ConfigDict(
         from_attributes=True,    # allows reading from Beanie model objects
