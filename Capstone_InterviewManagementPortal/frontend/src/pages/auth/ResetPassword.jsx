@@ -31,9 +31,9 @@ export default function ResetPassword() {
 
      
       const session = loadSession()
-      if (session?.email) {
-        await login(session.email, newPassword)
-      }
+     if (session?.user?.email) {
+      await login(session.user.email, newPassword)  
+       }
 
       
       navigate(ROUTES.DASHBOARD)

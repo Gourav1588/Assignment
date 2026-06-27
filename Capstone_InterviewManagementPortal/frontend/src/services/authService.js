@@ -14,6 +14,7 @@ const authService = {
         'Content-Type': 'application/json',
       },
     })
+    
     return response.data
   },
 

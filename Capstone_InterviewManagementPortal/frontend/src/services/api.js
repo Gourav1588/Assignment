@@ -9,11 +9,8 @@ const api = axios.create({
 // Attach Basic Auth header on every request automatically
 api.interceptors.request.use((config) => {
   const session = loadSession()
-  if (session?.email && session?.password) {
-    config.headers['Authorization'] = buildBasicAuthHeader(
-      session.email,
-      session.password
-    )
+  if (session?.authHeader) {
+    config.headers['Authorization'] = session.authHeader  
   }
   return config
 })

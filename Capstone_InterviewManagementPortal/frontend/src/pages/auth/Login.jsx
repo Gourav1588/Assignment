@@ -21,7 +21,7 @@ export default function Login() {
     try {
       const user = await login(email, password)
       console.log('user response:', user)              
-console.log('is_pending:', user.is_password_reset_pending) 
+      console.log('is_pending:', user.is_password_reset_pending) 
       if (user.is_password_reset_pending) {
         navigate(ROUTES.RESET_PASSWORD)
       } else {

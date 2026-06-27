@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import authService from '../services/authService'
-import { saveSession, loadSession, clearSession } from '../utils/auth'
+import { saveSession, loadSession, clearSession ,buildBasicAuthHeader} from '../utils/auth'
 
 const AuthContext = createContext(null)
 
@@ -23,7 +23,8 @@ export function AuthProvider({ children }) {
 
   async function login(email, password) {
     const userData = await authService.login(email, password)
-    saveSession(userData, email, password)
+      const authHeader = buildBasicAuthHeader(email, password)
+       saveSession(userData, authHeader)
 
     if (userData.is_password_reset_pending) {
       setPendingUser(userData)
@@ -49,7 +50,7 @@ export function AuthProvider({ children }) {
   )
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext)
   if (!context) {
     throw new Error('useAuth must be used inside AuthProvider')
