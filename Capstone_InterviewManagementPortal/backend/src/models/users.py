@@ -64,21 +64,21 @@ class UserCreate(BaseModel):
     @classmethod
     def validate_password_complexity(cls, v: str) -> str:
         """
-        Enforces password must have:
-        - At least one letter
-        - At least one digit
-        - At least one special character from (@$!%*#?&)
-        - Length between 6 and 12 characters
+        Enforces the same complexity rules as PasswordResetRequest.
         """
-        if not re.match(
-            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,12}$", v
-        ):
-            raise ValueError(
-                "Password must be alphanumeric and contain "
-                "at least one special character (@$!%*#?&)."
-            )
+        if len(v) < 6 or len(v) > 12:
+            raise ValueError("Password length must be between 6 and 12 characters.")
+
+        if not re.search(r"[A-Za-z]", v):
+            raise ValueError("Password must contain at least one letter.")
+
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain at least one number.")
+
+        if not re.search(r"[@$!%*#?&]", v):
+            raise ValueError("Password must contain at least one special character (@$!%*#?&).")
+
         return v
-    
 
 
 class UserUpdate(BaseModel):
@@ -98,7 +98,7 @@ class UserResponse(BaseModel):
     validation_alias="_id" maps MongoDB's internal _id field
     to the cleaner Python name 'id'.
     """
-    id: PydanticObjectId = Field(..., validation_alias="_id")
+    id: PydanticObjectId = Field(..., alias="_id")
     email: EmailStr
     role: UserRole
     full_name: str
@@ -118,15 +118,19 @@ class PasswordResetRequest(BaseModel):
     @field_validator("new_password")
     @classmethod
     def validate_password_complexity(cls, v: str) -> str:
-        """
-        Enforces the same complexity rules as UserCreate.
-        Regex covers length (6-12) so no separate len() check needed.
-        """
-        if not re.match(
-            r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,12}$", v
-        ):
-            raise ValueError(
-                "Password must contain letters, numbers, "
-                "and special characters (@$!%*#?&)."
-            )
-        return v
+       """
+       Enforces the same complexity rules as UserCreate.
+       """
+       if len(v) < 6 or len(v) > 12:
+           raise ValueError("Password length must be between 6 and 12 characters.")
+
+       if not re.search(r"[A-Za-z]", v):
+           raise ValueError("Password must contain at least one letter.")
+
+       if not re.search(r"\d", v):
+           raise ValueError("Password must contain at least one number.")
+
+       if not re.search(r"[@$!%*#?&]", v):
+           raise ValueError("Password must contain at least one special character (@$!%*#?&).")
+
+       return v
