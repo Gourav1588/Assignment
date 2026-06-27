@@ -1,6 +1,6 @@
 # Q1 - This file IMPORTS the module (utility_functions_module.py) and uses its functions.
 
-from utility_functions_module import convert_celsius_to_fahrenheit, convert_km_to_miles
+from q1utility_functions_module import convert_celsius_to_fahrenheit,convert_km_to_miles
 
 # Constants
 SAMPLE_CELSIUS: float = 30

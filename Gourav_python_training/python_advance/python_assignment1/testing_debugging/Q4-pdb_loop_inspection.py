@@ -1,5 +1,5 @@
 # Q4 - Use pdb breakpoints inside a loop and inspect variable values.
-# Q4 - Use pdb breakpoints inside a loop and inspect variable values.
+
 
 SAMPLE_NUMBERS = [4, 8, 15, 16, 23, 42]
 

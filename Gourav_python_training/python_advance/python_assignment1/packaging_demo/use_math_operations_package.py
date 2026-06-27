@@ -1,6 +1,6 @@
 # Q4 - This file USES the math_operations_package by importing from it.
 
-from math_operations_package.basic_operations import add, subtract, multiply, divide
+from q4math_operations_package import add, subtract, multiply, divide
 
 # Constants
 NUM_A = 10
