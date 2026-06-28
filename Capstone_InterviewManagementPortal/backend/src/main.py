@@ -11,6 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.core.database import Database
 from src.routers.auth import router as auth_router
 from src.core.error_handlers import register_error_handlers
+from src.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
@@ -18,10 +21,18 @@ async def lifespan(app: FastAPI):
     """
     Handles startup database connections and handles clean shutdowns.
     """
-    await Database.connect_db()  # Initialize the MongoDB client connection and bind Beanie models
+    try:
+        logger.info("Initializing MongoDB client connection and binding Beanie models...")
+        await Database.connect_db()  # Initialize the MongoDB client connection and bind Beanie models
+    except Exception as e:
+        logger.critical(f"Failed to connect to MongoDB during startup: {e}")
+        raise e
+    
     yield
+    
+    logger.info("Safely closing down database pool connections on shutdown...") 
     Database.close_db()          # Safely close down database pool connections on shutdown
-
+    
 
 app = FastAPI(
     title="Interview Management Portal",

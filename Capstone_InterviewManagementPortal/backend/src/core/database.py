@@ -6,6 +6,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from src.core.config import settings
 from src.models.users import User
+from src.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 class Database:
     """
@@ -19,11 +22,19 @@ class Database:
         """
         Connects to the database and initializes our data models.
         """
-        cls.client = AsyncIOMotorClient(settings.MONGO_URI)
-        cls.db = cls.client[settings.DATABASE_NAME]
+        try:
+            cls.client = AsyncIOMotorClient(settings.MONGO_URI)
+            cls.db = cls.client[settings.DATABASE_NAME]
         
-        await init_beanie(database=cls.db, document_models=[User])
-        print(f"Connected to database: {settings.DATABASE_NAME}")
+            await cls.client.admin.command("ping") 
+        
+            await init_beanie(database=cls.db, document_models=[User])
+            logger.info(f"Connected to database: {settings.DATABASE_NAME}")
+        
+        except Exception as e:
+            logger.critical(f"Database initialization failed during startup: {e}")
+            raise e
+            
 
     @classmethod
     def close_db(cls) -> None:
@@ -32,4 +43,4 @@ class Database:
         """
         if cls.client is not None:
             cls.client.close()
-            print("Database connection closed.")
+            logger.info("Database connection closed cleanly.")

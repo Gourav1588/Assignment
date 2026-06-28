@@ -11,7 +11,9 @@ from fastapi import APIRouter, Depends, status
 from src.models.users import User, UserResponse, PasswordResetRequest
 from src.services.auth_service import auth_service
 from src.core.dependencies import get_current_user
-from src.core.logger import logger
+from src.core.logger import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter(
     prefix="/auth",
@@ -29,7 +31,7 @@ async def login_user(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/reset-password", response_model=UserResponse)
-async def reset_temporary_password(
+async def reset_password(
     payload: PasswordResetRequest, 
     current_user: User = Depends(get_current_user)  # Extract identity from authenticated context
 ):
