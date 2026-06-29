@@ -74,4 +74,17 @@ class UserRepository:
         await user.set({"is_active": False})
         return user
     
+    @staticmethod
+    async def activate_user(user_id: str) -> Optional[User]:
+        """
+        Finds a user by ID and sets is_active to True.
+        Reactivates the user document. Returns the updated user document.
+        """
+        user = await UserRepository.find_by_id(user_id)
+        if not user:
+            return None
+            
+        await user.set({"is_active": True})
+        return user
+    
 user_repository = UserRepository()

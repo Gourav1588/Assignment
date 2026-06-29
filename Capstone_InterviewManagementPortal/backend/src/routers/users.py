@@ -65,3 +65,11 @@ async def disable_user(
     Sets is_active to False — does not delete the user.
     """
     return await user_service.disable_user(user_id)
+
+@router.patch("/{user_id}/activate", response_model=UserResponse)
+async def activate_user(
+    user_id: str,
+    _=Depends(require_role(UserRole.ADMIN)),
+):
+    """Admin reactivates a disabled user account."""
+    return await user_service.activate_user(user_id)

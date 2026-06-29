@@ -12,7 +12,7 @@ Contains:
 from src.models.users import User, UserCreate, UserUpdate
 from src.repositories.user_repository import user_repository
 from src.core.security import hash_password
-from src.core.exceptions import ResourceNotFoundException, DuplicateEmailException
+from src.core.exceptions import ResourceNotFoundException, DuplicateEmailException,ConflictException
 from src.core.logger import logger
 
 
@@ -75,6 +75,19 @@ class UserService:
         disabled = await user_repository.disable_user(user_id)
         logger.info("User disabled: %s", user_id)
         return disabled
+    
+    async def activate_user(self, user_id: str) -> User:
+        """
+        Sets is_active to True.
+        Reactivates a previously disabled user account back into active service.
+        """
+        user = await self.get_user_by_id(user_id)
+        if user.is_active:
+           raise ConflictException("User is already active.")
+        activated = await user_repository.activate_user(user_id)
+        logger.info("User reactivated: %s", user_id)
+        return activated
+    
 
 
 user_service = UserService()
