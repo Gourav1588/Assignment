@@ -4,16 +4,16 @@ This module initializes the FastAPI server engine and registers all endpoint rou
 Contains:
 - lifespan → Manages application lifecycle hooks for database operations
 """
-
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.core.database import Database
 from src.routers.auth import router as auth_router
 from src.core.error_handlers import register_error_handlers
-from src.core.logger import get_logger
 
-logger = get_logger(__name__)
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager

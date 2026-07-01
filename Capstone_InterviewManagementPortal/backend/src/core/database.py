@@ -1,14 +1,14 @@
 """
 This module handles our database connection.
 """
+import logging
 from typing import Any, Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from src.core.config import settings
 from src.models.users import User
-from src.core.logger import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 class Database:
     """

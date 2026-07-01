@@ -13,8 +13,3 @@ logging.basicConfig(
     ]
 )
 
-def get_logger(module_name: str) -> logging.Logger:
-    """
-    Returns a logger instance bound to the specific calling module path.
-    """
-    return logging.getLogger(module_name)
