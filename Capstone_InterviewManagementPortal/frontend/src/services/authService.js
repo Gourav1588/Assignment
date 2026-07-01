@@ -18,13 +18,15 @@ const authService = {
     return response.data
   },
 
-  // Reset password — session already exists, use api instance
-  async resetPassword(newPassword) {
-    const response = await api.post('/auth/reset-password', {
+  async changePassword(oldPassword, newPassword) {
+    const response = await api.post('/auth/change-password', {
+      old_password: oldPassword,
       new_password: newPassword,
     })
     return response.data
   },
+
+
 }
 
 export default authService

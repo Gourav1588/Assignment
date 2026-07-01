@@ -8,12 +8,15 @@ Contains:
 - update_user    → updates full_name and/or role
 - disable_user   → sets is_active to False
 """
-
-from src.models.users import User, UserCreate, UserUpdate
+import logging
+from src.models.users import User
+from src.schemas.request.user_request import UserCreate, UserUpdate
 from src.repositories.user_repository import user_repository
 from src.core.security import hash_password
 from src.core.exceptions import ResourceNotFoundException, DuplicateEmailException,ConflictException
-from src.core.logger import logger
+
+logger = logging.getLogger(__name__)
+
 
 
 class UserService:

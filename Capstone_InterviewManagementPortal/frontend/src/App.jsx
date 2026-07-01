@@ -1,9 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import MainLayout from './components/layout/MainLayout'
 import { ROUTES } from './constants/route'
 import Login from './pages/auth/Login'
-import ResetPassword from './pages/auth/ResetPassword'
+import ChangePassword from './pages/auth/ChangePassword'
 import UserList from './pages/users/UserList'
 import EditUser from './pages/users/EditUser'
 import CreateUser from './pages/users/CreateUser'
@@ -16,17 +16,14 @@ const InterviewsPage = () => <div style={{ padding: 24 }}>Interviews — coming 
 const MyInterviewsPage = () => <div style={{ padding: 24 }}>My Interviews — coming soon</div>
 
 function ProtectedRoute({ children, allowedRoles }) {
-  const { user, pendingUser, loading } = useAuth()
+  const { user, loading } = useAuth()
 
   if (loading) return <div>Loading...</div>
 
+  if (!user) { return <Navigate to={ROUTES.LOGIN} replace /> }
 
-  if (!user && !pendingUser) {
-    return <Navigate to={ROUTES.LOGIN} replace />
-  }
-
-  if (pendingUser?.is_password_reset_pending) {
-    return <Navigate to={ROUTES.RESET_PASSWORD} replace />
+  if (user.is_password_reset_pending && location.pathname !== ROUTES.CHANGE_PASSWORD) {
+    return <Navigate to={ROUTES.CHANGE_PASSWORD} replace />
   }
 
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
@@ -47,6 +44,9 @@ function PublicRoute({ children }) {
 
   if (loading) return <div>Loading...</div>
 
+  if (user?.is_password_reset_pending) {
+    return <Navigate to={ROUTES.CHANGE_PASSWORD} replace />
+  }
 
   if (user) return <Navigate to={ROUTES.DASHBOARD} replace />
 
@@ -58,9 +58,9 @@ function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path={ROUTES.LOGIN} element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
 
       {/* Protected */}
+      <Route path={ROUTES.CHANGE_PASSWORD} element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
       <Route path={ROUTES.DASHBOARD} element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path={ROUTES.USERS} element={<ProtectedRoute allowedRoles={['Admin']}><UserList /></ProtectedRoute>} />
       <Route path={ROUTES.USER_CREATE} element={<ProtectedRoute allowedRoles={['Admin']}><CreateUser /></ProtectedRoute>} />

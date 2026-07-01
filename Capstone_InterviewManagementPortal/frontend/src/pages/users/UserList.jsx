@@ -82,7 +82,7 @@ export default function UserList() {
                             </tr>
                         ) : (
                             users.map((user) => (
-                                <tr key={user._id}>
+                                <tr key={user.id}>
                                     <td>{user.full_name}</td>
                                     <td>{user.email}</td>
                                     <td>{user.role}</td>
@@ -94,19 +94,19 @@ export default function UserList() {
                                     <td style={{ display: 'flex', gap: '8px' }}>
                                         <button
                                             className="btn btn-warning"
-                                            onClick={() => navigate(`/users/${user._id}/edit`)}
+                                            onClick={() => navigate(`/users/${user.id}/edit`)}
                                         >
                                             Edit
                                         </button>
                                         {user.is_active ? (
                                             <button
                                                 className="btn btn-danger"
-                                                onClick={() => handleDisable(user._id)}
+                                                onClick={() => handleDisable(user.id)}
                                             >
                                                 Disable
                                             </button>
                                         ) : (
-                                            <button className="btn btn-success" onClick={() => handleActivate((user._id))}>
+                                            <button className="btn btn-success" onClick={() => handleActivate((user.id))}>
                                                 Activate
                                             </button>
                                         )}

@@ -13,7 +13,6 @@ Contains:
 """
 
 import base64
-import pytest
 from src.models.users import User
 from src.core.security import hash_password
 
