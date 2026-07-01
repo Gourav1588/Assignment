@@ -3,15 +3,21 @@ Defines REST routes handling security verifications, logins, and credential modi
 
 Contains:
 - login_user           → Validates Basic Auth and returns user profile
-- reset_temporary_password → Updates temporary password on first login
-- terminate_session        → Logs and handles client session termination
+- POST /change-password → changes password (first login + voluntary)
 """
-
-from fastapi import APIRouter, Depends, status
-from src.models.users import User, UserResponse, PasswordResetRequest
+import logging
+from fastapi import APIRouter, Depends
+from src.models.users import User
+from src.schemas.response.user_response import UserResponse
+from src.schemas.request.user_request import  PasswordChangeRequest
 from src.services.auth_service import auth_service
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from src.core.dependencies import get_current_user
-from src.core.logger import logger
+
+security = HTTPBasic()
+
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/auth",
@@ -20,21 +26,26 @@ router = APIRouter(
 
 
 @router.post("/login", response_model=UserResponse)
-async def login_user(current_user: User = Depends(get_current_user)):
-    """
-    Returns user metadata after successful Basic Auth verification.
-    """
-    logger.info(f"Login endpoint accessed successfully for user: {current_user.email}")
-    return current_user
-
-
-@router.post("/reset-password", response_model=UserResponse)
-async def reset_temporary_password(
-    payload: PasswordResetRequest, 
-    current_user: User = Depends(get_current_user)  # Extract identity from authenticated context
+async def login_user(
+    credentials: HTTPBasicCredentials = Depends(security),
 ):
-    """
-    Modifies temporary credentials and fully activates corporate accounts.
-    """
-    logger.info(f"Password reset requested for email: {current_user.email}")
-    return await auth_service.update_user_password(current_user.email, payload.new_password)
+    
+    user = await auth_service.authenticate_user(
+        credentials.username,
+        credentials.password,
+    )
+    logger.info(f"Login endpoint accessed successfully for user: {user.email}")
+    return user
+
+
+@router.post("/change-password", response_model=UserResponse)
+async def change_password(
+    payload: PasswordChangeRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Handles both first login forced reset and voluntary password change."""
+    return await auth_service.change_password(
+        current_user.email,
+        payload.old_password,
+        payload.new_password,
+    )

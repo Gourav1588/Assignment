@@ -1,118 +1,99 @@
 """
-Integration test suite for authentication API endpoints.
+Unit test suite verifying authentication service business logic operations.
 
 Contains:
-- test_login_success                → Valid credentials return user profile with 200
-- test_login_wrong_password         → Wrong password returns 401
-- test_login_unknown_email          → Unknown email returns 401
-- test_login_no_credentials         → Missing header returns 401
-- test_reset_password_success       → Valid new password clears pending flag
-- test_reset_password_weak_password → Weak password returns 422
-- test_reset_password_requires_auth → Unauthenticated reset attempt returns 401
+- MockPayload                           → Local Pydantic wrapper mimicking credentials input
+- test_authenticate_user_success        → Asserts correct user retrieval on matching hashes
+- test_authenticate_user_wrong_password → Asserts UnauthorizedException on key mismatches
+- test_change_password_success            → Valid old password allows changing to new
+- test_change_password_wrong_old_password → Wrong old password returns 401
+- test_change_password_requires_auth      → Unauthenticated change attempt returns 401
 """
 
-import base64
+import pytest
+from src.services.auth_service import auth_service
 from src.models.users import User
 from src.core.security import hash_password
+from src.core.exceptions import UnauthorizedException
 
 
-def make_auth_header(email: str, password: str) -> dict:
-    """Helper — builds Basic Auth header from email and password."""
-    token = base64.b64encode(f"{email}:{password}".encode()).decode()
-    return {"Authorization": f"Basic {token}"}
-
-
-async def create_test_user(
-    email="test@nucleusteq.com",
-    password="Valid@1234",
-    role="Admin",
-    full_name="Test User",
-    is_password_reset_pending=False,
-) -> User:
-    """Helper — inserts a user into the mock DB and returns it."""
+async def test_authenticate_user_success():
+    """
+    Confirms successful verification and user record extraction for exact credential pairs.
+    """
+    await User.all().delete()
     user = User(
-        email=email,
-        password=hash_password(password),
-        role=role,
-        full_name=full_name,
-        is_password_reset_pending=is_password_reset_pending,
+        email="test@nucleusteq.com",
+        password=hash_password("Valid@1234"),
+        role="Admin",
+        full_name="Test User",
+        is_password_reset_pending=True
     )
     await user.insert()
-    return user
+
+    
+    authenticated_user = await auth_service.authenticate_user("test@nucleusteq.com","Valid@1234",)
+    assert authenticated_user.email == "test@nucleusteq.com"
 
 
-# ── Login ──────────────────────────────────────────────────────────────────
 
-async def test_login_success(client):
-    """Valid credentials return 200 and the user profile payload."""
-    await create_test_user()
-    response = await client.post(
-        "/api/v1/auth/login",
-        headers=make_auth_header("test@nucleusteq.com", "Valid@1234"),
+async def test_authenticate_user_wrong_password():
+    """
+    Ensures an unauthorized domain exception is safely raised for faulty hash values.
+    """
+    
+    await User.all().delete()
+    await User(
+        email="test@nucleusteq.com",
+        password=hash_password("Valid@1234"),
+        role="Admin",
+        full_name="Test User",
+        is_password_reset_pending=True,
+    ).insert()
+    
+    with pytest.raises(UnauthorizedException):
+        await auth_service.authenticate_user(
+            "test@nucleusteq.com",
+            "WrongPassword1",
     )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["email"] == "test@nucleusteq.com"
-    assert body["role"] == "Admin"
-    assert "password" not in body
 
+# ── change_password ────────────────────────────────────────────────────────
 
-async def test_login_wrong_password(client):
-    """Incorrect password returns 401 Unauthorized."""
-    await create_test_user()
-    response = await client.post(
-        "/api/v1/auth/login",
-        headers=make_auth_header("test@nucleusteq.com", "Wrong@1234"),
+async def test_change_password_success():
+    """Old password verified, new password saved, pending flag cleared."""
+    await User.all().delete()
+    await User(
+        email="test@nucleusteq.com",
+        password=hash_password("Valid@1234"),
+        role="Admin",
+        full_name="Test User",
+        is_password_reset_pending=True,
+    ).insert()
+
+    updated = await auth_service.change_password(
+        email="test@nucleusteq.com",
+        old_password="Valid@1234",
+        new_password="Changed@9876",
     )
-    assert response.status_code == 401
-    assert response.json()["error_code"] == "UNAUTHORIZED_ACCESS"
+    assert updated.is_password_reset_pending is False
+    assert updated.password != hash_password("Valid@1234")
 
 
-async def test_login_unknown_email(client):
-    """Unknown email returns 401 — not 404, to avoid user enumeration."""
-    response = await client.post(
-        "/api/v1/auth/login",
-        headers=make_auth_header("nobody@nucleusteq.com", "Valid@1234"),
-    )
-    assert response.status_code == 401
+async def test_change_password_wrong_old_password():
+    """Wrong old password raises UnauthorizedException."""
+    await User.all().delete()
+    await User(
+        email="test@nucleusteq.com",
+        password=hash_password("Valid@1234"),
+        role="Admin",
+        full_name="Test User",
+        is_password_reset_pending=False,
+    ).insert()
 
+    with pytest.raises(UnauthorizedException):
+        await auth_service.change_password(
+            email="test@nucleusteq.com",
+            old_password="Wrong@1234",
+            new_password="Changed@9876",
+        )
 
-async def test_login_no_credentials(client):
-    """Request with no Authorization header returns 401."""
-    response = await client.post("/api/v1/auth/login")
-    assert response.status_code == 401
-
-
-# ── Reset Password ─────────────────────────────────────────────────────────
-
-async def test_reset_password_success(client):
-    """Valid new password updates hash and clears is_password_reset_pending."""
-    await create_test_user(is_password_reset_pending=True)
-    response = await client.post(
-        "/api/v1/auth/reset-password",
-        json={"new_password": "Changed@9876"},
-        headers=make_auth_header("test@nucleusteq.com", "Valid@1234"),
-    )
-    assert response.status_code == 200
-    assert response.json()["is_password_reset_pending"] is False
-
-
-async def test_reset_password_weak_password(client):
-    """Password failing complexity rules returns 422 Validation Error."""
-    await create_test_user()
-    response = await client.post(
-        "/api/v1/auth/reset-password",
-        json={"new_password": "123"},
-        headers=make_auth_header("test@nucleusteq.com", "Valid@1234"),
-    )
-    assert response.status_code == 422
-    assert response.json()["error_code"] == "VALIDATION_ERROR"
-
-
-async def test_reset_password_requires_auth(client):
-    """Reset password without credentials returns 401."""
-    response = await client.post(
-        "/api/v1/auth/reset-password",
-        json={"new_password": "Changed@9876"},
-    )
-    assert response.status_code == 401

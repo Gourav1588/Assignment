@@ -9,12 +9,16 @@ Contains:
 - PUT    /users/{user_id}    → update user
 - PATCH  /users/{user_id}/disable → disable user
 """
-
+import logging
 from fastapi import APIRouter, Depends, status
-from src.models.users import UserCreate, UserUpdate, UserResponse
+from src.schemas.request.user_request import UserCreate, UserUpdate
+from src.schemas.response.user_response import UserResponse
 from src.services.user_service import user_service
 from src.core.dependencies import require_role
 from src.enums.roles import UserRole
+
+logger = logging.getLogger(__name__)
+
 
 router = APIRouter(prefix="/users", tags=["User Management"])
 
@@ -25,6 +29,7 @@ async def create_user(
     _=Depends(require_role(UserRole.ADMIN)),
 ):
     """Admin creates a new HR or Interviewer account."""
+    logger.info(f"Create user request received for {payload.email}")
     return await user_service.create_user(payload)
 
 
@@ -33,6 +38,7 @@ async def list_users(
     _=Depends(require_role(UserRole.ADMIN)),
 ):
     """Admin retrieves all user accounts."""
+    logger.info("List users request received.")
     return await user_service.list_users()
 
 
@@ -42,6 +48,7 @@ async def get_user(
     _=Depends(require_role(UserRole.ADMIN)),
 ):
     """Admin retrieves a single user by their ID."""
+    logger.info(f"Get user request received for ID: {user_id}")
     return await user_service.get_user_by_id(user_id)
 
 
@@ -52,6 +59,7 @@ async def update_user(
     _=Depends(require_role(UserRole.ADMIN)),
 ):
     """Admin updates a user's full_name or role."""
+    logger.info(f"Update user request received for ID: {user_id}")
     return await user_service.update_user(user_id, payload)
 
 
@@ -64,4 +72,5 @@ async def disable_user(
     Admin disables a user account.
     Sets is_active to False — does not delete the user.
     """
+    logger.info(f"Disable user request received for ID: {user_id}")
     return await user_service.disable_user(user_id)

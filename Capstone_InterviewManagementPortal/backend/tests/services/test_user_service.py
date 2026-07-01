@@ -15,7 +15,8 @@ Contains:
 
 import pytest
 from src.services.user_service import UserService
-from src.models.users import User, UserCreate, UserUpdate
+from src.models.users import User
+from src.schemas.request.user_request import UserCreate, UserUpdate
 from src.core.security import hash_password
 from src.core.exceptions import DuplicateEmailException, ResourceNotFoundException
 from src.enums.roles import UserRole

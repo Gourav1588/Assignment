@@ -1,12 +1,12 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { NAV_ITEMS } from '../../constants/route'
+import { NAV_ITEMS, ROUTES } from '../../constants/route'
 import './MainLayout.css'
 
 export default function MainLayout({ children }) {
   const { user, logout } = useAuth()
-  const navigate         = useNavigate()
-  const location         = useLocation()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   function handleLogout() {
     logout()
@@ -35,6 +35,14 @@ export default function MainLayout({ children }) {
         <div className="sidebar-footer">
           <div className="sidebar-user-name">{user?.full_name}</div>
           <div className="sidebar-user-role">{user?.role}</div>
+          <Link
+            to={ROUTES.CHANGE_PASSWORD}
+            className="nav-link"
+            style={{ fontSize: '12px', marginBottom: '8px', padding: '6px 8px' }}>
+
+            Change Password
+          </Link>
+
           <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>

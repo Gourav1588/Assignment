@@ -5,33 +5,23 @@ import { saveSession, loadSession, clearSession } from '../utils/auth'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser]               = useState(null)
-  const [pendingUser, setPendingUser] = useState(null)
-  const [loading, setLoading]         = useState(true)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const session = loadSession()
+
     if (session?.user) {
-      if (session.user.is_password_reset_pending) {
-        setPendingUser(session.user)
-      } else {
-        setUser(session.user)
-      }
+      setUser(session.user)
     }
+
     setLoading(false)
   }, [])
 
   async function login(email, password) {
     const userData = await authService.login(email, password)
     saveSession(userData, email, password)
-
-    if (userData.is_password_reset_pending) {
-      setPendingUser(userData)
-      setUser(null)
-    } else {
-      setUser(userData)
-      setPendingUser(null)
-    }
+    setUser(userData)
 
     return userData
   }
@@ -39,11 +29,11 @@ export function AuthProvider({ children }) {
   function logout() {
     clearSession()
     setUser(null)
-    setPendingUser(null)
+
   }
 
   return (
-    <AuthContext.Provider value={{ user, pendingUser, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )
