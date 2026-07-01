@@ -9,6 +9,9 @@ Contains:
 - test_reset_password_success       → Valid new password clears pending flag
 - test_reset_password_weak_password → Weak password returns 422
 - test_reset_password_requires_auth → Unauthenticated reset attempt returns 401
+- test_change_password_success         → Valid old password allows changing to new
+- test_change_password_wrong_old_password → Wrong old password returns 401
+- test_change_password_requires_auth   → Unauthenticated change attempt returns 401
 """
 
 import base64
@@ -82,37 +85,36 @@ async def test_login_no_credentials(client):
     response = await client.post("/api/v1/auth/login")
     assert response.status_code == 401
 
-
-# ── Reset Password ─────────────────────────────────────────────────────────
-
-async def test_reset_password_success(client):
-    """Valid new password updates hash and clears is_password_reset_pending."""
-    await create_test_user(is_password_reset_pending=True)
+    
+# ── change  Password ─────────────────────────────────────────────────────────
+    
+async def test_change_password_success(client):
+    """Valid old password allows changing to new password."""
+    await create_test_user(is_password_reset_pending=False)
     response = await client.post(
-        "/api/v1/auth/reset-password",
-        json={"new_password": "Changed@9876"},
+        "/api/v1/auth/change-password",
+        json={"old_password": "Valid@1234", "new_password": "Changed@9876"},
         headers=make_auth_header("test@nucleusteq.com", "Valid@1234"),
     )
     assert response.status_code == 200
-    assert response.json()["is_password_reset_pending"] is False
 
 
-async def test_reset_password_weak_password(client):
-    """Password failing complexity rules returns 422 Validation Error."""
-    await create_test_user()
+async def test_change_password_wrong_old_password(client):
+    """Wrong old password returns 401."""
+    await create_test_user(is_password_reset_pending=False)
     response = await client.post(
-        "/api/v1/auth/reset-password",
-        json={"new_password": "123"},
+        "/api/v1/auth/change-password",
+        json={"old_password": "Wrong@1234", "new_password": "Changed@9876"},
         headers=make_auth_header("test@nucleusteq.com", "Valid@1234"),
     )
-    assert response.status_code == 422
-    assert response.json()["error_code"] == "VALIDATION_ERROR"
+    assert response.status_code == 401
+    assert response.json()["error_code"] == "UNAUTHORIZED_ACCESS"
 
 
-async def test_reset_password_requires_auth(client):
-    """Reset password without credentials returns 401."""
+async def test_change_password_requires_auth(client):
+    """Change password without credentials returns 401."""
     response = await client.post(
-        "/api/v1/auth/reset-password",
-        json={"new_password": "Changed@9876"},
+        "/api/v1/auth/change-password",
+        json={"old_password": "Valid@1234", "new_password": "Changed@9876"},
     )
     assert response.status_code == 401
