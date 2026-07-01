@@ -5,13 +5,13 @@ import { ROUTES } from '../../constants/route'
 import './Auth.css'
 
 export default function Login() {
-  const [email, setEmail]       = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const { login } = useAuth()
-  const navigate  = useNavigate()
+  const navigate = useNavigate()
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -20,11 +20,14 @@ export default function Login() {
 
     try {
       const user = await login(email, password)
-      console.log('user response:', user)              
-console.log('is_pending:', user.is_password_reset_pending) 
+
+      console.log("Returned user:", user)
+      console.log("Pending:", user.is_password_reset_pending)
       if (user.is_password_reset_pending) {
-        navigate(ROUTES.RESET_PASSWORD)
+        console.log("Navigating to change password")
+        navigate(ROUTES.CHANGE_PASSWORD)
       } else {
+        console.log("Navigating to dashboard")
         navigate(ROUTES.DASHBOARD)
       }
     } catch (err) {
