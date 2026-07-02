@@ -24,7 +24,7 @@ def make_payload(**kwargs) -> JobCreate:
         "details": "We are looking for a skilled backend developer.",
         "role": "Software Engineer",
         "required_skills": "Python, FastAPI, MongoDB",
-        "experience_required": "2-4 years",
+        "experience_required": 2,
         "employment_type": "Full Time",
         "location": "Bangalore",
     }
@@ -38,7 +38,7 @@ async def seed_job() -> Job:
         details="We are looking for a skilled backend developer.",
         role="Software Engineer",
         required_skills="Python, FastAPI",
-        experience_required="2-4 years",
+        experience_required=2,
         employment_type="Full Time",
         location="Bangalore",
         created_by="hr@nucleusteq.com",
@@ -91,7 +91,6 @@ async def test_get_job_by_id_not_found():
 
 
 async def test_update_job_success():
-    """Updates only the provided fields — other fields stay unchanged."""
     await Job.all().delete()
     created = await seed_job()
 
@@ -101,8 +100,8 @@ async def test_update_job_success():
     )
     assert updated.title == "Senior Backend Developer"
     assert updated.employment_type == "Internship"
-    assert updated.location == "Bangalore"    # unchanged field stays
-    assert updated.role == "Software Engineer"  # unchanged field stays
+    assert updated.location == "Bangalore"   
+    assert updated.role == "Software Engineer"  
 
 
 async def test_update_job_not_found():

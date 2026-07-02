@@ -53,7 +53,7 @@ def job_payload(**kwargs):
         "details": "We are looking for a skilled backend developer.",
         "role": "Software Engineer",
         "required_skills": "Python, FastAPI",
-        "experience_required": "2-4 years",
+        "experience_required": 2,
         "employment_type": "Full Time",
         "location": "Bangalore",
     }
@@ -150,7 +150,7 @@ async def test_get_job_by_id_not_found(client):
 
 
 async def test_update_job_success(client):
-    """HR updates a job description — only provided fields change."""
+    """HR updates a job description"""
     await User.all().delete()
     await Job.all().delete()
     await seed_hr()
@@ -169,7 +169,7 @@ async def test_update_job_success(client):
     )
     assert response.status_code == 200
     assert response.json()["title"] == "Senior Backend Developer"
-    assert response.json()["location"] == "Bangalore"  # unchanged
+    assert response.json()["location"] == "Bangalore" 
 
 
 async def test_update_job_not_found(client):

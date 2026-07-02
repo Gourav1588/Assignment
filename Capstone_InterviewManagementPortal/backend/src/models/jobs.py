@@ -10,7 +10,7 @@ class Job(Document):
     details: str
     role: str
     required_skills: str
-    experience_required: str
+    experience_required: float
     employment_type: EmploymentType
     location: str
     created_by: str

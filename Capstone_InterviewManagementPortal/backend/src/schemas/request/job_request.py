@@ -10,7 +10,7 @@ class JobCreate(BaseModel):
     details: str = Field(..., min_length=10)
     role: str = Field(..., min_length=2, max_length=100)
     required_skills: str = Field(..., min_length=2)
-    experience_required: str = Field(..., min_length=1)
+    experience_required: float = Field(..., ge=0)
     employment_type: EmploymentType
     location: str = Field(..., min_length=2)
 
@@ -20,6 +20,6 @@ class JobUpdate(BaseModel):
     details: str | None = Field(default=None, min_length=10)
     role: str | None = Field(default=None, min_length=2, max_length=100)
     required_skills: str | None = Field(default=None, min_length=2)
-    experience_required: str | None = None
+    experience_required: float | None = Field(default=None, ge=0)
     employment_type: EmploymentType | None = None
     location: str | None = Field(default=None, min_length=2)
