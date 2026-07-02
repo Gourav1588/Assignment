@@ -12,6 +12,8 @@ from src.core.database import Database
 from src.routers.auth import router as auth_router
 from src.core.error_handlers import register_error_handlers
 from src.routers.users import router as users_router 
+from src.routers.jobs import router as jobs_router
+
 
 
 logger = logging.getLogger(__name__)
@@ -58,3 +60,4 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/api/v1")  
 app.include_router(users_router, prefix="/api/v1")  
+app.include_router(jobs_router, prefix="/api/v1")
