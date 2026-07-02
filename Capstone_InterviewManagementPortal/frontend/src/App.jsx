@@ -7,10 +7,12 @@ import ChangePassword from './pages/auth/ChangePassword'
 import UserList from './pages/users/UserList'
 import EditUser from './pages/users/EditUser'
 import CreateUser from './pages/users/CreateUser'
+import JobList from './pages/jobs/JobList'
+import CreateJob from './pages/jobs/CreateJob'
+import EditJob from './pages/jobs/EditJob'
+import JobDetail from './pages/jobs/JobDetail'
 
 const DashboardPage = () => <div style={{ padding: 24 }}>Dashboard — coming soon</div>
-const UsersPage = () => <div style={{ padding: 24 }}>Users — coming soon</div>
-const JobsPage = () => <div style={{ padding: 24 }}>Jobs — coming soon</div>
 const CandidatesPage = () => <div style={{ padding: 24 }}>Candidates — coming soon</div>
 const InterviewsPage = () => <div style={{ padding: 24 }}>Interviews — coming soon</div>
 const MyInterviewsPage = () => <div style={{ padding: 24 }}>My Interviews — coming soon</div>
@@ -65,7 +67,10 @@ function AppRoutes() {
       <Route path={ROUTES.USERS} element={<ProtectedRoute allowedRoles={['Admin']}><UserList /></ProtectedRoute>} />
       <Route path={ROUTES.USER_CREATE} element={<ProtectedRoute allowedRoles={['Admin']}><CreateUser /></ProtectedRoute>} />
       <Route path={ROUTES.USER_EDIT} element={<ProtectedRoute allowedRoles={['Admin']}><EditUser /></ProtectedRoute>} />
-      <Route path={ROUTES.JOBS} element={<ProtectedRoute><JobsPage /></ProtectedRoute>} />
+      <Route path={ROUTES.JOBS} element={<ProtectedRoute allowedRoles={['HR']}><JobList /></ProtectedRoute>} />
+      <Route path={ROUTES.JOB_CREATE} element={<ProtectedRoute allowedRoles={['HR']} ><CreateJob /></ProtectedRoute>} />
+      <Route path="/jobs/:id" element={<ProtectedRoute allowedRoles={['HR']}><JobDetail /></ProtectedRoute>} />
+      <Route path="/jobs/:id/edit" element={<ProtectedRoute allowedRoles={['HR']}><EditJob /></ProtectedRoute>} />
       <Route path={ROUTES.CANDIDATES} element={<ProtectedRoute><CandidatesPage /></ProtectedRoute>} />
       <Route path={ROUTES.INTERVIEWS} element={<ProtectedRoute><InterviewsPage /></ProtectedRoute>} />
       <Route path={ROUTES.MY_INTERVIEWS} element={<ProtectedRoute><MyInterviewsPage /></ProtectedRoute>} />

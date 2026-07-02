@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import userService from '../../services/userService'
 import { ROUTES } from '../../constants/route'
 import './Users.css'
+import {
+    validateEmail,
+    validatePassword,
+} from '../../utils/validation'
 
 export default function CreateUser() {
     const [form, setForm] = useState({
@@ -19,24 +23,31 @@ export default function CreateUser() {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    function validate() {
-        if (!form.full_name.trim()) return 'Full name is required.'
-        if (!form.email.endsWith('@nucleusteq.com')) return 'Email must be a @nucleusteq.com address.'
-        if (form.password.length < 6 || form.password.length > 12) return 'Password must be 6-12 characters.'
-        return null
-    }
+
 
     async function handleSubmit(e) {
         e.preventDefault()
         setError('')
 
-        const validationError = validate()
-        if (validationError) {
-            setError(validationError)
+        if (!form.full_name.trim()) {
+            setError('Full name is required.')
+            return
+        }
+
+        const emailError = validateEmail(form.email)
+        if (emailError) {
+            setError(emailError)
+            return
+        }
+
+        const passwordError = validatePassword(form.password)
+        if (passwordError) {
+            setError(passwordError)
             return
         }
 
         setLoading(true)
+
         try {
             await userService.createUser(form)
             navigate(ROUTES.USERS)
