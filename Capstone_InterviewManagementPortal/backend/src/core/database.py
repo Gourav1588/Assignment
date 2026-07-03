@@ -8,6 +8,7 @@ from beanie import init_beanie
 from src.core.config import settings
 from src.models.users import User
 from src.models.jobs import Job
+from src.models.candidates import Candidate
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ class Database:
         
             await cls.client.admin.command("ping") 
         
-            await init_beanie(database=cls.db, document_models=[User,Job])
+            await init_beanie(database=cls.db, document_models=[User,Job,Candidate])
             logger.info(f"Connected to database: {settings.DATABASE_NAME}")
         
         except Exception as e:

@@ -13,6 +13,7 @@ from mongomock_motor import AsyncMongoMockClient
 from src.main import app as main_app
 from src.models.users import User
 from src.models.jobs import Job
+from src.models.candidates import Candidate
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +24,7 @@ async def init_test_db():
     mock_client = AsyncMongoMockClient()
     await init_beanie(
         database=mock_client.test_db,
-        document_models=[User,Job]
+        document_models=[User,Job,Candidate]
     )
     yield
 
