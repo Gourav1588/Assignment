@@ -11,9 +11,12 @@ import JobList from './pages/jobs/JobList'
 import CreateJob from './pages/jobs/CreateJob'
 import EditJob from './pages/jobs/EditJob'
 import JobDetail from './pages/jobs/JobDetail'
+import CandidateList from './pages/candidates/CandidateList'
+import CreateCandidate from './pages/candidates/CreateCandidate'
+import CandidateDetail from './pages/candidates/CandidateDetail'
+import EditCandidate from './pages/candidates/EditCandidate'
 
 const DashboardPage = () => <div style={{ padding: 24 }}>Dashboard — coming soon</div>
-const CandidatesPage = () => <div style={{ padding: 24 }}>Candidates — coming soon</div>
 const InterviewsPage = () => <div style={{ padding: 24 }}>Interviews — coming soon</div>
 const MyInterviewsPage = () => <div style={{ padding: 24 }}>My Interviews — coming soon</div>
 
@@ -69,9 +72,12 @@ function AppRoutes() {
       <Route path={ROUTES.USER_EDIT} element={<ProtectedRoute allowedRoles={['Admin']}><EditUser /></ProtectedRoute>} />
       <Route path={ROUTES.JOBS} element={<ProtectedRoute allowedRoles={['HR']}><JobList /></ProtectedRoute>} />
       <Route path={ROUTES.JOB_CREATE} element={<ProtectedRoute allowedRoles={['HR']} ><CreateJob /></ProtectedRoute>} />
-      <Route path="/jobs/:id" element={<ProtectedRoute allowedRoles={['HR']}><JobDetail /></ProtectedRoute>} />
-      <Route path="/jobs/:id/edit" element={<ProtectedRoute allowedRoles={['HR']}><EditJob /></ProtectedRoute>} />
-      <Route path={ROUTES.CANDIDATES} element={<ProtectedRoute><CandidatesPage /></ProtectedRoute>} />
+      <Route path={ROUTES.JOBS_DETAIL} element={<ProtectedRoute allowedRoles={['HR']}><JobDetail /></ProtectedRoute>} />
+      <Route path={ROUTES.JOB_EDIT} element={<ProtectedRoute allowedRoles={['HR']}><EditJob /></ProtectedRoute>} />
+      <Route path={ROUTES.CANDIDATES} element={<ProtectedRoute allowedRoles={['HR']}><CandidateList /></ProtectedRoute>} />
+      <Route path={ROUTES.CANDIDATE_CREATE} element={<ProtectedRoute allowedRoles={['HR']}><CreateCandidate /></ProtectedRoute>} />
+      <Route path={ROUTES.CANDIDATE_DETAIL} element={<ProtectedRoute allowedRoles={['HR']}><CandidateDetail /></ProtectedRoute>} />
+      <Route path={ROUTES.CANDIDATE_EDIT} element={<ProtectedRoute allowedRoles={['HR']}><EditCandidate /></ProtectedRoute>} />
       <Route path={ROUTES.INTERVIEWS} element={<ProtectedRoute><InterviewsPage /></ProtectedRoute>} />
       <Route path={ROUTES.MY_INTERVIEWS} element={<ProtectedRoute><MyInterviewsPage /></ProtectedRoute>} />
 
