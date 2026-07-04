@@ -36,9 +36,10 @@ export default function Login() {
         navigate(ROUTES.DASHBOARD)
       }
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError('Invalid email or password.')
-      } else {
+      if (err.response.data.detail) {
+        setError(err.response.data.detail);
+      }
+      else {
         setError('Something went wrong. Please try again.')
       }
     } finally {
