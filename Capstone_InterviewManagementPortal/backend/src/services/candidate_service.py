@@ -75,6 +75,13 @@ class CandidateService:
     ) -> Candidate:
         """Update an existing candidate."""
         await self.get_candidate(candidate_id)
+        if payload.mobile_number is not None:
+            if await candidate_repository.mobile_exists_for_other(
+                payload.mobile_number, candidate_id
+        ):
+                raise ConflictException(
+                    "A candidate with this mobile number already exists."
+            )
         update_data = payload.model_dump(exclude_none=True)
         updated = await candidate_repository.update_candidate(candidate_id, update_data)
         logger.info("Candidate updated: %s by %s", candidate_id, updated_by)

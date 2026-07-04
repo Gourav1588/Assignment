@@ -67,6 +67,16 @@ class CandidateRepository:
 
         await candidate.save()
         return candidate
+    
+    @staticmethod
+    async def mobile_exists_for_other(mobile: str, candidate_id: str) -> bool:
+        """Check if a mobile number exists for another candidate."""
+        candidate = await Candidate.find_one(
+            Candidate.mobile_number == mobile
+        )
+        if not candidate:
+            return False
+        return str(candidate.id) != candidate_id
 
 
 candidate_repository = CandidateRepository()

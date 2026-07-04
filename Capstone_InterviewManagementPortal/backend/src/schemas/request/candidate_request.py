@@ -31,7 +31,7 @@ class CandidateUpdate(BaseModel):
     first_name: str | None = Field(default=None, min_length=1, max_length=50)
     last_name: str | None = Field(default=None, min_length=1, max_length=50)
     mobile_number: str| None = None
-    current_company: str | None = Field(default=None, min_length=1, max_length=100)
+    current_company: str | None = Field(default=None, min_length=2, max_length=100)
     total_experience: float | None = Field(default=None, ge=0, le=50)
     
     @field_validator("mobile_number")
