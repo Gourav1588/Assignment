@@ -1,0 +1,9 @@
+# 1. Environment Secrets
+.env
+
+# 2. Automatically generated Python bytecode caches
+__pycache__/
+*.pyc
+
+# 4. Local media storage (Candidate PDFs should stay local)
+backend/uploads/resumes/*
