@@ -2,7 +2,7 @@
 Request schemas for Candidate Management endpoints.
 """
 from pydantic import BaseModel, EmailStr, Field, field_validator
-
+from src.enums.candidate_enums import CandidateStatus
 
 class CandidateCreate(BaseModel):
     """Validates payload when HR creates a new candidate profile."""
@@ -43,3 +43,7 @@ class CandidateUpdate(BaseModel):
         if len(digits) != 10:
             raise ValueError("Mobile number must be exactly 10 digits.")
         return digits
+
+class CandidateStatusUpdate(BaseModel):
+    """Validates payload when HR updates candidate status."""
+    status: CandidateStatus

@@ -18,6 +18,7 @@ class Candidate(Document):
     current_company: str
     total_experience: float
     applied_job: str
+    resume_data: bytes | None = None
     status: CandidateStatus = CandidateStatus.PROFILE_CREATED
     created_by: str
 

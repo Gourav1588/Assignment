@@ -13,6 +13,8 @@ Contains:
 from typing import Optional
 from src.models.candidates import Candidate
 from src.enums.candidate_enums import CandidateStatus
+from src.models.status_history import StatusHistory
+from src.schemas.response import candidate_response
 
 
 class CandidateRepository:
@@ -42,8 +44,8 @@ class CandidateRepository:
     async def find_all(status: CandidateStatus | None = None) -> list[Candidate]:
         """Retrieve all candidates or filter by status."""
         if status:
-            return await Candidate.find(Candidate.status == status).to_list()
-        return await Candidate.find_all().to_list()
+            return await Candidate.find(Candidate.status == status).project(candidate_response.CandidateResponse).to_list()
+        return await Candidate.find_all().project(candidate_response.CandidateResponse).to_list()
 
     @staticmethod
     async def find_by_id(candidate_id: str) -> Optional[Candidate]:
@@ -77,6 +79,40 @@ class CandidateRepository:
         if not candidate:
             return False
         return str(candidate.id) != candidate_id
+    
+    @staticmethod
+    async def set_resume_data(candidate_id: str, data: bytes) -> Optional[Candidate]:
+        return await CandidateRepository.update_candidate(
+            candidate_id, {"resume_data": data}
+        )
+
+    @staticmethod
+    async def update_status(
+        candidate_id: str, new_status: CandidateStatus
+    ) -> Optional[Candidate]:
+        return await CandidateRepository.update_candidate(
+            candidate_id, {"status": new_status}
+        )
+
+    @staticmethod
+    async def add_status_history(
+        candidate_id: str,
+        previous_status: str,
+        new_status: str,
+        changed_by: str,
+    ) -> None:
+        await StatusHistory(
+            candidate_id=candidate_id,
+            previous_status=previous_status,
+            new_status=new_status,
+            changed_by=changed_by,
+        ).insert()
+
+    @staticmethod
+    async def get_status_history(candidate_id: str) -> list[StatusHistory]:
+        return await StatusHistory.find(
+            StatusHistory.candidate_id == candidate_id
+        ).sort("changed_at").to_list()
 
 
 candidate_repository = CandidateRepository()

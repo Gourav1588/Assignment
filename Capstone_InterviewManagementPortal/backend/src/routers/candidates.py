@@ -7,13 +7,19 @@ Contains:
 - GET  /candidates              → list all candidates with optional status filter
 - GET  /candidates/{id}         → get a single candidate by ID
 - PUT  /candidates/{id}         → update candidate profile fields
+- POST  /candidates/{id}/resume           → upload candidate resume (PDF)
+- GET   /candidates/{id}/resume           → view candidate resume
+- PATCH /candidates/{id}/status           → update candidate status
+- GET   /candidates/{id}/status-history   → retrieve candidate status history
 """
+import io
 import logging
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status,UploadFile,File
+from fastapi.responses import StreamingResponse
 from src.models.users import User
 from src.enums.candidate_enums import CandidateStatus
-from src.schemas.request.candidate_request import CandidateCreate, CandidateUpdate
-from src.schemas.response.candidate_response import CandidateResponse
+from src.schemas.request.candidate_request import CandidateCreate, CandidateUpdate,CandidateStatusUpdate
+from src.schemas.response.candidate_response import CandidateResponse,StatusHistoryResponse
 from src.services.candidate_service import candidate_service
 from src.core.dependencies import require_role
 from src.enums.roles import UserRole
@@ -66,3 +72,53 @@ async def update_candidate(
     return await candidate_service.update_candidate(
         candidate_id, payload, updated_by=current_user.email
     )
+
+@router.post("/{candidate_id}/resume", response_model=CandidateResponse)
+async def upload_resume(
+    candidate_id: str,
+    file: UploadFile = File(...),
+    current_user: User = Depends(require_role(UserRole.HR)),
+):
+    """HR uploads a PDF resume stored as BinData in MongoDB. Max 10MB."""
+    logger.info("Resume upload for %s by: %s", candidate_id, current_user.email)
+    return await candidate_service.upload_resume(
+        candidate_id, file, uploaded_by=current_user.email
+    )
+
+
+@router.get("/{candidate_id}/resume")
+async def get_resume(
+    candidate_id: str,
+    current_user: User = Depends(require_role(UserRole.HR)),
+):
+    """Streams stored PDF inline so browser opens it in a new tab."""
+    logger.info("Resume view for %s by: %s", candidate_id, current_user.email)
+    pdf_bytes = await candidate_service.get_resume_bytes(candidate_id)
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline; filename=resume.pdf"},
+    )
+
+
+@router.patch("/{candidate_id}/status", response_model=CandidateResponse)
+async def update_status(
+    candidate_id: str,
+    payload: CandidateStatusUpdate,
+    current_user: User = Depends(require_role(UserRole.HR)),
+):
+    """HR updates candidate status and records transition in history."""
+    logger.info("Status update for %s by: %s", candidate_id, current_user.email)
+    return await candidate_service.update_status(
+        candidate_id, payload, changed_by=current_user.email
+    )
+
+
+@router.get("/{candidate_id}/status-history", response_model=list[StatusHistoryResponse])
+async def get_status_history(
+    candidate_id: str,
+    current_user: User = Depends(require_role(UserRole.HR)),
+):
+    """HR views the full status transition history for a candidate."""
+    logger.info("Status history for %s by: %s", candidate_id, current_user.email)
+    return await candidate_service.get_status_history(candidate_id)

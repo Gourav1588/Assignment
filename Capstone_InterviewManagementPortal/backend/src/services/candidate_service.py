@@ -12,14 +12,17 @@ Contains:
 """
 
 import logging
+from fastapi import UploadFile
 from src.enums.candidate_enums import CandidateStatus
 from src.models.candidates import Candidate
+from src.models.status_history import StatusHistory
 from src.repositories.candidate_repository import candidate_repository
 from src.repositories.job_repository import job_repository
-from src.schemas.request.candidate_request import CandidateCreate, CandidateUpdate
+from src.schemas.request.candidate_request import CandidateCreate, CandidateUpdate,CandidateStatusUpdate
 from src.core.exceptions import ResourceNotFoundException, ConflictException
-
 logger = logging.getLogger(__name__)
+
+MAX_RESUME_BYTES = 10 * 1024 * 1024
 
 
 class CandidateService:
@@ -62,6 +65,7 @@ class CandidateService:
     ) -> list[Candidate]:
         """Retrieve all candidates or filter by status."""
         return await candidate_repository.find_all(status)
+    
 
     async def get_candidate(self, candidate_id: str) -> Candidate:
         """Retrieve a candidate by ID."""
@@ -80,12 +84,66 @@ class CandidateService:
                 payload.mobile_number, candidate_id
         ):
                 raise ConflictException(
-                    "A candidate with this mobile number already exists."
-            )
+                "A candidate with this mobile number already exists."
+        )
         update_data = payload.model_dump(exclude_none=True)
         updated = await candidate_repository.update_candidate(candidate_id, update_data)
         logger.info("Candidate updated: %s by %s", candidate_id, updated_by)
         return updated
+    
+    async def upload_resume(
+        self, candidate_id: str, file: UploadFile, uploaded_by: str
+    ) -> Candidate:
+        """Validates incoming PDF streams and updates document file bytes."""
+        await self.get_candidate(candidate_id)
 
+        if file.content_type != "application/pdf":
+            raise ConflictException("Resume must be uploaded in PDF format.")
 
+        data = await file.read()
+
+        if len(data) > MAX_RESUME_BYTES:
+            raise ConflictException("Resume file must not exceed 10MB.")
+
+        updated = await candidate_repository.set_resume_data(candidate_id, data)
+        logger.info("Resume saved for: %s by %s", candidate_id, uploaded_by)
+        return updated
+
+    async def get_resume_bytes(self, candidate_id: str) -> bytes:
+        """Returns raw PDF bytes for streaming inline to the browser tab."""
+        candidate = await self.get_candidate(candidate_id)
+        if not candidate.resume_data:
+            raise ResourceNotFoundException(
+                "No resume uploaded for this candidate yet."
+            )
+        return candidate.resume_data
+
+    async def update_status(
+        self, candidate_id: str, payload: CandidateStatusUpdate, changed_by: str
+    ) -> Candidate:
+        """Transitions workflow status positions """
+        candidate = await self.get_candidate(candidate_id)
+        previous_status = candidate.status
+        new_status = payload.status
+
+        updated = await candidate_repository.update_status(candidate_id, new_status)
+        await candidate_repository.add_status_history(
+            candidate_id=candidate_id,
+            previous_status=previous_status,
+            new_status=new_status,
+            changed_by=changed_by,
+        )
+        logger.info(
+            "Candidate %s status: %s → %s by %s",
+            candidate_id, previous_status, new_status, changed_by
+        )
+        return updated
+
+    async def get_status_history(
+        self, candidate_id: str
+    ) -> list[StatusHistory]:
+        """Collects the complete  history."""
+        await self.get_candidate(candidate_id)
+        return await candidate_repository.get_status_history(candidate_id)
+    
 candidate_service = CandidateService()
