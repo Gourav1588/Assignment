@@ -98,17 +98,19 @@ export default function UserList() {
                                         >
                                             Edit
                                         </button>
-                                        {user.is_active ? (
-                                            <button
-                                                className="btn btn-danger"
-                                                onClick={() => handleDisable(user.id)}
-                                            >
-                                                Disable
-                                            </button>
-                                        ) : (
-                                            <button className="btn btn-success" onClick={() => handleActivate((user.id))}>
-                                                Activate
-                                            </button>
+                                        {user.role !== 'Admin' && (
+                                            user.is_active ? (
+                                                <button
+                                                    className="btn btn-danger"
+                                                    onClick={() => handleDisable(user.id)}
+                                                >
+                                                    Disable
+                                                </button>
+                                            ) : (
+                                                <button className="btn btn-success" onClick={() => handleActivate((user.id))}>
+                                                    Activate
+                                                </button>
+                                            )
                                         )}
                                     </td>
                                 </tr>
