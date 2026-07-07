@@ -9,6 +9,7 @@ export default function EditUser() {
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [fetching, setFetching] = useState(true)
+    const [isAdmin, setIsAdmin] = useState(false)
 
     const { id } = useParams()
     const navigate = useNavigate()
@@ -18,6 +19,7 @@ export default function EditUser() {
             try {
                 const user = await userService.getUserById(id)
                 setForm({ full_name: user.full_name, role: user.role })
+                setIsAdmin(user.role === 'Admin')
             } catch {
                 setError('Failed to load user.')
             } finally {
@@ -84,10 +86,23 @@ export default function EditUser() {
 
                     <div className="form-group">
                         <label>Role</label>
-                        <select name="role" value={form.role} onChange={handleChange}>
-                            <option value="HR">HR</option>
-                            <option value="Interviewer">Interviewer</option>
-                        </select>
+                        {isAdmin ? (
+                            <>
+                                <input
+                                    value="Admin"
+                                    disabled
+                                    style={{ background: '#f8fafc', color: '#94a3b8' }}
+                                />
+                                <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
+                                    Admin role cannot be changed.
+                                </p>
+                            </>) : (
+
+                            <select name="role" value={form.role} onChange={handleChange}>
+                                <option value="HR">HR</option>
+                                <option value="Interviewer">Interviewer</option>
+                            </select>
+                        )}
                     </div>
 
                     <div className="form-actions">
