@@ -1,10 +1,17 @@
 """
-Unit tests for resume upload and status tracking service logic.
-Validated against raw database document return formats.
+Unit tests for resume access and status tracking service logic.
+Contains:
+- test_get_resume_bytes_success        → returns PDF bytes when resume exists
+- test_get_resume_bytes_not_found      → raises ResourceNotFoundException when missing
+- test_update_status_success           → forward transition succeeds
+- test_update_status_invalid_transition → backward/skip transition raises ConflictException
+- test_update_status_terminal_state    → updating terminal status raises ConflictException
+- test_update_status_records_history   → previous status captured in history
+- test_get_status_history_multiple     → returns transitions in correct order
+- test_get_status_history_empty        → empty list before any change
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
 from src.services.candidate_service import CandidateService
 from src.models.candidates import Candidate
 from src.models.jobs import Job
@@ -32,7 +39,7 @@ async def seed_job() -> Job:
     return job
 
 
-async def seed_candidate(job_id: str) -> Candidate:
+async def seed_candidate(job_id: str,resume_data: bytes | None = b"%PDF-1.4 fake") -> Candidate:
     """Create a sample candidate linked to a job."""
     candidate = Candidate(
         first_name="Rahul",
@@ -42,6 +49,7 @@ async def seed_candidate(job_id: str) -> Candidate:
         current_company="ABC Corp",
         total_experience=3.0,
         applied_job=job_id,
+        resume_data=resume_data,
         status=CandidateStatus.PROFILE_CREATED,
         created_by="hr@nucleusteq.com",
     )
@@ -49,67 +57,25 @@ async def seed_candidate(job_id: str) -> Candidate:
     return candidate
 
 
-async def test_upload_resume_success():
+async def test_get_resume_bytes_success():
+    """Returns PDF bytes when resume exists."""
     await Candidate.all().delete()
     await Job.all().delete()
 
     job = await seed_job()
     created = await seed_candidate(str(job.id))
-
-    # Mock a valid PDF upload
-    mock_file = MagicMock()
-    mock_file.content_type = "application/pdf"
-    mock_file.read = AsyncMock(return_value=b"%PDF-1.4 fake content")
-
-    response = await service.upload_resume(
-        str(created.id), mock_file, uploaded_by="hr@nucleusteq.com"
-    )
-
-    assert response.resume_data is not None
+    
+    pdf_bytes = await service.get_resume_bytes(str(created.id))
+    assert bytes(pdf_bytes)== b"%PDF-1.4 fake"
+    
 
 
-async def test_upload_resume_invalid_format():
+async def test_get_resume_bytes_not_found():
+    """Raises ResourceNotFoundException when no resume uploaded."""
     await Candidate.all().delete()
     await Job.all().delete()
-
     job = await seed_job()
-    created = await seed_candidate(str(job.id))
-
-    # Mock an unsupported file type
-    mock_file = MagicMock()
-    mock_file.content_type = "image/png"
-    mock_file.read = AsyncMock(return_value=b"fake image")
-
-    with pytest.raises(ConflictException):
-        await service.upload_resume(
-            str(created.id), mock_file, uploaded_by="hr@nucleusteq.com"
-        )
-
-
-async def test_upload_resume_exceeds_limit():
-    await Candidate.all().delete()
-    await Job.all().delete()
-
-    job = await seed_job()
-    created = await seed_candidate(str(job.id))
-
-    # Mock a file larger than the allowed limit
-    mock_file = MagicMock()
-    mock_file.content_type = "application/pdf"
-    mock_file.read = AsyncMock(return_value=b"x" * (11 * 1024 * 1024))
-
-    with pytest.raises(ConflictException):
-        await service.upload_resume(
-            str(created.id), mock_file, uploaded_by="hr@nucleusteq.com"
-        )
-
-
-async def test_get_resume_bytes_not_uploaded():
-    await Candidate.all().delete()
-    await Job.all().delete()
-
-    job = await seed_job()
-    created = await seed_candidate(str(job.id))
+    created = await seed_candidate(str(job.id), resume_data=None)
 
     with pytest.raises(ResourceNotFoundException):
         await service.get_resume_bytes(str(created.id))
@@ -131,8 +97,55 @@ async def test_update_status_success():
 
     assert updated.status == CandidateStatus.INTERVIEW_SCHEDULED
 
+async def test_update_status_invalid_transition():
+    """Skipping a status step raises ConflictException."""
+    await Candidate.all().delete()
+    await Job.all().delete()
+    await StatusHistory.all().delete()
+    job = await seed_job()
+    created = await seed_candidate(str(job.id))
+
+    with pytest.raises(ConflictException):
+        await service.update_status(
+            str(created.id),
+            CandidateStatusUpdate(status=CandidateStatus.INTERVIEW_COMPLETED),
+            changed_by="hr@nucleusteq.com",
+        )
+        
+async def test_update_status_terminal_state():
+    """Updating from a terminal status raises ConflictException."""
+    await Candidate.all().delete()
+    await Job.all().delete()
+    await StatusHistory.all().delete()
+    job = await seed_job()
+    created = await seed_candidate(str(job.id))
+
+    # Move to terminal state step by step
+    await service.update_status(
+        str(created.id),
+        CandidateStatusUpdate(status=CandidateStatus.INTERVIEW_SCHEDULED),
+        changed_by="hr@nucleusteq.com",
+    )
+    await service.update_status(
+        str(created.id),
+        CandidateStatusUpdate(status=CandidateStatus.INTERVIEW_COMPLETED),
+        changed_by="hr@nucleusteq.com",
+    )
+    await service.update_status(
+        str(created.id),
+        CandidateStatusUpdate(status=CandidateStatus.SELECTED),
+        changed_by="hr@nucleusteq.com",
+    )
+
+    with pytest.raises(ConflictException):
+        await service.update_status(
+            str(created.id),
+            CandidateStatusUpdate(status=CandidateStatus.REJECTED),
+            changed_by="hr@nucleusteq.com",
+        )
 
 async def test_update_status_records_history():
+    """Previous and new status both captured in history."""
     await Candidate.all().delete()
     await Job.all().delete()
     await StatusHistory.all().delete()
