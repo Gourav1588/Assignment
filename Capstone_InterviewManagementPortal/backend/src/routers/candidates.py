@@ -3,22 +3,22 @@ Candidate Management API endpoints.
 All endpoints restricted to HR role.
 
 Contains:
-- POST /candidates              → create a new candidate profile
+- POST /candidates              → create candidate with mandatory PDF resume
 - GET  /candidates              → list all candidates with optional status filter
 - GET  /candidates/{id}         → get a single candidate by ID
 - PUT  /candidates/{id}         → update candidate profile fields
-- POST  /candidates/{id}/resume           → upload candidate resume (PDF)
 - GET   /candidates/{id}/resume           → view candidate resume
 - PATCH /candidates/{id}/status           → update candidate status
 - GET   /candidates/{id}/status-history   → retrieve candidate status history
 """
 import io
+from fastapi import Form
 import logging
 from fastapi import APIRouter, Depends, Query, status,UploadFile,File
 from fastapi.responses import StreamingResponse
 from src.models.users import User
 from src.enums.candidate_enums import CandidateStatus
-from src.schemas.request.candidate_request import CandidateCreate, CandidateUpdate,CandidateStatusUpdate
+from src.schemas.request.candidate_request import CandidateUpdate,CandidateStatusUpdate
 from src.schemas.response.candidate_response import CandidateResponse,StatusHistoryResponse
 from src.services.candidate_service import candidate_service
 from src.core.dependencies import require_role
@@ -31,13 +31,32 @@ router = APIRouter(prefix="/candidates", tags=["Candidate Management"])
 
 @router.post("", response_model=CandidateResponse, status_code=status.HTTP_201_CREATED)
 async def create_candidate(
-    payload: CandidateCreate,
+    first_name: str = Form(...),
+    last_name: str = Form(...),
+    email: str = Form(...),
+    mobile_number: str = Form(...),
+    current_company: str = Form(...),
+    total_experience: float = Form(...),
+    applied_job: str = Form(...),
+    resume: UploadFile = File(...),
     current_user: User = Depends(require_role(UserRole.HR)),
 ):
-    """HR creates a new candidate profile with default PROFILE_CREATED status."""
+    """
+    Creates a candidate profile with a mandatory PDF resume in one request.
+    Sent as multipart/form-data — profile fields and file together.
+    Resume cannot be omitted — the backend rejects the request without it.
+    """
     logger.info("Create candidate request by: %s", current_user.email)
     return await candidate_service.create_candidate(
-        payload, created_by=current_user.email
+      first_name=first_name,
+    last_name=last_name,
+    email=email,
+    mobile_number=mobile_number,
+    current_company=current_company,
+    total_experience=total_experience,
+    applied_job=applied_job,
+    resume=resume,
+    created_by=current_user.email,
     )
 
 
@@ -72,19 +91,6 @@ async def update_candidate(
     return await candidate_service.update_candidate(
         candidate_id, payload, updated_by=current_user.email
     )
-
-@router.post("/{candidate_id}/resume", response_model=CandidateResponse)
-async def upload_resume(
-    candidate_id: str,
-    file: UploadFile = File(...),
-    current_user: User = Depends(require_role(UserRole.HR)),
-):
-    """HR uploads a PDF resume stored as BinData in MongoDB. Max 10MB."""
-    logger.info("Resume upload for %s by: %s", candidate_id, current_user.email)
-    return await candidate_service.upload_resume(
-        candidate_id, file, uploaded_by=current_user.email
-    )
-
 
 @router.get("/{candidate_id}/resume")
 async def get_resume(
