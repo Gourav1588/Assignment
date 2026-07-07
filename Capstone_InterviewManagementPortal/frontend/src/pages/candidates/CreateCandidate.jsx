@@ -15,6 +15,7 @@ export default function CreateCandidate() {
         total_experience: '',
         applied_job: '',
     })
+    const [resumeFile, setResumeFile] = useState(null)
     const [jobs, setJobs] = useState([])
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -47,6 +48,9 @@ export default function CreateCandidate() {
         if (!form.current_company.trim()) return 'Current company is required.'
         if (form.total_experience === '') return 'Total experience is required.'
         if (!form.applied_job) return 'Please select an applied job.'
+        if (!resumeFile) return 'Resume is required.'
+        if (resumeFile.type !== 'application/pdf') return 'Resume must be a PDF file.'
+        if (resumeFile.size > 5 * 1024 * 1024) return 'Resume must not exceed 5MB.'
         return null
     }
 
@@ -62,10 +66,17 @@ export default function CreateCandidate() {
 
         setLoading(true)
         try {
-            await candidateService.createCandidate({
-                ...form,
-                total_experience: parseFloat(form.total_experience),
-            })
+            const formData = new FormData()
+            formData.append('first_name', form.first_name)
+            formData.append('last_name', form.last_name)
+            formData.append('email', form.email)
+            formData.append('mobile_number', form.mobile_number)
+            formData.append('current_company', form.current_company)
+            formData.append('total_experience', form.total_experience)
+            formData.append('applied_job', form.applied_job)
+            formData.append('resume', resumeFile)
+
+            await candidateService.createCandidate(formData)
             navigate(ROUTES.CANDIDATES)
         } catch (err) {
             const errors = err.response?.data?.errors
@@ -179,6 +190,17 @@ export default function CreateCandidate() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Resume</label>
+                        <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={(e) => setResumeFile(e.target.files[0])}
+                            required
+                        />
+                        <p className="form-hint">PDF only · Max 5MB</p>
                     </div>
 
                     <div className="form-actions">
