@@ -7,12 +7,15 @@ Contains:
 - test_create_candidate_duplicate_email    → duplicate email returns 409
 - test_create_candidate_duplicate_mobile   → duplicate mobile returns 409
 - test_create_candidate_invalid_mobile     → mobile exceeding 10 digits returns 422
+- test_create_candidate_no_resume          → missing resume returns 422
+- test_create_candidate_wrong_resume_format → non-PDF returns 409
 - test_list_candidates                     → HR lists all candidates
 - test_get_candidate_by_id_success         → HR gets single candidate
 - test_get_candidate_not_found             → unknown ID returns 404
 - test_update_candidate_success            → HR updates candidate
 """
 import base64
+import io
 from src.models.users import User
 from src.models.jobs import Job
 from src.models.candidates import Candidate
@@ -65,7 +68,8 @@ async def seed_job() -> Job:
     return job
 
 
-def candidate_payload(job_id: str, **kwargs):
+def candidate_form_data(job_id: str, **kwargs):
+    """Returns form fields for multipart/form-data candidate creation."""
     defaults = {
         "first_name": "Rahul",
         "last_name": "Sharma",
@@ -78,8 +82,13 @@ def candidate_payload(job_id: str, **kwargs):
     defaults.update(kwargs)
     return defaults
 
+def pdf_file(filename: str = "cv.pdf") -> dict:
+    """Returns a valid PDF file for multipart upload."""
+    return {"resume": (filename, io.BytesIO(b"%PDF-1.4 fake content"), "application/pdf")}
+
 
 async def test_create_candidate_success(client):
+    """HR creates a candidate with resume — returns 201."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -88,7 +97,8 @@ async def test_create_candidate_success(client):
 
     response = await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id)),
+        data=candidate_form_data(str(job.id)),
+        files=pdf_file(),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     assert response.status_code == 201
@@ -97,6 +107,7 @@ async def test_create_candidate_success(client):
 
 
 async def test_create_candidate_as_admin_forbidden(client):
+    """Admin cannot create candidates — returns 403."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -105,13 +116,15 @@ async def test_create_candidate_as_admin_forbidden(client):
 
     response = await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id)),
+        data=candidate_form_data(str(job.id)),
+        files=pdf_file(),
         headers=auth_header("admin@nucleusteq.com", "Admin@123"),
     )
     assert response.status_code == 403
 
 
 async def test_create_candidate_duplicate_email(client):
+    """Duplicate email returns 409."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -120,18 +133,21 @@ async def test_create_candidate_duplicate_email(client):
 
     await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id)),
+        data=candidate_form_data(str(job.id)),
+        files=pdf_file(),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     response = await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id)),
+        data=candidate_form_data(str(job.id)),
+        files=pdf_file(),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     assert response.status_code == 409
 
 
 async def test_create_candidate_duplicate_mobile(client):
+    """Duplicate mobile returns 409."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -140,18 +156,21 @@ async def test_create_candidate_duplicate_mobile(client):
 
     await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id)),
+        data=candidate_form_data(str(job.id)),
+        files=pdf_file(),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     response = await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id), email="other@gmail.com"),
+        data=candidate_form_data(str(job.id), email="other@gmail.com"),
+        files=pdf_file(),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     assert response.status_code == 409
 
 
 async def test_create_candidate_invalid_mobile(client):
+    """Invalid mobile number returns 422."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -160,10 +179,44 @@ async def test_create_candidate_invalid_mobile(client):
 
     response = await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id), mobile_number="123"),
+        data=candidate_form_data(str(job.id), mobile_number="123"),
+        files=pdf_file(),
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
+    assert response.status_code == 409
+    
+
+async def test_create_candidate_no_resume(client):
+    """Missing resume returns 422 — resume is mandatory."""
+    await User.all().delete()
+    await Job.all().delete()
+    await Candidate.all().delete()
+    await seed_hr()
+    job = await seed_job()
+
+    response = await client.post(
+        "/api/v1/candidates",
+        data=candidate_form_data(str(job.id)),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     assert response.status_code == 422
+    
+async def test_create_candidate_wrong_resume_format(client):
+    """Non-PDF resume returns 409."""
+    await User.all().delete()
+    await Job.all().delete()
+    await Candidate.all().delete()
+    await seed_hr()
+    job = await seed_job()
+
+    response = await client.post(
+        "/api/v1/candidates",
+        data=candidate_form_data(str(job.id)),
+        files={"resume": ("photo.png", io.BytesIO(b"fake image"), "image/png")},
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
+    assert response.status_code == 409
+
 
 
 async def test_list_candidates(client):
@@ -175,7 +228,8 @@ async def test_list_candidates(client):
 
     await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id)),
+        data=candidate_form_data(str(job.id)),
+        files=pdf_file(),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     response = await client.get(
@@ -187,6 +241,7 @@ async def test_list_candidates(client):
 
 
 async def test_get_candidate_by_id_success(client):
+    """HR retrieves a single candidate by ID."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -195,7 +250,8 @@ async def test_get_candidate_by_id_success(client):
 
     create_response = await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id)),
+        data=candidate_form_data(str(job.id)),
+        files=pdf_file(),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     candidate_id = create_response.json()["id"]
@@ -209,6 +265,7 @@ async def test_get_candidate_by_id_success(client):
 
 
 async def test_get_candidate_not_found(client):
+    """Unknown ID returns 404."""
     await User.all().delete()
     await Candidate.all().delete()
     await seed_hr()
@@ -221,6 +278,7 @@ async def test_get_candidate_not_found(client):
 
 
 async def test_update_candidate_success(client):
+    """HR updates candidate profile fields."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -229,7 +287,8 @@ async def test_update_candidate_success(client):
 
     create_response = await client.post(
         "/api/v1/candidates",
-        json=candidate_payload(str(job.id)),
+        data=candidate_form_data(str(job.id)),
+        files=pdf_file(),
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     candidate_id = create_response.json()["id"]
