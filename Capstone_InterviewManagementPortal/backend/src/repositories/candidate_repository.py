@@ -8,13 +8,16 @@ Contains:
 - find_all          → Retrieves all candidates or filters by status.
 - find_by_id        → Retrieves a candidate by ID.
 - update_candidate  → Updates an existing candidate document.
+- set_resume_data         → Stores PDF bytes on the candidate document
+- update_status           → Updates the candidate status field
+- add_status_history      → Inserts a status transition record
+- get_status_history      → Retrieves all status transitions for a candidate
 """
 
 from typing import Optional
 from src.models.candidates import Candidate
 from src.enums.candidate_enums import CandidateStatus
 from src.models.status_history import StatusHistory
-from src.schemas.response import candidate_response
 
 
 class CandidateRepository:
@@ -44,8 +47,8 @@ class CandidateRepository:
     async def find_all(status: CandidateStatus | None = None) -> list[Candidate]:
         """Retrieve all candidates or filter by status."""
         if status:
-            return await Candidate.find(Candidate.status == status).project(candidate_response.CandidateResponse).to_list()
-        return await Candidate.find_all().project(candidate_response.CandidateResponse).to_list()
+            return await Candidate.find(Candidate.status == status).to_list()
+        return await Candidate.find_all().to_list()
 
     @staticmethod
     async def find_by_id(candidate_id: str) -> Optional[Candidate]:
@@ -80,11 +83,6 @@ class CandidateRepository:
             return False
         return str(candidate.id) != candidate_id
     
-    @staticmethod
-    async def set_resume_data(candidate_id: str, data: bytes) -> Optional[Candidate]:
-        return await CandidateRepository.update_candidate(
-            candidate_id, {"resume_data": data}
-        )
 
     @staticmethod
     async def update_status(
