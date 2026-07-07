@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import candidateService from '../../services/candidateService'
 import './Candidates.css'
+import { ROUTES } from '../../constants/route'
+
+const VALID_NEXT_STATUSES = {
+    PROFILE_CREATED: ['INTERVIEW_SCHEDULED'],
+    INTERVIEW_SCHEDULED: ['INTERVIEW_COMPLETED'],
+    INTERVIEW_COMPLETED: ['SELECTED', 'REJECTED'],
+    SELECTED: [],
+    REJECTED: [],
+}
 
 export default function EditCandidate() {
     const [form, setForm] = useState({
@@ -11,9 +20,13 @@ export default function EditCandidate() {
         current_company: '',
         total_experience: '',
     })
+    const [currentStatus, setCurrentStatus] = useState('')
+    const [newStatus, setNewStatus] = useState('')
+    const [success, setSuccess] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [fetching, setFetching] = useState(true)
+    const [statusLoading, setStatusLoading] = useState(false)
 
     const { id } = useParams()
     const navigate = useNavigate()
@@ -29,6 +42,8 @@ export default function EditCandidate() {
                     current_company: candidate.current_company,
                     total_experience: candidate.total_experience,
                 })
+                setCurrentStatus(candidate.status)
+                setNewStatus(candidate.status)
             } catch {
                 setError('Failed to load candidate.')
             } finally {
@@ -43,9 +58,12 @@ export default function EditCandidate() {
     }
 
     function validate() {
-        if (form.mobile_number && !/^\d{10}$/.test(form.mobile_number)) {
-            return 'Mobile number must be exactly 10 digits.'
-        }
+        if (!form.first_name.trim()) return 'First name is required.'
+        if (!form.last_name.trim()) return 'Last name is required.'
+        if (!form.mobile_number.trim()) return 'Mobile number is required.'
+        if (!/^\d{10}$/.test(form.mobile_number)) return 'Mobile must be exactly 10 digits.'
+        if (!form.current_company.trim()) return 'Current company is required.'
+        if (form.total_experience === '') return 'Total experience is required.'
         return null
     }
 
@@ -65,7 +83,7 @@ export default function EditCandidate() {
                 ...form,
                 total_experience: parseFloat(form.total_experience),
             })
-            navigate(`/candidates/${id}`)
+            setSuccess('Profile updated successfully.')
         } catch (err) {
             const errors = err.response?.data?.errors
             const detail = err.response?.data?.detail
@@ -74,24 +92,58 @@ export default function EditCandidate() {
             } else if (typeof detail === 'string') {
                 setError(detail)
             } else {
-                setError('Failed to update candidate.')
+                setError('Failed to update profile.')
             }
         } finally {
             setLoading(false)
         }
     }
 
-    if (fetching) return <p className="loading-text">Loading candidate...</p>
+    async function handleStatusSubmit(e) {
+        e.preventDefault()
+        setError('')
+        setSuccess('')
 
+        if (newStatus === currentStatus) {
+            setError('Please select a different status.')
+            return
+        }
+
+        setStatusLoading(true)
+        try {
+            await candidateService.updateStatus(id, newStatus)
+            setCurrentStatus(newStatus)
+            setSuccess('Status updated successfully.')
+        } catch (err) {
+            const detail = err.response?.data?.detail
+            setError(typeof detail === 'string' ? detail : 'Failed to update status.')
+        } finally {
+            setStatusLoading(false)
+        }
+    }
+
+    if (fetching) return <p className="loading-text">Loading candidate...</p>
+    const nextOptions = VALID_NEXT_STATUSES[currentStatus] || []
+    const isTerminal = nextOptions.length === 0
     return (
-        <div>
+        <>
             <div className="page-header">
                 <h2>Edit Candidate</h2>
+                <button
+                    className="btn btn-secondary btn-lg"
+                    onClick={() => navigate(ROUTES.CANDIDATES)}
+                >
+                    Back
+                </button>
             </div>
 
-            <div className="form-card">
-                {error && <div className="error-msg">{error}</div>}
+            {error && <div className="error-msg">{error}</div>}
+            {success && <div className="success-msg">{success}</div>}
 
+            <div className="detail-card">
+                <h3 style={{ fontSize: '15px', color: '#1e293b', marginBottom: '16px' }}>
+                    Profile Information
+                </h3>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>First Name</label>
@@ -100,7 +152,7 @@ export default function EditCandidate() {
                             value={form.first_name}
                             onChange={handleChange}
                             placeholder="Enter first name"
-                            required
+
                         />
                     </div>
 
@@ -111,7 +163,7 @@ export default function EditCandidate() {
                             value={form.last_name}
                             onChange={handleChange}
                             placeholder="Enter last name"
-                            required
+
                         />
                     </div>
 
@@ -123,7 +175,7 @@ export default function EditCandidate() {
                             onChange={handleChange}
                             placeholder="10 digit mobile number"
                             maxLength={10}
-                            required
+
                         />
                     </div>
 
@@ -134,7 +186,7 @@ export default function EditCandidate() {
                             value={form.current_company}
                             onChange={handleChange}
                             placeholder="Current employer"
-                            required
+
                         />
                     </div>
 
@@ -149,7 +201,7 @@ export default function EditCandidate() {
                             value={form.total_experience}
                             onChange={handleChange}
                             placeholder="e.g. 3"
-                            required
+
                         />
                     </div>
 
@@ -157,16 +209,46 @@ export default function EditCandidate() {
                         <button type="submit" className="btn btn-primary" disabled={loading}>
                             {loading ? 'Saving...' : 'Save Changes'}
                         </button>
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={() => navigate(`/candidates/${id}`)}
-                        >
-                            Cancel
-                        </button>
                     </div>
                 </form>
             </div>
-        </div>
+
+
+            <div className="detail-card">
+                <h3 style={{ fontSize: '15px', color: '#1e293b', marginBottom: '16px' }}>
+                    Update Status
+                </h3>
+                {isTerminal ? (
+                    <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                        Current status <strong>{currentStatus.replace(/_/g, ' ')}</strong> is final — no further changes allowed.
+                    </p>
+                ) : (
+                    <form onSubmit={handleStatusSubmit}>
+                        <div className="form-group">
+                            <label>Current Status</label>
+                            <p style={{ fontSize: '13px', color: '#374151', marginTop: '4px' }}>
+                                <span className={`badge badge-${currentStatus.toLowerCase().replace(/_/g, '-').replace('profile-created', 'created').replace('interview-scheduled', 'scheduled').replace('interview-completed', 'completed')}`}>
+                                    {currentStatus.replace(/_/g, ' ')}
+                                </span>
+                            </p>
+                        </div>
+                        <div className="form-group">
+                            <label>Change To</label>
+                            <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
+                                <option value={currentStatus}>{currentStatus.replace(/_/g, ' ')} (current)</option>
+                                {nextOptions.map((s) => (
+                                    <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-actions">
+                            <button type="submit" className="btn btn-primary btn-lg" disabled={statusLoading}>
+                                {statusLoading ? 'Updating...' : 'Update Status'}
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
+        </>
     )
 }
