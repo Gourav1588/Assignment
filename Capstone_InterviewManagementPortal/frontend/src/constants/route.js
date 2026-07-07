@@ -13,6 +13,7 @@ export const ROUTES = {
   CANDIDATE_CREATE: '/candidates/create',
   CANDIDATE_DETAIL: '/candidates/:id',
   CANDIDATE_EDIT: '/candidates/:id/edit',
+  CANDIDATE_HISTORY: '/candidates/:id/history',
   INTERVIEWS: '/interviews',
   INTERVIEW_CREATE: '/interviews/create',
   MY_INTERVIEWS: '/my-interviews',
