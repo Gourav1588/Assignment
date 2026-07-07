@@ -15,6 +15,7 @@ import CandidateList from './pages/candidates/CandidateList'
 import CreateCandidate from './pages/candidates/CreateCandidate'
 import CandidateDetail from './pages/candidates/CandidateDetail'
 import EditCandidate from './pages/candidates/EditCandidate'
+import StatusHistory from './pages/candidates/StatusHistory'
 
 const DashboardPage = () => <div style={{ padding: 24 }}>Dashboard — coming soon</div>
 const InterviewsPage = () => <div style={{ padding: 24 }}>Interviews — coming soon</div>
@@ -76,6 +77,7 @@ function AppRoutes() {
       <Route path={ROUTES.JOB_EDIT} element={<ProtectedRoute allowedRoles={['HR']}><EditJob /></ProtectedRoute>} />
       <Route path={ROUTES.CANDIDATES} element={<ProtectedRoute allowedRoles={['HR']}><CandidateList /></ProtectedRoute>} />
       <Route path={ROUTES.CANDIDATE_CREATE} element={<ProtectedRoute allowedRoles={['HR']}><CreateCandidate /></ProtectedRoute>} />
+      <Route path={ROUTES.CANDIDATE_HISTORY} element={<ProtectedRoute allowedRoles={['HR']}><StatusHistory /></ProtectedRoute>} />
       <Route path={ROUTES.CANDIDATE_DETAIL} element={<ProtectedRoute allowedRoles={['HR']}><CandidateDetail /></ProtectedRoute>} />
       <Route path={ROUTES.CANDIDATE_EDIT} element={<ProtectedRoute allowedRoles={['HR']}><EditCandidate /></ProtectedRoute>} />
       <Route path={ROUTES.INTERVIEWS} element={<ProtectedRoute><InterviewsPage /></ProtectedRoute>} />
