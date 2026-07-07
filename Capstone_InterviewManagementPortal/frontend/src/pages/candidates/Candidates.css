@@ -166,3 +166,30 @@ tr:last-child td { border-bottom: none; }
 .badge-completed { background: #f0fdf4; color: #16a34a; }
 .badge-selected  { background: #dcfce7; color: #15803d; }
 .badge-rejected  { background: #fef2f2; color: #dc2626; }
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.history-table th {
+  padding: 10px 12px;
+  background: #f8fafc;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.history-table td {
+  padding: 10px 12px;
+  color: #4b5563;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
