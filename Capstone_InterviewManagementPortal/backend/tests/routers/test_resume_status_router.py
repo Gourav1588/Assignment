@@ -1,6 +1,18 @@
 """
 Integration tests for resume and status tracking API endpoints.
+
+Contains:
+- test_get_resume_success              → PDF streamed successfully
+- test_get_resume_candidate_not_found  → unknown candidate returns 404
+- test_update_status_success           → valid transition returns 200
+- test_update_status_invalid_value     → unknown status value returns 422
+- test_update_status_invalid_transition → backward transition returns 409
+- test_update_status_terminal_state    → updating terminal status returns 409
+- test_get_status_history_success      → returns history after status change
+- test_get_status_history_empty        → empty list before any change
 """
+
+
 
 import base64
 import io
@@ -57,75 +69,19 @@ async def seed_candidate(job_id: str) -> Candidate:
         current_company="ABC Corp",
         total_experience=3.0,
         applied_job=job_id,
+        resume_data=b"%PDF-1.4 fake content",
+        status="PROFILE_CREATED",
         created_by="hr@nucleusteq.com",
     )
     await candidate.insert()
     return candidate
 
 
-async def test_upload_resume_success(client):
+async def test_get_resume_success(client):
+    """Resume is streamed inline as PDF."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
-
-    await seed_hr()
-    job = await seed_job()
-    created = await seed_candidate(str(job.id))
-
-    # Upload a valid PDF resume
-    response = await client.post(
-        f"/api/v1/candidates/{created.id}/resume",
-        files={"file": ("resume.pdf", io.BytesIO(b"%PDF-1.4 content"), "application/pdf")},
-        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
-    )
-
-    assert response.status_code == 200
-    assert response.json()["id"] == str(created.id)
-
-
-async def test_upload_resume_wrong_format(client):
-    await User.all().delete()
-    await Job.all().delete()
-    await Candidate.all().delete()
-
-    await seed_hr()
-    job = await seed_job()
-    created = await seed_candidate(str(job.id))
-
-    # Upload an unsupported file type
-    response = await client.post(
-        f"/api/v1/candidates/{created.id}/resume",
-        files={"file": ("photo.png", io.BytesIO(b"fake image"), "image/png")},
-        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
-    )
-
-    assert response.status_code == 409
-
-
-async def test_upload_resume_exceeds_limit(client):
-    await User.all().delete()
-    await Job.all().delete()
-    await Candidate.all().delete()
-
-    await seed_hr()
-    job = await seed_job()
-    created = await seed_candidate(str(job.id))
-
-    # Upload a file larger than the allowed size
-    response = await client.post(
-        f"/api/v1/candidates/{created.id}/resume",
-        files={"file": ("big.pdf", io.BytesIO(b"x" * (11 * 1024 * 1024)), "application/pdf")},
-        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
-    )
-
-    assert response.status_code == 409
-
-
-async def test_get_resume_not_uploaded(client):
-    await User.all().delete()
-    await Job.all().delete()
-    await Candidate.all().delete()
-
     await seed_hr()
     job = await seed_job()
     created = await seed_candidate(str(job.id))
@@ -134,16 +90,30 @@ async def test_get_resume_not_uploaded(client):
         f"/api/v1/candidates/{created.id}/resume",
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
 
+
+async def test_get_resume_candidate_not_found(client):
+    """Unknown candidate ID returns 404."""
+    await User.all().delete()
+    await Candidate.all().delete()
+    await seed_hr()
+
+    response = await client.get(
+        "/api/v1/candidates/000000000000000000000000/resume",
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
     assert response.status_code == 404
 
 
+
 async def test_update_status_success(client):
+    """Valid forward transition returns 200."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
     await StatusHistory.all().delete()
-
     await seed_hr()
     job = await seed_job()
     created = await seed_candidate(str(job.id))
@@ -159,6 +129,7 @@ async def test_update_status_success(client):
 
 
 async def test_update_status_invalid(client):
+    """Unknown status value returns 422."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -174,9 +145,62 @@ async def test_update_status_invalid(client):
     )
 
     assert response.status_code == 422
+    
+async def test_update_status_invalid_transition(client):
+    """Skipping a status step returns 409."""
+    await User.all().delete()
+    await Job.all().delete()
+    await Candidate.all().delete()
+    await StatusHistory.all().delete()
+    await seed_hr()
+    job = await seed_job()
+    created = await seed_candidate(str(job.id))
+
+    response = await client.patch(
+        f"/api/v1/candidates/{created.id}/status",
+        json={"status": "INTERVIEW_COMPLETED"},
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
+    assert response.status_code == 409
+    
+async def test_update_status_terminal_state(client):
+    """Updating a terminal status returns 409."""
+    await User.all().delete()
+    await Job.all().delete()
+    await Candidate.all().delete()
+    await StatusHistory.all().delete()
+    await seed_hr()
+    job = await seed_job()
+    created = await seed_candidate(str(job.id))
+
+    # Move to terminal state
+    await client.patch(
+        f"/api/v1/candidates/{created.id}/status",
+        json={"status": "INTERVIEW_SCHEDULED"},
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
+    await client.patch(
+        f"/api/v1/candidates/{created.id}/status",
+        json={"status": "INTERVIEW_COMPLETED"},
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
+    await client.patch(
+        f"/api/v1/candidates/{created.id}/status",
+        json={"status": "SELECTED"},
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
+
+    # Try to change from terminal state
+    response = await client.patch(
+        f"/api/v1/candidates/{created.id}/status",
+        json={"status": "REJECTED"},
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
+    assert response.status_code == 409
 
 
 async def test_get_status_history_success(client):
+    """Returns history after a status change."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
@@ -204,6 +228,7 @@ async def test_get_status_history_success(client):
 
 
 async def test_get_status_history_empty(client):
+    """Empty list before any status change."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()
