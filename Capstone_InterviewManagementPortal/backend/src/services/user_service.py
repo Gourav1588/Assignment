@@ -14,6 +14,8 @@ from src.schemas.request.user_request import UserCreate, UserUpdate
 from src.repositories.user_repository import user_repository
 from src.core.security import hash_password
 from src.core.exceptions import ResourceNotFoundException, DuplicateEmailException,ConflictException
+from src.enums.roles import UserRole
+
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +75,11 @@ class UserService:
         Sets is_active to False.
         Does not delete the user — keeps history and audit trail intact.
         """
-        await self.get_user_by_id(user_id)  # raises 404 if not found
-
+        user = await self.get_user_by_id(user_id)  # raises 404 if not found
+        
+        if user.role == UserRole.ADMIN:
+            raise ConflictException("Admin accounts cannot be disabled.")
+        
         disabled = await user_repository.disable_user(user_id)
         logger.info("User disabled: %s", user_id)
         return disabled
