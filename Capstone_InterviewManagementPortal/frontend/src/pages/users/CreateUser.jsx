@@ -8,15 +8,20 @@ import {
     validatePassword,
 } from '../../utils/validation'
 
+function generateTempPassword() {
+    return Math.random().toString(36).slice(2, 8) + '@1A'
+}
+
 export default function CreateUser() {
     const [form, setForm] = useState({
         full_name: '',
         email: '',
-        password: '',
+        password: generateTempPassword(),
         role: 'HR',
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const navigate = useNavigate()
 
     function handleChange(e) {
@@ -100,15 +105,26 @@ export default function CreateUser() {
                     </div>
 
                     <div className="form-group">
-                        <label>Password</label>
-                        <input
-                            name="password"
-                            type="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            placeholder="6-12 chars, letter + number + special char"
-                            required
-                        />
+                        <label>Temporary Password</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <input
+                                name="password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={form.password}
+                                onChange={handleChange}
+                                style={{ flex: 1 }}
+                            />
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? 'Hide' : 'Show'}
+                            </button>
+                        </div>
+                        <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
+                            Share this with the user. They must change it on first login.
+                        </p>
                     </div>
 
                     <div className="form-group">
