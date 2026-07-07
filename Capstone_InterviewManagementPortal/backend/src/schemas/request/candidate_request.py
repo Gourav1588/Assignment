@@ -1,5 +1,7 @@
 """
 Request schemas for Candidate Management endpoints.
+CandidateCreate is used only for field validation in the service layer.
+The router receives fields via Form() and resume via File().
 """
 from pydantic import BaseModel, EmailStr, Field, field_validator
 from src.enums.candidate_enums import CandidateStatus
