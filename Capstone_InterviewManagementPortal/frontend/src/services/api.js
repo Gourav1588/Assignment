@@ -3,14 +3,17 @@ import { loadSession, clearSession, buildBasicAuthHeader } from '../utils/auth'
 
 const api = axios.create({
   baseURL: '/api/v1',
-  headers: { 'Content-Type': 'application/json' },
 })
 
 // Attach Basic Auth header on every request automatically
 api.interceptors.request.use((config) => {
   const session = loadSession()
   if (session?.authHeader) {
-    config.headers['Authorization'] = session.authHeader  
+    config.headers['Authorization'] = session.authHeader
+  }
+
+  if (!(config.data instanceof FormData)) {
+    config.headers['Content-Type'] = 'application/json'
   }
   return config
 })
