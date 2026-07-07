@@ -25,6 +25,7 @@ export default function CandidateList() {
     const [statusFilter, setStatusFilter] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [resumeLoadingId, setResumeLoadingId] = useState(null)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -40,6 +41,17 @@ export default function CandidateList() {
             setError('Failed to load candidates.')
         } finally {
             setLoading(false)
+        }
+    }
+
+    async function handleViewResume(id) {
+        setResumeLoadingId(id)
+        try {
+            await candidateService.viewResume(id)
+        } catch {
+            setError('Failed to open resume.')
+        } finally {
+            setResumeLoadingId(null)
         }
     }
 
@@ -108,13 +120,34 @@ export default function CandidateList() {
                                         </span>
                                     </td>
                                     <td>
-                                        <button
-                                            className="btn btn-secondary"
-                                            style={{ padding: '6px 12px', fontSize: '12px' }}
-                                            onClick={() => navigate(`/candidates/${c.id}`)}
-                                        >
-                                            View
-                                        </button>
+                                        <div className="actions-cell">
+                                            <button
+                                                className="btn btn-secondary"
+                                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                                onClick={() => navigate(`/candidates/${c.id}`)}
+                                            >
+                                                View
+                                            </button>
+                                            <button
+                                                className="btn btn-warning"
+                                                onClick={() => navigate(`/candidates/${c.id}/edit`)}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="btn btn-purple"
+                                                onClick={() => navigate(`/candidates/${c.id}/history`)}
+                                            >
+                                                History
+                                            </button>
+                                            <button
+                                                className="btn btn-green"
+                                                disabled={resumeLoadingId === c.id}
+                                                onClick={() => handleViewResume(c.id)}
+                                            >
+                                                {resumeLoadingId === c.id ? '...' : 'Resume'}
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))
