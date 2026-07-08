@@ -8,6 +8,8 @@ from src.models.jobs import Job
 from src.models.candidates import Candidate
 from src.enums.candidate_enums import CandidateStatus
 from src.core.security import hash_password
+from src.schemas.request.interview_request import InterviewCreate
+from src.models.interview import Interview
 
 
 def auth_header(email: str, password: str) -> dict:
@@ -136,3 +138,32 @@ def feedback_payload(**kwargs) -> dict:
     }
     defaults.update(kwargs)
     return defaults
+
+async def create_interview_via_api(
+    client, candidate_id: str, interviewer_id: str, **kwargs
+) -> dict:
+    """Creates an interview via HTTP and returns the full response body."""
+    response = await client.post(
+        "/api/v1/interviews",
+        json=interview_payload(candidate_id, interviewer_id, **kwargs),
+        headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
+    )
+    return response.json()
+
+async def create_interview_via_service(
+    service, candidate_id: str, interviewer_id: str, **kwargs
+) -> Interview:
+    """Creates an interview via service and returns the Interview document."""
+    defaults = dict(
+        candidate_id=candidate_id,
+        job_title="Backend Developer",
+        interview_date="2024-08-15",
+        interview_time="10:00",
+        interviewer_id=interviewer_id,
+        focus_areas="Python, FastAPI",
+    )
+    defaults.update(kwargs)
+    return await service.create_interview(
+        InterviewCreate(**defaults),
+        scheduled_by="hr@nucleusteq.com",
+    )

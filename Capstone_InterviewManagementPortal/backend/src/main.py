@@ -14,6 +14,7 @@ from src.core.error_handlers import register_error_handlers
 from src.routers.users import router as users_router 
 from src.routers.jobs import router as jobs_router
 from src.routers.candidates import router as candidates_router
+from src.routers.interviews import router as interview_router
 
 
 logger = logging.getLogger(__name__)
@@ -62,3 +63,4 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")  
 app.include_router(jobs_router, prefix="/api/v1")
 app.include_router(candidates_router, prefix="/api/v1")
+app.include_router(interview_router, prefix="/api/v1")
