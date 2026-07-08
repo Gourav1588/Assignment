@@ -78,9 +78,16 @@ class UserService:
         model_dump(exclude_none=True) ensures fields not sent
         are not overwritten with None.
         """
-        await self.get_user_by_id(user_id)  # raises 404 if not found
-
+        user = await self.get_user_by_id(user_id)
+        
+        if user.role == UserRole.ADMIN and payload.role is not None:
+            raise ConflictException("Admin role cannot be modified.")
+        
         update_data = payload.model_dump(exclude_none=True)
+        
+        if not update_data:
+            raise ConflictException("No fields provided for update.")
+        
         updated = await user_repository.update_user(user_id, update_data)
         logger.info("User updated: %s", user_id)
         return updated
@@ -94,6 +101,9 @@ class UserService:
         
         if user.role == UserRole.ADMIN:
             raise ConflictException("Admin accounts cannot be disabled.")
+        
+        if not user.is_active:
+            raise ConflictException("User is already disabled.")
         
         disabled = await user_repository.disable_user(user_id)
         logger.info("User disabled: %s", user_id)
