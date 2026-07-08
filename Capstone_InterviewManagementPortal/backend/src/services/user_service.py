@@ -9,12 +9,15 @@ Contains:
 - disable_user   → sets is_active to False
 """
 import logging
+import math
 from src.models.users import User
 from src.schemas.request.user_request import UserCreate, UserUpdate
 from src.repositories.user_repository import user_repository
 from src.core.security import hash_password
 from src.core.exceptions import ResourceNotFoundException, DuplicateEmailException,ConflictException
 from src.enums.roles import UserRole
+from src.schemas.response.user_response import UserResponse
+from src.schemas.response.pagination import PaginatedResponse
 
 
 logger = logging.getLogger(__name__)
@@ -46,9 +49,21 @@ class UserService:
         logger.info("User created: %s [%s]", created.email, created.role)
         return created
 
-    async def list_users(self) -> list[User]:
-        """Returns all users. Admin sees everyone."""
-        return await user_repository.find_all()
+    async def list_users(
+        self, page: int = 1, page_size: int = 10
+    ) -> PaginatedResponse[UserResponse]:
+        """
+        Returns a paginated list of users.
+        """
+        users, total = await user_repository.find_paginated(page, page_size)
+        total_pages = math.ceil(total / page_size) if total > 0 else 1
+        return PaginatedResponse(
+            items=users,        
+            total=total,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages,
+        )
 
     async def get_user_by_id(self, user_id: str) -> User:
         """Returns a single user by ID or raises 404."""

@@ -8,10 +8,13 @@ Contains:
 - update_job    → updates provided fields only
 """
 import logging
+import math
 from src.models.jobs import Job
 from src.repositories.job_repository import job_repository
 from src.schemas.request.job_request import JobCreate, JobUpdate
 from src.core.exceptions import ResourceNotFoundException
+from src.schemas.response.pagination import PaginatedResponse
+from src.schemas.response.job_response import JobResponse
 
 
 logger = logging.getLogger(__name__)
@@ -34,8 +37,22 @@ class JobService:
         logger.info("Job created: %s by %s", created.title, created_by)
         return created
 
-    async def list_jobs(self) -> list[Job]:
-        return await job_repository.find_all()
+    
+    async def list_jobs(
+        self, page: int = 1, page_size: int = 10
+    ) -> PaginatedResponse[JobResponse]:
+        """
+        Returns a paginated list of job descriptions.
+        """
+        jobs, total = await job_repository.find_paginated(page, page_size)
+        total_pages = math.ceil(total / page_size) if total > 0 else 1
+        return PaginatedResponse(
+            items=jobs,         
+            total=total,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages,
+        )
 
     async def get_job_by_id(self, job_id: str) -> Job:
         job = await job_repository.find_by_id(job_id)

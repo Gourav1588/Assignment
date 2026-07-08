@@ -33,12 +33,16 @@ class UserRepository:
             return None
         
     @staticmethod
-    async def find_all() -> list[User]:
+    async def find_paginated(page: int, page_size: int) -> tuple[list[User], int]:
         """
-        Returns all user documents from the collection.
-        Sorted by full_name ascending for consistent listing order.
+        Returns a page of users and the total count.
+        skip calculates how many records to jump over based on current page.
         """
-        return await User.find_all().to_list()
+        skip = (page - 1) * page_size
+        total = await User.count()
+        users = await User.find_all().skip(skip).limit(page_size).to_list()
+        return users, total
+
 
     @staticmethod
     async def save_user(user_document: User) -> User:

@@ -10,9 +10,10 @@ Contains:
 - PATCH  /users/{user_id}/disable → disable user
 """
 import logging
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status,Query
 from src.schemas.request.user_request import UserCreate, UserUpdate
 from src.schemas.response.user_response import UserResponse
+from src.schemas.response.pagination import PaginatedResponse
 from src.services.user_service import user_service
 from src.core.dependencies import require_role
 from src.enums.roles import UserRole
@@ -33,13 +34,15 @@ async def create_user(
     return await user_service.create_user(payload)
 
 
-@router.get("", response_model=list[UserResponse])
+@router.get("", response_model=PaginatedResponse[UserResponse])
 async def list_users(
+    page: int = Query(default=1, ge=1, description="Page number"),
+    page_size: int = Query(default=10, ge=1, le=100, description="Records per page"),
     _=Depends(require_role(UserRole.ADMIN)),
 ):
-    """Admin retrieves all user accounts."""
+    """Admin retrieves paginated list of user ."""
     logger.info("List users request received.")
-    return await user_service.list_users()
+    return await user_service.list_users(page=page,page_size=page_size)
 
 
 @router.get("/{user_id}", response_model=UserResponse)

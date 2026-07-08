@@ -44,11 +44,21 @@ class CandidateRepository:
         return document
 
     @staticmethod
-    async def find_all(status: CandidateStatus | None = None) -> list[Candidate]:
-        """Retrieve all candidates or filter by status."""
-        if status:
-            return await Candidate.find(Candidate.status == status).to_list()
-        return await Candidate.find_all().to_list()
+    async def find_paginated(
+        page: int,
+        page_size: int,
+        status: CandidateStatus | None = None,
+    ) -> tuple[list[Candidate], int]:
+        """
+        Returns a page of candidates and the total count.
+        Supports optional status filter.
+        skip calculates how many records to jump over based on current page.
+        """
+        skip = (page - 1) * page_size
+        query = Candidate.find(Candidate.status == status) if status else Candidate.find_all()
+        total = await query.count()
+        candidates = await query.skip(skip).limit(page_size).to_list()
+        return candidates, total
 
     @staticmethod
     async def find_by_id(candidate_id: str) -> Optional[Candidate]:

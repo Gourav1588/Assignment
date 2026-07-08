@@ -15,6 +15,7 @@ Contains:
 """
 
 import logging
+import math
 from fastapi import UploadFile
 from src.enums.candidate_enums import CandidateStatus
 from src.models.candidates import Candidate
@@ -23,6 +24,8 @@ from src.repositories.candidate_repository import candidate_repository
 from src.repositories.job_repository import job_repository
 from src.schemas.request.candidate_request import  CandidateUpdate,CandidateStatusUpdate
 from src.core.exceptions import ResourceNotFoundException, ConflictException
+from src.schemas.response.candidate_response import CandidateResponse
+from src.schemas.response.pagination import PaginatedResponse
 logger = logging.getLogger(__name__)
 
 MAX_RESUME_BYTES = 5 * 1024 * 1024
@@ -95,12 +98,28 @@ class CandidateService:
         created = await candidate_repository.create_candidate(candidate)
         logger.info("Candidate created: %s by %s", created.email, created_by)
         return created
-
+    
+    
     async def list_candidates(
-        self, status: CandidateStatus | None = None
-    ) -> list[Candidate]:
-        """Retrieve all candidates or filter by status."""
-        return await candidate_repository.find_all(status)
+        self,
+        page: int = 1,
+        page_size: int = 10,
+        status: CandidateStatus | None = None,
+    ) -> PaginatedResponse[CandidateResponse]:
+        """
+        Returns a paginated list of candidates with optional status filter.
+        """
+        candidates, total = await candidate_repository.find_paginated(
+            page, page_size, status
+        )
+        total_pages = math.ceil(total / page_size) if total > 0 else 1
+        return PaginatedResponse(
+            items=candidates,   
+            total=total,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages,
+        )
     
 
     async def get_candidate(self, candidate_id: str) -> Candidate:

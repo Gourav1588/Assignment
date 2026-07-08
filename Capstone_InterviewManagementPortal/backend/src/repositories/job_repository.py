@@ -12,9 +12,17 @@ class JobRepository:
         await job_document.insert()
         return job_document
 
+    
     @staticmethod
-    async def find_all() -> list[Job]:
-        return await Job.find_all().to_list()
+    async def find_paginated(page: int, page_size: int) -> tuple[list[Job], int]:
+        """
+        Returns a page of jobs and the total count.
+        skip calculates how many records to jump over based on current page.
+        """
+        skip = (page - 1) * page_size
+        total = await Job.count()
+        jobs = await Job.find_all().skip(skip).limit(page_size).to_list()
+        return jobs, total
 
     @staticmethod
     async def find_by_id(job_id: str) -> Optional[Job]:

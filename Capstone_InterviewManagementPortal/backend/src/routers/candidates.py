@@ -20,6 +20,7 @@ from src.models.users import User
 from src.enums.candidate_enums import CandidateStatus
 from src.schemas.request.candidate_request import CandidateUpdate,CandidateStatusUpdate
 from src.schemas.response.candidate_response import CandidateResponse,StatusHistoryResponse
+from src.schemas.response.pagination import PaginatedResponse
 from src.services.candidate_service import candidate_service
 from src.core.dependencies import require_role
 from src.enums.roles import UserRole
@@ -60,14 +61,16 @@ async def create_candidate(
     )
 
 
-@router.get("", response_model=list[CandidateResponse])
+@router.get("", response_model=PaginatedResponse[CandidateResponse])
 async def list_candidates(
+    page: int = Query(default=1, ge=1, description="Page number starting from 1"),
+    page_size: int = Query(default=10, ge=1, le=100, description="Number of records per page"),
     candidate_status: CandidateStatus | None = Query(default=None),
     current_user: User = Depends(require_role(UserRole.HR)),
 ):
     """HR retrieves all candidates with an optional status filter."""
     logger.info("List candidates request by: %s", current_user.email)
-    return await candidate_service.list_candidates(candidate_status)
+    return await candidate_service.list_candidates(page=page,page_size=page_size,status=candidate_status)
 
 
 @router.get("/{candidate_id}", response_model=CandidateResponse)
