@@ -20,6 +20,20 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=6, max_length=12)
     role: UserRole
     full_name: str = Field(..., min_length=2)
+    
+    
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, v: str) -> str:
+        v = v.strip()
+
+        if len(v) < 2:
+            raise ValueError("Full name must be at least 2 characters long.")
+
+        if not re.fullmatch(r"[A-Za-z ]+", v):
+            raise ValueError("Full name can contain only letters and spaces.")
+
+        return v
 
     @field_validator("email")
     @classmethod
@@ -38,6 +52,19 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=2)
     role: UserRole | None = None
+    
+    @field_validator("full_name")
+    @classmethod
+    def validate_full_name(cls, v: str) -> str:
+        v = v.strip()
+
+        if len(v) < 2:
+            raise ValueError("Full name must be at least 2 characters long.")
+
+        if not re.fullmatch(r"[A-Za-z ]+", v):
+            raise ValueError("Full name can contain only letters and spaces.")
+
+        return v
 
 
 
