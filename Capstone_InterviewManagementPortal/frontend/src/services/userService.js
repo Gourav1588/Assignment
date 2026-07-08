@@ -2,8 +2,10 @@ import api from './api'
 
 const userService = {
 
-    async getAllUsers() {
-        const response = await api.get('/users')
+    async getAllUsers(page = 1, page_size = 10) {
+        const response = await api.get('/users', {
+            params: { page, page_size }
+        })
         return response.data
     },
 

@@ -193,3 +193,11 @@ tr:last-child td { border-bottom: none; }
   gap: 12px;
   flex-wrap: wrap;
 }
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+}

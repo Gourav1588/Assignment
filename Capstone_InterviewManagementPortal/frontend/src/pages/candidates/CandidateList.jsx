@@ -26,17 +26,30 @@ export default function CandidateList() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [resumeLoadingId, setResumeLoadingId] = useState(null)
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+
+    const PAGE_SIZE = 10
+
     const navigate = useNavigate()
 
     useEffect(() => {
         fetchCandidates()
-    }, [statusFilter])
+    }, [page, statusFilter])
+
+    function handleStatusFilterChange(e) {
+        setStatusFilter(e.target.value)
+        setPage(1)
+    }
+
 
     async function fetchCandidates() {
         setLoading(true)
         try {
-            const data = await candidateService.getAllCandidates(statusFilter || null)
-            setCandidates(data)
+            const data = await candidateService.getAllCandidates(page, PAGE_SIZE, statusFilter || null)
+            setCandidates(data.items)
+            setTotalPages(data.total_pages)
+
         } catch {
             setError('Failed to load candidates.')
         } finally {
@@ -75,7 +88,7 @@ export default function CandidateList() {
                 </label>
                 <select
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
+                    onChange={handleStatusFilterChange}
                 >
                     <option value="">All</option>
                     {STATUS_OPTIONS.map((s) => (
@@ -155,6 +168,30 @@ export default function CandidateList() {
                     </tbody>
                 </table>
             </div>
+            {totalPages > 1 && (
+                <div className="pagination">
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => setPage((p) => p - 1)}
+                        disabled={page === 1}
+                    >
+                        ← Prev
+                    </button>
+
+                    <span style={{ fontSize: '13px', color: '#374151', padding: '0 12px' }}>
+                        Page {page} of {totalPages}
+                    </span>
+
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => setPage((p) => p + 1)}
+                        disabled={page === totalPages}
+                    >
+                        Next →
+                    </button>
+
+                </div>
+            )}
         </div>
     )
 }

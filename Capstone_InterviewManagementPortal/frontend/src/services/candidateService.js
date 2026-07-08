@@ -2,8 +2,9 @@ import api from './api'
 
 const candidateService = {
 
-    async getAllCandidates(status = null) {
-        const params = status ? { candidate_status: status } : {}
+    async getAllCandidates(page = 1, page_size = 10, status = null) {
+        const params = { page, page_size }
+        if (status) params.candidate_status = status
         const response = await api.get('/candidates', { params })
         return response.data
     },

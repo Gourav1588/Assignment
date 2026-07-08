@@ -8,16 +8,23 @@ export default function JobList() {
     const [jobs, setJobs] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+
+    const PAGE_SIZE = 10
+
     const navigate = useNavigate()
 
     useEffect(() => {
         fetchJobs()
-    }, [])
+    }, [page])
 
     async function fetchJobs() {
+        setLoading(true)
         try {
-            const data = await jobService.getAllJobs()
-            setJobs(data)
+            const data = await jobService.getAllJobs(page, PAGE_SIZE)
+            setJobs(data.items)
+            setTotalPages(data.total_pages)
         } catch {
             setError('Failed to load jobs.')
         } finally {
@@ -91,6 +98,32 @@ export default function JobList() {
                     </tbody>
                 </table>
             </div>
+
+            {totalPages > 1 && (
+                <div className="pagination">
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => setPage((p) => p - 1)}
+                        disabled={page === 1}
+                    >
+                        ← Prev
+                    </button>
+
+                    <span style={{ fontSize: '13px', color: '#374151', padding: '0 12px' }}>
+                        Page {page} of {totalPages}
+                    </span>
+
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => setPage((p) => p + 1)}
+                        disabled={page === totalPages}
+                    >
+                        Next →
+                    </button>
+
+                </div>
+            )}
+
         </div>
     )
 }

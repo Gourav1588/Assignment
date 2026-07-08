@@ -186,3 +186,11 @@ tr:last-child td {
   background: #eff6ff;
   color: #2563eb;
 }
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+}

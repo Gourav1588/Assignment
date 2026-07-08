@@ -175,3 +175,11 @@ tr:last-child td {
   font-size: 14px;
   padding: 20px 0;
 }
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+}

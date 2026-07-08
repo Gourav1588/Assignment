@@ -24,7 +24,7 @@ export default function CreateCandidate() {
     useEffect(() => {
         async function loadJobs() {
             try {
-                const data = await jobService.getAllJobs()
+                const data = await jobService.getAllJobsForDropdown()
                 setJobs(data)
             } catch {
                 setError('Failed to load jobs.')

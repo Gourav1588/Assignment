@@ -8,16 +8,23 @@ export default function UserList() {
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+
+    const PAGE_SIZE = 10
+
     const navigate = useNavigate()
 
     useEffect(() => {
         fetchUsers()
-    }, [])
+    }, [page])
 
     async function fetchUsers() {
+        setLoading(true)
         try {
-            const data = await userService.getAllUsers()
-            setUsers(data)
+            const data = await userService.getAllUsers(page, PAGE_SIZE)
+            setUsers(data.items)
+            setTotalPages(data.total_pages)
         } catch {
             setError('Failed to load users.')
         } finally {
@@ -119,6 +126,31 @@ export default function UserList() {
                     </tbody>
                 </table>
             </div>
+            {totalPages > 1 && (
+                <div className="pagination">
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => setPage((p) => p - 1)}
+                        disabled={page === 1}
+                    >
+                        ← Prev
+                    </button>
+
+                    <span style={{ fontSize: '13px', color: '#374151', padding: '0 12px' }}>
+                        Page {page} of {totalPages}
+                    </span>
+
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => setPage((p) => p + 1)}
+                        disabled={page === totalPages}
+                    >
+                        Next →
+                    </button>
+
+                </div>
+            )}
+
         </div>
     )
 }
