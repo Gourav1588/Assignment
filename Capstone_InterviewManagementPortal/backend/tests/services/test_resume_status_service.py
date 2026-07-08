@@ -19,43 +19,9 @@ from src.models.status_history import StatusHistory
 from src.schemas.request.candidate_request import CandidateStatusUpdate
 from src.enums.candidate_enums import CandidateStatus
 from src.core.exceptions import ResourceNotFoundException, ConflictException
+from tests.helpers import seed_job, seed_candidate
 
 service = CandidateService()
-
-
-async def seed_job() -> Job:
-    """Create a sample job for candidate mapping."""
-    job = Job(
-        title="Backend Developer",
-        details="Looking for a backend developer.",
-        role="Software Engineer",
-        required_skills="Python",
-        experience_required=2,
-        employment_type="Full Time",
-        location="Bangalore",
-        created_by="hr@nucleusteq.com",
-    )
-    await job.insert()
-    return job
-
-
-async def seed_candidate(job_id: str,resume_data: bytes | None = b"%PDF-1.4 fake") -> Candidate:
-    """Create a sample candidate linked to a job."""
-    candidate = Candidate(
-        first_name="Rahul",
-        last_name="Sharma",
-        email="rahul@gmail.com",
-        mobile_number="9876543210",
-        current_company="ABC Corp",
-        total_experience=3.0,
-        applied_job=job_id,
-        resume_data=resume_data,
-        status=CandidateStatus.PROFILE_CREATED,
-        created_by="hr@nucleusteq.com",
-    )
-    await candidate.insert()
-    return candidate
-
 
 async def test_get_resume_bytes_success():
     """Returns PDF bytes when resume exists."""

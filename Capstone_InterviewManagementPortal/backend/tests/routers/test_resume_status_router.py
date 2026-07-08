@@ -12,73 +12,14 @@ Contains:
 - test_get_status_history_empty        → empty list before any change
 """
 
-
-
-import base64
-import io
 from src.models.users import User
 from src.models.jobs import Job
 from src.models.candidates import Candidate
 from src.models.status_history import StatusHistory
-from src.core.security import hash_password
-
-
-def auth_header(email: str, password: str) -> dict:
-    """Generate Basic Authentication header."""
-    token = base64.b64encode(f"{email}:{password}".encode()).decode()
-    return {"Authorization": f"Basic {token}"}
-
-
-async def seed_hr() -> User:
-    """Create a sample HR user for authenticated requests."""
-    user = User(
-        email="hr@nucleusteq.com",
-        password=hash_password("Hr@12345"),
-        role="HR",
-        full_name="HR User",
-        is_password_reset_pending=False,
-        is_active=True,
-    )
-    await user.insert()
-    return user
-
-
-async def seed_job() -> Job:
-    """Create a sample job."""
-    job = Job(
-        title="Backend Developer",
-        details="Looking for a backend developer.",
-        role="Software Engineer",
-        required_skills="Python",
-        experience_required=2,
-        employment_type="Full Time",
-        location="Bangalore",
-        created_by="hr@nucleusteq.com",
-    )
-    await job.insert()
-    return job
-
-
-async def seed_candidate(job_id: str) -> Candidate:
-    """Create a sample candidate linked to a job."""
-    candidate = Candidate(
-        first_name="Rahul",
-        last_name="Sharma",
-        email="rahul@gmail.com",
-        mobile_number="9876543210",
-        current_company="ABC Corp",
-        total_experience=3.0,
-        applied_job=job_id,
-        resume_data=b"%PDF-1.4 fake content",
-        status="PROFILE_CREATED",
-        created_by="hr@nucleusteq.com",
-    )
-    await candidate.insert()
-    return candidate
+from tests.helpers import auth_header, seed_hr, seed_job, seed_candidate
 
 
 async def test_get_resume_success(client):
-    """Resume is streamed inline as PDF."""
     await User.all().delete()
     await Job.all().delete()
     await Candidate.all().delete()

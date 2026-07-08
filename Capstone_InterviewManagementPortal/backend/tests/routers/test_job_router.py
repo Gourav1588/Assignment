@@ -10,41 +10,10 @@ Contains:
 - test_update_job_success            → HR updates a job
 - test_update_job_not_found          → unknown ID returns 404
 """
-import base64
+
 from src.models.users import User
 from src.models.jobs import Job
-from src.core.security import hash_password
-
-
-def auth_header(email: str, password: str) -> dict:
-    token = base64.b64encode(f"{email}:{password}".encode()).decode()
-    return {"Authorization": f"Basic {token}"}
-
-
-async def seed_hr() -> User:
-    user = User(
-        email="hr@nucleusteq.com",
-        password=hash_password("Hr@12345"),
-        role="HR",
-        full_name="HR User",
-        is_password_reset_pending=False,
-        is_active=True,
-    )
-    await user.insert()
-    return user
-
-
-async def seed_admin() -> User:
-    user = User(
-        email="admin@nucleusteq.com",
-        password=hash_password("Admin@123"),
-        role="Admin",
-        full_name="Admin User",
-        is_password_reset_pending=False,
-        is_active=True,
-    )
-    await user.insert()
-    return user
+from tests.helpers import auth_header, seed_admin, seed_hr
 
 
 def job_payload(**kwargs):
@@ -106,11 +75,11 @@ async def test_list_jobs_as_hr(client):
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     response = await client.get(
-        "/api/v1/jobs",
+        "/api/v1/jobs?page=1&page_size=10",
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert len(response.json()["items"]) == 1
 
 
 async def test_get_job_by_id_success(client):

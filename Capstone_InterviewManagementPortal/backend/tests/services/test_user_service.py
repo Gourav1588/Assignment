@@ -48,8 +48,6 @@ async def seed_user(email="hr@nucleusteq.com", role="HR") -> User:
     return user
 
 
-# ── create_user ────────────────────────────────────────────────────────
-
 async def test_create_user_success():
     """Created user has correct fields and password is not stored as plain text."""
     await User.all().delete()
@@ -59,7 +57,7 @@ async def test_create_user_success():
     assert user.role == UserRole.HR
     assert user.is_active is True
     assert user.is_password_reset_pending is True
-    assert user.password != "Test@123"   # password must not be plain text
+    assert user.password != "Test@123"  
 
 
 async def test_create_user_duplicate_email():
@@ -71,19 +69,15 @@ async def test_create_user_duplicate_email():
         await service.create_user(make_payload())
 
 
-# ── list_users ─────────────────────────────────────────────────────────
-
 async def test_list_users():
-    """Returns all users in the system."""
     await User.all().delete()
     await seed_user("hr@nucleusteq.com")
     await seed_user("interviewer@nucleusteq.com", role="Interviewer")
 
-    users = await service.list_users()
-    assert len(users) == 2
+    result = await service.list_users(page=1,page_size=10)
+    assert result.total == 2
+    assert len(result.items)==2
 
-
-# ── get_user_by_id ─────────────────────────────────────────────────────
 
 async def test_get_user_by_id_success():
     """Returns the correct user for a valid ID."""

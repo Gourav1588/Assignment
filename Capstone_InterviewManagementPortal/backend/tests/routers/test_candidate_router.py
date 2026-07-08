@@ -14,77 +14,15 @@ Contains:
 - test_get_candidate_not_found             → unknown ID returns 404
 - test_update_candidate_success            → HR updates candidate
 """
-import base64
+
 import io
 from src.models.users import User
 from src.models.jobs import Job
 from src.models.candidates import Candidate
-from src.core.security import hash_password
-
-
-def auth_header(email: str, password: str) -> dict:
-    token = base64.b64encode(f"{email}:{password}".encode()).decode()
-    return {"Authorization": f"Basic {token}"}
-
-
-async def seed_hr() -> User:
-    user = User(
-        email="hr@nucleusteq.com",
-        password=hash_password("Hr@12345"),
-        role="HR",
-        full_name="HR User",
-        is_password_reset_pending=False,
-        is_active=True,
-    )
-    await user.insert()
-    return user
-
-
-async def seed_admin() -> User:
-    user = User(
-        email="admin@nucleusteq.com",
-        password=hash_password("Admin@123"),
-        role="Admin",
-        full_name="Admin User",
-        is_password_reset_pending=False,
-        is_active=True,
-    )
-    await user.insert()
-    return user
-
-
-async def seed_job() -> Job:
-    job = Job(
-        title="Backend Developer",
-        details="Looking for a backend developer.",
-        role="Software Engineer",
-        required_skills="Python",
-        experience_required=2,
-        employment_type="Full Time",
-        location="Bangalore",
-        created_by="hr@nucleusteq.com",
-    )
-    await job.insert()
-    return job
-
-
-def candidate_form_data(job_id: str, **kwargs):
-    """Returns form fields for multipart/form-data candidate creation."""
-    defaults = {
-        "first_name": "Rahul",
-        "last_name": "Sharma",
-        "email": "rahul@gmail.com",
-        "mobile_number": "9876543210",
-        "current_company": "ABC Corp",
-        "total_experience": 3.0,
-        "applied_job": job_id,
-    }
-    defaults.update(kwargs)
-    return defaults
-
-def pdf_file(filename: str = "cv.pdf") -> dict:
-    """Returns a valid PDF file for multipart upload."""
-    return {"resume": (filename, io.BytesIO(b"%PDF-1.4 fake content"), "application/pdf")}
+from tests.helpers import (      
+    auth_header, seed_admin, seed_hr,
+    seed_job, candidate_form_data, pdf_file,
+)
 
 
 async def test_create_candidate_success(client):
@@ -233,11 +171,11 @@ async def test_list_candidates(client):
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     response = await client.get(
-        "/api/v1/candidates",
+        "/api/v1/candidates?page=1&page_size=10",
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     assert response.status_code == 200
-    assert len(response.json()) == 1
+    assert len(response.json()["items"]) == 1
 
 
 async def test_get_candidate_by_id_success(client):

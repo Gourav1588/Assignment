@@ -12,40 +12,8 @@ Contains:
 - test_disable_user_success          → Admin disables a user
 """
 
-import base64
 from src.models.users import User
-from src.core.security import hash_password
-
-
-def auth_header(email: str, password: str) -> dict:
-    token = base64.b64encode(f"{email}:{password}".encode()).decode()
-    return {"Authorization": f"Basic {token}"}
-
-
-async def seed_admin() -> User:
-    user = User(
-        email="admin@nucleusteq.com",
-        password=hash_password("Admin@123"),
-        role="Admin",
-        full_name="Admin User",
-        is_password_reset_pending=False,
-        is_active=True,
-    )
-    await user.insert()
-    return user
-
-
-async def seed_hr() -> User:
-    user = User(
-        email="hr@nucleusteq.com",
-        password=hash_password("Hr@12345"),
-        role="HR",
-        full_name="HR User",
-        is_password_reset_pending=False,
-        is_active=True,
-    )
-    await user.insert()
-    return user
+from tests.helpers import auth_header, seed_admin, seed_hr
 
 
 def new_user_payload(email="newhr@nucleusteq.com"):
@@ -56,8 +24,6 @@ def new_user_payload(email="newhr@nucleusteq.com"):
         "full_name": "New HR User",
     }
 
-
-# ── create user ────────────────────────────────────────────────────────
 
 async def test_create_user_as_admin(client):
     """Admin can create a new user — returns 201 with user data."""
@@ -111,8 +77,6 @@ async def test_create_user_duplicate_email(client):
     assert response.json()["error_code"] == "DUPLICATE_EMAIL"
 
 
-# ── list users ─────────────────────────────────────────────────────────
-
 async def test_list_users_as_admin(client):
     """Admin gets all users in the system."""
     await User.all().delete()
@@ -120,14 +84,12 @@ async def test_list_users_as_admin(client):
     await seed_hr()
 
     response = await client.get(
-        "/api/v1/users",
+        "/api/v1/users?page=1&page_size=10",
         headers=auth_header("admin@nucleusteq.com", "Admin@123"),
     )
     assert response.status_code == 200
-    assert len(response.json()) == 2
+    assert len(response.json()["items"]) == 2
 
-
-# ── get user by id ─────────────────────────────────────────────────────
 
 async def test_get_user_by_id_success(client):
     """Admin retrieves a specific user by ID."""

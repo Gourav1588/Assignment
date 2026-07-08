@@ -17,48 +17,12 @@ from unittest.mock import AsyncMock, MagicMock
 from src.services.candidate_service import CandidateService
 from src.models.candidates import Candidate
 from src.models.jobs import Job
-from src.schemas.request.candidate_request import CandidateCreate, CandidateUpdate
+from src.schemas.request.candidate_request import  CandidateUpdate
 from src.enums.candidate_enums import CandidateStatus
 from src.core.exceptions import ResourceNotFoundException, ConflictException
+from tests.helpers import seed_job, seed_candidate
 
 service = CandidateService()
-
-
-async def seed_job() -> Job:
-    job = Job(
-        title="Backend Developer",
-        details="Looking for a backend developer.",
-        role="Software Engineer",
-        required_skills="Python",
-        experience_required=2,
-        employment_type="Full Time",
-        location="Bangalore",
-        created_by="hr@nucleusteq.com",
-    )
-    await job.insert()
-    return job
-
-
-async def seed_candidate(
-    email="candidate@gmail.com",
-    mobile="9876543210",
-    job_id=None,
-) -> Candidate:
-    candidate = Candidate(
-        first_name="Rahul",
-        last_name="Sharma",
-        email=email,
-        mobile_number=mobile,
-        current_company="ABC Corp",
-        total_experience=3.0,
-        applied_job=job_id or "000000000000000000000000",
-        resume_data=b"%PDF-1.4 fake content",
-        status=CandidateStatus.PROFILE_CREATED,
-        created_by="hr@nucleusteq.com",
-    )
-    await candidate.insert()
-    return candidate
-
 
 def make_pdf_file(content_type: str = "application/pdf") -> MagicMock:
     """Returns a mock UploadFile with PDF content."""
@@ -149,9 +113,9 @@ async def test_list_candidates():
         job_id=str(job.id)
     )
 
-    candidates = await service.list_candidates()
-    assert len(candidates) == 2
-
+    result = await service.list_candidates(page=1,page_size=10)
+    assert result.total == 2
+    assert len(result.items)==2
 
 async def test_list_candidates_by_status():
     await Candidate.all().delete()
@@ -159,11 +123,17 @@ async def test_list_candidates_by_status():
     job = await seed_job()
     await seed_candidate(job_id=str(job.id))
 
-    results = await service.list_candidates(CandidateStatus.PROFILE_CREATED)
-    assert len(results) == 1
+    results = await service.list_candidates(
+        page=1,page_size=10,
+        status=CandidateStatus.PROFILE_CREATED
+    )
+    assert len(results.items) == 1
 
-    empty = await service.list_candidates(CandidateStatus.SELECTED)
-    assert len(empty) == 0
+    empty = await service.list_candidates(
+        page=1, page_size=10,
+        status=CandidateStatus.SELECTED
+    )
+    assert len(empty.items) == 0
 
 
 async def test_get_candidate_not_found():
@@ -186,4 +156,4 @@ async def test_update_candidate_success():
     )
     assert updated.current_company == "XYZ Corp"
     assert updated.total_experience == 5.0
-    assert updated.email == "candidate@gmail.com"
+    assert updated.email == "rahul@gmail.com"

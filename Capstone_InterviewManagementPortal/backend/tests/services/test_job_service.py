@@ -14,6 +14,7 @@ from src.services.job_service import JobService
 from src.models.jobs import Job
 from src.schemas.request.job_request import JobCreate, JobUpdate
 from src.core.exceptions import ResourceNotFoundException
+from tests.helpers import seed_job
 
 service = JobService()
 
@@ -30,21 +31,6 @@ def make_payload(**kwargs) -> JobCreate:
     }
     defaults.update(kwargs)
     return JobCreate(**defaults)
-
-
-async def seed_job() -> Job:
-    job = Job(
-        title="Backend Developer",
-        details="We are looking for a skilled backend developer.",
-        role="Software Engineer",
-        required_skills="Python, FastAPI",
-        experience_required=2,
-        employment_type="Full Time",
-        location="Bangalore",
-        created_by="hr@nucleusteq.com",
-    )
-    await job.insert()
-    return job
 
 
 async def test_create_job_success():
@@ -68,8 +54,9 @@ async def test_list_jobs():
         created_by="hr@nucleusteq.com"
     )
 
-    jobs = await service.list_jobs()
-    assert len(jobs) == 2
+    result = await service.list_jobs(page=1,page_size=10)
+    assert result.total == 2
+    assert len(result.items) ==2
 
 
 async def test_get_job_by_id_success():

@@ -14,15 +14,10 @@ Contains:
 - test_change_password_requires_auth   → Unauthenticated change attempt returns 401
 """
 
-import base64
+
 from src.models.users import User
 from src.core.security import hash_password
-
-
-def make_auth_header(email: str, password: str) -> dict:
-    """Helper — builds Basic Auth header from email and password."""
-    token = base64.b64encode(f"{email}:{password}".encode()).decode()
-    return {"Authorization": f"Basic {token}"}
+from tests.helpers import auth_header
 
 
 async def create_test_user(
@@ -44,14 +39,13 @@ async def create_test_user(
     return user
 
 
-# ── Login ──────────────────────────────────────────────────────────────────
 
 async def test_login_success(client):
     """Valid credentials return 200 and the user profile payload."""
     await create_test_user()
     response = await client.post(
         "/api/v1/auth/login",
-        headers=make_auth_header("test@nucleusteq.com", "Valid@1234"),
+        headers=auth_header("test@nucleusteq.com", "Valid@1234"),
     )
     assert response.status_code == 200
     body = response.json()
@@ -65,7 +59,7 @@ async def test_login_wrong_password(client):
     await create_test_user()
     response = await client.post(
         "/api/v1/auth/login",
-        headers=make_auth_header("test@nucleusteq.com", "Wrong@1234"),
+        headers=auth_header("test@nucleusteq.com", "Wrong@1234"),
     )
     assert response.status_code == 401
     assert response.json()["error_code"] == "UNAUTHORIZED_ACCESS"
@@ -75,7 +69,7 @@ async def test_login_unknown_email(client):
     """Unknown email returns 401 — not 404, to avoid user enumeration."""
     response = await client.post(
         "/api/v1/auth/login",
-        headers=make_auth_header("nobody@nucleusteq.com", "Valid@1234"),
+        headers=auth_header("nobody@nucleusteq.com", "Valid@1234"),
     )
     assert response.status_code == 401
 
@@ -86,15 +80,13 @@ async def test_login_no_credentials(client):
     assert response.status_code == 401
 
     
-# ── change  Password ─────────────────────────────────────────────────────────
-    
 async def test_change_password_success(client):
     """Valid old password allows changing to new password."""
     await create_test_user(is_password_reset_pending=False)
     response = await client.post(
         "/api/v1/auth/change-password",
         json={"old_password": "Valid@1234", "new_password": "Changed@9876"},
-        headers=make_auth_header("test@nucleusteq.com", "Valid@1234"),
+        headers=auth_header("test@nucleusteq.com", "Valid@1234"),
     )
     assert response.status_code == 200
 
@@ -105,7 +97,7 @@ async def test_change_password_wrong_old_password(client):
     response = await client.post(
         "/api/v1/auth/change-password",
         json={"old_password": "Wrong@1234", "new_password": "Changed@9876"},
-        headers=make_auth_header("test@nucleusteq.com", "Valid@1234"),
+        headers=auth_header("test@nucleusteq.com", "Valid@1234"),
     )
     assert response.status_code == 401
     assert response.json()["error_code"] == "UNAUTHORIZED_ACCESS"

@@ -15,6 +15,8 @@ from src.models.users import User
 from src.models.jobs import Job
 from src.models.candidates import Candidate
 from src.models.status_history import StatusHistory
+from src.models.interview import Interview
+from src.models.feedback import Feedback
 
 
 
@@ -26,7 +28,10 @@ async def init_test_db():
     mock_client = AsyncMongoMockClient()
     await init_beanie(
         database=mock_client.test_db,
-        document_models=[User,Job,Candidate,StatusHistory]
+        document_models=[
+            User, Job, Candidate, StatusHistory,
+             Interview, Feedback,               
+        ]
     )
     yield
 
