@@ -83,6 +83,47 @@ class InterviewRepository:
         return await Interview.find(
             Interview.interviewer_id == interviewer_id
         ).count()
+        
+    @staticmethod
+    async def find_conflict_for_candidate(
+        candidate_id: str,
+        interview_date: str,
+        interview_time: str,
+        exclude_id: str | None = None,
+    ) -> Optional[Interview]:
+        """
+        Checks if candidate already has an interview at the same date and time.
+        exclude_id is used during updates to skip the current interview
+        so HR can keep the same slot without triggering a conflict.
+        """
+        existing = await Interview.find_one(
+            Interview.candidate_id == candidate_id,
+            Interview.interview_date == interview_date,
+            Interview.interview_time == interview_time,
+        )
+        
+        if existing and exclude_id and str(existing.id) == exclude_id:
+            return None   # same interview being updated — not a conflict
+        return existing
 
+    @staticmethod
+    async def find_conflict_for_interviewer(
+        interviewer_id: str,
+        interview_date: str,
+        interview_time: str,
+        exclude_id: str | None = None,
+    ) -> Optional[Interview]:
+        """
+        Checks if interviewer already has an interview at the same date and time.
+        exclude_id is used during updates to skip the current interview.
+        """
+        existing = await Interview.find_one(
+            Interview.interviewer_id == interviewer_id,
+            Interview.interview_date == interview_date,
+            Interview.interview_time == interview_time,
+        )
+        if existing and exclude_id and str(existing.id) == exclude_id:
+            return None   # same interview being updated — not a conflict
+        return existing
 
 interview_repository = InterviewRepository()

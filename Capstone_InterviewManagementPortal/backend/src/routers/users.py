@@ -38,7 +38,7 @@ async def create_user(
 async def list_users(
     page: int = Query(default=1, ge=1, description="Page number"),
     page_size: int = Query(default=10, ge=1, le=100, description="Records per page"),
-    _=Depends(require_role(UserRole.ADMIN)),
+    _=Depends(require_role(UserRole.ADMIN,UserRole.HR)),
 ):
     """Admin retrieves paginated list of user ."""
     logger.info("List users request received.")
