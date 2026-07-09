@@ -142,7 +142,7 @@ export default function EditJob() {
                             name="experience_required"
                             value={form.experience_required}
                             onChange={handleChange}
-                            placeholder="e.g. 2-4 years"
+                            placeholder="e.g. 4 years  2.5 years"
                             required
                         />
                     </div>
