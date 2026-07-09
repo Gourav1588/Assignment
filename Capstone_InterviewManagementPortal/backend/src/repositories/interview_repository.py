@@ -44,7 +44,7 @@ class InterviewRepository:
         Interviewers only see their own interviews .
         """
         skip = (page - 1) * page_size
-        query = Interview.find(Interview.interviewer_id == interviewer_id)
+        query = Interview.find({"interviewer_id": interviewer_id})
         total = await query.count()
         interviews = await query.skip(skip).limit(page_size).to_list()
         return interviews, total
@@ -81,7 +81,7 @@ class InterviewRepository:
         Used for interviewer dashboard assigned_interviews count.
         """
         return await Interview.find(
-            Interview.interviewer_id == interviewer_id
+            {"interviewer_id": interviewer_id}
         ).count()
         
     @staticmethod
@@ -96,14 +96,14 @@ class InterviewRepository:
         exclude_id is used during updates to skip the current interview
         so HR can keep the same slot without triggering a conflict.
         """
-        existing = await Interview.find_one(
-            Interview.candidate_id == candidate_id,
-            Interview.interview_date == interview_date,
-            Interview.interview_time == interview_time,
-        )
+        existing = await Interview.find_one({    
+            "candidate_id":   candidate_id,      
+            "interview_date": interview_date,     
+            "interview_time": interview_time,
+        })
         
         if existing and exclude_id and str(existing.id) == exclude_id:
-            return None   # same interview being updated — not a conflict
+            return None  
         return existing
 
     @staticmethod
@@ -117,13 +117,13 @@ class InterviewRepository:
         Checks if interviewer already has an interview at the same date and time.
         exclude_id is used during updates to skip the current interview.
         """
-        existing = await Interview.find_one(
-            Interview.interviewer_id == interviewer_id,
-            Interview.interview_date == interview_date,
-            Interview.interview_time == interview_time,
-        )
+        existing = await Interview.find_one({   
+            "interviewer_id": interviewer_id,
+            "interview_date": interview_date,
+            "interview_time": interview_time,
+        })
         if existing and exclude_id and str(existing.id) == exclude_id:
-            return None   # same interview being updated — not a conflict
+            return None  
         return existing
 
 interview_repository = InterviewRepository()
