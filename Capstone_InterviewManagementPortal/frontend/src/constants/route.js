@@ -17,11 +17,12 @@ export const ROUTES = {
   INTERVIEWS: '/interviews',
   INTERVIEW_CREATE: '/interviews/create',
   MY_INTERVIEWS: '/my-interviews',
+  SUBMIT_FEEDBACK: '/my-interviews/:id/feedback',
+  INTERVIEW_DETAIL: '/interviews/:id'
 }
 
 export const NAV_ITEMS = {
   Admin: [
-    { label: 'Dashboard', path: ROUTES.DASHBOARD },
     { label: 'Users', path: ROUTES.USERS },
   ],
   HR: [

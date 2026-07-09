@@ -16,10 +16,13 @@ import CreateCandidate from './pages/candidates/CreateCandidate'
 import CandidateDetail from './pages/candidates/CandidateDetail'
 import EditCandidate from './pages/candidates/EditCandidate'
 import StatusHistory from './pages/candidates/StatusHistory'
+import InterviewList from './pages/interviews/InterviewList'
+import ScheduleInterview from './pages/interviews/ScheduleInterview'
+import InterviewDetail from './pages/interviews/InterviewDetail'
+import MyInterviewList from './pages/interviews/MyInterviewList'
+import SubmitFeedback from './pages/interviews/SubmitFeedback'
+import Dashboard from './pages/dashboard/Dashboard'
 
-const DashboardPage = () => <div style={{ padding: 24 }}>Dashboard — coming soon</div>
-const InterviewsPage = () => <div style={{ padding: 24 }}>Interviews — coming soon</div>
-const MyInterviewsPage = () => <div style={{ padding: 24 }}>My Interviews — coming soon</div>
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth()
@@ -65,12 +68,18 @@ function AppRoutes() {
       {/* Public */}
       <Route path={ROUTES.LOGIN} element={<PublicRoute><Login /></PublicRoute>} />
 
-      {/* Protected */}
+      {/* Auth */}
       <Route path={ROUTES.CHANGE_PASSWORD} element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
-      <Route path={ROUTES.DASHBOARD} element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+
+      {/* Dashboard — role based inside Dashboard component */}
+      <Route path={ROUTES.DASHBOARD} element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+      {/* Admin */}
       <Route path={ROUTES.USERS} element={<ProtectedRoute allowedRoles={['Admin']}><UserList /></ProtectedRoute>} />
       <Route path={ROUTES.USER_CREATE} element={<ProtectedRoute allowedRoles={['Admin']}><CreateUser /></ProtectedRoute>} />
       <Route path={ROUTES.USER_EDIT} element={<ProtectedRoute allowedRoles={['Admin']}><EditUser /></ProtectedRoute>} />
+
+      {/* HR */}
       <Route path={ROUTES.JOBS} element={<ProtectedRoute allowedRoles={['HR']}><JobList /></ProtectedRoute>} />
       <Route path={ROUTES.JOB_CREATE} element={<ProtectedRoute allowedRoles={['HR']} ><CreateJob /></ProtectedRoute>} />
       <Route path={ROUTES.JOBS_DETAIL} element={<ProtectedRoute allowedRoles={['HR']}><JobDetail /></ProtectedRoute>} />
@@ -80,8 +89,13 @@ function AppRoutes() {
       <Route path={ROUTES.CANDIDATE_HISTORY} element={<ProtectedRoute allowedRoles={['HR']}><StatusHistory /></ProtectedRoute>} />
       <Route path={ROUTES.CANDIDATE_DETAIL} element={<ProtectedRoute allowedRoles={['HR']}><CandidateDetail /></ProtectedRoute>} />
       <Route path={ROUTES.CANDIDATE_EDIT} element={<ProtectedRoute allowedRoles={['HR']}><EditCandidate /></ProtectedRoute>} />
-      <Route path={ROUTES.INTERVIEWS} element={<ProtectedRoute><InterviewsPage /></ProtectedRoute>} />
-      <Route path={ROUTES.MY_INTERVIEWS} element={<ProtectedRoute><MyInterviewsPage /></ProtectedRoute>} />
+      <Route path={ROUTES.INTERVIEWS} element={<ProtectedRoute allowedRoles={['HR']}><InterviewList /></ProtectedRoute>} />
+      <Route path={ROUTES.INTERVIEW_CREATE} element={<ProtectedRoute allowedRoles={['HR']}><ScheduleInterview /></ProtectedRoute>} />
+      <Route path={ROUTES.INTERVIEW_DETAIL} element={<ProtectedRoute allowedRoles={['HR']}><InterviewDetail /></ProtectedRoute>} />
+
+      {/* Interviewer */}
+      <Route path={ROUTES.MY_INTERVIEWS} element={<ProtectedRoute allowedRoles={['Interviewer']}><MyInterviewList /></ProtectedRoute>} />
+      <Route path={ROUTES.SUBMIT_FEEDBACK} element={<ProtectedRoute allowedRoles={['Interviewer']}><SubmitFeedback /></ProtectedRoute>} />
 
       {/* Default */}
       <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
