@@ -32,8 +32,14 @@ const userService = {
     async activateUser(id) {
         const response = await api.patch(`/users/${id}/activate`)
         return response.data
+    },
 
-    }
+    async getAllInterviewersForDropdown() {
+        const response = await api.get('/users', {
+            params: { page: 1, page_size: 1000 }
+        })
+        return response.data.items.filter(u => u.role === 'Interviewer')
+    },
 }
 
 export default userService

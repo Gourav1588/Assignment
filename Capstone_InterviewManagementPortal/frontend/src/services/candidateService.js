@@ -43,6 +43,12 @@ const candidateService = {
         return response.data
     },
 
+    async getAllCandidatesForDropdown() {
+        const response = await api.get('/candidates', {
+            params: { page: 1, page_size: 1000 }
+        })
+        return response.data.items
+    },
 
 
 }
