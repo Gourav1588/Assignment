@@ -3,6 +3,7 @@ Helper functions shared across all test files.
 """
 import base64
 import io
+from datetime import date, timedelta
 from src.models.users import User
 from src.models.jobs import Job
 from src.models.candidates import Candidate
@@ -115,10 +116,11 @@ def pdf_file(filename: str = "cv.pdf") -> dict:
 
 
 def interview_payload(candidate_id: str, interviewer_id: str, **kwargs) -> dict:
+    tomorrow = (date.today() + timedelta(days=1)).isoformat()
     defaults = {
         "candidate_id":   candidate_id,
         "job_title":      "Backend Developer",
-        "interview_date": "2024-08-15",
+        "interview_date": tomorrow,
         "interview_time": "10:00",
         "interviewer_id": interviewer_id,
         "focus_areas":    "Python, FastAPI",
@@ -154,10 +156,11 @@ async def create_interview_via_service(
     service, candidate_id: str, interviewer_id: str, **kwargs
 ) -> Interview:
     """Creates an interview via service and returns the Interview document."""
+    tomorrow = (date.today() + timedelta(days=1)).isoformat()
     defaults = dict(
         candidate_id=candidate_id,
         job_title="Backend Developer",
-        interview_date="2024-08-15",
+        interview_date=tomorrow,
         interview_time="10:00",
         interviewer_id=interviewer_id,
         focus_areas="Python, FastAPI",

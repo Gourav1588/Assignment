@@ -3,6 +3,7 @@ Unit tests for InterviewService business logic.
 """
 import pytest
 from src.services.interview_service import InterviewService
+from datetime import date, timedelta
 from src.models.users import User
 from src.models.jobs import Job
 from src.models.candidates import Candidate
@@ -167,13 +168,15 @@ async def test_update_interview_success():
     job = await seed_job()
     candidate = await seed_candidate(str(job.id))
     created = await create_interview_via_service(service, str(candidate.id), str(interviewer.id))
+    
+    new_date = (date.today() + timedelta(days=2)).isoformat()
 
     updated = await service.update_interview(
         str(created.id),
-        InterviewUpdate(interview_date="2024-09-01", interview_time="14:00"),
+        InterviewUpdate(interview_date=new_date, interview_time="14:00"),
         updated_by="hr@nucleusteq.com",
     )
-    assert updated.interview_date == "2024-09-01"
+    assert updated.interview_date == new_date
     assert updated.interview_time == "14:00"
     assert updated.focus_areas == "Python, FastAPI"
 

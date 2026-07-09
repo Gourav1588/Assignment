@@ -5,6 +5,7 @@ from src.models.users import User
 from src.models.jobs import Job
 from src.models.candidates import Candidate
 from src.models.interview import Interview
+from datetime import date, timedelta
 from tests.helpers import (
     auth_header, seed_admin, seed_hr, seed_interviewer,
     seed_job, seed_candidate, interview_payload,
@@ -274,14 +275,16 @@ async def test_update_interview_success(client):
     job = await seed_job()
     candidate = await seed_candidate(str(job.id))
     interview_id = await create_interview(client, str(candidate.id), str(interviewer.id))
-
+    
+    new_date = (date.today() + timedelta(days=2)).isoformat()
+    
     response = await client.put(
         f"/api/v1/interviews/{interview_id}",
-        json={"interview_date": "2024-09-01", "interview_time": "14:00"},
+        json={"interview_date": new_date, "interview_time": "14:00"},
         headers=auth_header("hr@nucleusteq.com", "Hr@12345"),
     )
     assert response.status_code == 200
-    assert response.json()["interview_date"] == "2024-09-01"
+    assert response.json()["interview_date"] == new_date
     assert response.json()["interview_time"] == "14:00"
 
 
