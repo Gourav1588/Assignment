@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import interviewService from '../../services/interviewService'
-import { ROUTES } from '../../constants/route'
+import { hasInterviewPassed } from '../../utils/interviewTime'
 import './Interviews.css'
 
 export default function MyInterviewList() {
@@ -19,6 +19,7 @@ export default function MyInterviewList() {
 
     async function fetchInterviews() {
         setLoading(true)
+        setError('')
         try {
             const data = await interviewService.getMyInterviews(page, PAGE_SIZE)
             setInterviews(data.items)
@@ -48,34 +49,44 @@ export default function MyInterviewList() {
                             <th>Date</th>
                             <th>Time</th>
                             <th>Focus Areas</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {interviews.length === 0 ? (
                             <tr>
-                                <td colSpan="5" style={{ textAlign: 'center', color: '#94a3b8' }}>
+                                <td colSpan="6" style={{ textAlign: 'center', color: '#94a3b8' }}>
                                     No interviews assigned
                                 </td>
                             </tr>
                         ) : (
-                            interviews.map((i) => (
-                                <tr key={i.id}>
-                                    <td>{i.job_title}</td>
-                                    <td>{i.interview_date}</td>
-                                    <td>{i.interview_time}</td>
-                                    <td>{i.focus_areas}</td>
-                                    <td>
-                                        <button
-                                            className="btn btn-secondary"
-                                            style={{ padding: '6px 12px', fontSize: '12px' }}
-                                            onClick={() => navigate(`/my-interviews/${i.id}/feedback`)}
-                                        >
-                                            Feedback
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
+                            interviews.map((i) => {
+                                const passed = hasInterviewPassed(i.interview_date, i.interview_time)
+
+                                return (
+                                    <tr key={i.id}>
+                                        <td>{i.job_title}</td>
+                                        <td>{i.interview_date}</td>
+                                        <td>{i.interview_time}</td>
+                                        <td>{i.focus_areas}</td>
+                                        <td>
+                                            <span className={passed ? 'badge badge-completed' : 'badge badge-scheduled'}>
+                                                {passed ? 'Completed' : 'Upcoming'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="btn btn-secondary"
+                                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                                onClick={() => navigate(`/my-interviews/${i.id}/feedback`)}
+                                            >
+                                                {passed ? 'Feedback' : 'View'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )
+                            })
                         )}
                     </tbody>
                 </table>

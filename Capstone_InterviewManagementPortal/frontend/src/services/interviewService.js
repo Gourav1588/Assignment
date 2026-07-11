@@ -41,10 +41,25 @@ const interviewService = {
             const response = await api.get(`/interviews/${id}/feedback`)
             return response.data
         } catch (err) {
-            if (err.response?.status === 404) return null
+            const detail = err.response?.data?.detail
+
+            if (
+                err.response?.status === 404 &&
+                typeof detail === 'string' &&
+                detail.toLowerCase().includes('no feedback')
+            ) {
+                return null
+            }
             throw err
         }
-    }
+    },
+
+    async getAllInterviewersForDropdown() {
+        const response = await api.get('/users', {
+            params: { page: 1, page_size: 100 }
+        })
+        return response.data.items.filter(c => c.status !== 'SELECTED' && c.status !== 'REJECTED')
+    },
 
 }
 

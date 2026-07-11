@@ -6,7 +6,7 @@ InterviewUpdate → validates payload when HR updates an existing interview
                   all fields optional so HR can update just one field
 """
 import re
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator,model_validator
 from datetime import date, timedelta
 
 OBJECT_ID_PATTERN = r"^[0-9a-fA-F]{24}$"
@@ -113,29 +113,29 @@ class InterviewUpdate(BaseModel):
         if parsed < today:
             raise ValueError("Interview date cannot be in the past.")
 
-        if parsed > today + timedelta(days=180):
+        if parsed > today + timedelta(days=30):
             raise ValueError("Interview date cannot be more than 6 months in the future.")
 
         return v
 
-    @field_validator("interview_time")
-    @classmethod
-    def validate_office_hours(cls, v: str | None) -> str | None:
-        if v is None:
-            return v
+    # @field_validator("interview_time")
+    # @classmethod
+    # def validate_office_hours(cls, v: str | None) -> str | None:
+    #     if v is None:
+    #         return v
 
-        if not re.match(r"^\d{2}:\d{2}$", v):
-            raise ValueError("Time must be in HH:MM format.")
+    #     if not re.match(r"^\d{2}:\d{2}$", v):
+    #         raise ValueError("Time must be in HH:MM format.")
 
-        hour, minute = map(int, v.split(":"))
+    #     hour, minute = map(int, v.split(":"))
 
-        if hour > 23 or minute > 59:
-            raise ValueError("Invalid time value.")
+    #     if hour > 23 or minute > 59:
+    #         raise ValueError("Invalid time value.")
 
-        if hour < 9 or (hour == 18 and minute > 0) or hour > 18:
-            raise ValueError("Interview time must be between 09:00 AM and 06:00 PM.")
+    #     if hour < 9 or (hour == 18 and minute > 0) or hour > 18:
+    #         raise ValueError("Interview time must be between 09:00 AM and 06:00 PM.")
 
-        return v
+    #     return v
 
     @field_validator("job_title", "focus_areas")
     @classmethod
@@ -150,3 +150,12 @@ class InterviewUpdate(BaseModel):
             raise ValueError("Field cannot contain only numbers.")
 
         return value.strip()
+    
+    @model_validator(mode="after")  
+    def validate_at_least_one_field(self):
+        if all(
+            getattr(self, field) is None
+            for field in ("job_title", "interview_date", "interview_time", "interviewer_id", "focus_areas")
+        ):
+            raise ValueError("At least one field must be provided to update.")
+        return self

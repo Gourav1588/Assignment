@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import interviewService from '../../services/interviewService'
 import userService from '../../services/userService'
-import candidateService from '../../services/candidateService'
 import { ROUTES } from '../../constants/route'
 import { validateInterview } from '../../utils/interviewValidation'
+import { hasInterviewPassed } from '../../utils/interviewTime'
 import './Interviews.css'
-
 
 function getDateBounds() {
     const today = new Date()
@@ -18,7 +17,7 @@ function getDateBounds() {
     }
 }
 
-export default function ScheduleInterview() {
+export default function EditInterview() {
     const [form, setForm] = useState({
         candidate_id: '',
         job_title: '',
@@ -28,28 +27,43 @@ export default function ScheduleInterview() {
         focus_areas: '',
     })
     const [interviewers, setInterviewers] = useState([])
-    const [candidates, setCandidates] = useState([])
+    const [isPassed, setIsPassed] = useState(false)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const [fetching, setFetching] = useState(true)
+
+    const { id } = useParams()
     const navigate = useNavigate()
 
     const dateBounds = getDateBounds()
 
     useEffect(() => {
-        async function loadData() {
+        async function load() {
             try {
-                const [interviewersData, candidatesData] = await Promise.all([
+                const [interview, interviewersData] = await Promise.all([
+                    interviewService.getInterviewById(id),
                     userService.getAllInterviewersForDropdown(),
-                    candidateService.getAllCandidatesForDropdown(),
                 ])
+
+                setForm({
+                    candidate_id: interview.candidate_id,
+                    job_title: interview.job_title,
+                    interview_date: interview.interview_date,
+                    interview_time: interview.interview_time,
+                    interviewer_id: interview.interviewer_id,
+                    focus_areas: interview.focus_areas,
+                })
                 setInterviewers(interviewersData)
-                setCandidates(candidatesData)
-            } catch {
-                setError('Failed to load form data.')
+                setIsPassed(hasInterviewPassed(interview.interview_date, interview.interview_time))
+            } catch (err) {
+                const detail = err.response?.data?.detail
+                setError(typeof detail === 'string' ? detail : 'Failed to load interview.')
+            } finally {
+                setFetching(false)
             }
         }
-        loadData()
-    }, [])
+        load()
+    }, [id])
 
     function handleChange(e) {
         setForm({ ...form, [e.target.name]: e.target.value })
@@ -67,38 +81,61 @@ export default function ScheduleInterview() {
 
         setLoading(true)
         try {
-            await interviewService.scheduleInterview(form)
+            await interviewService.updateInterview(id, {
+                job_title: form.job_title,
+                interview_date: form.interview_date,
+                interview_time: form.interview_time,
+                interviewer_id: form.interviewer_id,
+                focus_areas: form.focus_areas,
+            })
             navigate(ROUTES.INTERVIEWS)
         } catch (err) {
             const detail = err.response?.data?.detail
-            setError(typeof detail === 'string' ? detail : 'Failed to schedule interview.')
+            setError(typeof detail === 'string' ? detail : 'Failed to update interview.')
         } finally {
             setLoading(false)
         }
     }
 
+    if (fetching) return <p className="loading-text">Loading interview...</p>
+
+    if (isPassed) {
+        return (
+            <div>
+                <div className="page-header">
+                    <h2>Edit Interview</h2>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={() => navigate(ROUTES.INTERVIEWS)}
+                    >
+                        Back
+                    </button>
+                </div>
+                <div className="detail-card">
+                    <p style={{ fontSize: '14px', color: '#64748b' }}>
+                        This interview has already taken place and can no longer be modified.
+                    </p>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div>
             <div className="page-header">
-                <h2>Schedule Interview</h2>
+                <h2>Edit Interview</h2>
+                <button
+                    className="btn btn-secondary"
+                    onClick={() => navigate(ROUTES.INTERVIEWS)}
+                >
+                    Back
+                </button>
             </div>
 
             <div className="form-card">
                 {error && <div className="error-msg">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Candidate</label>
-                        <select name="candidate_id" value={form.candidate_id} onChange={handleChange} required>
-                            <option value="">Select a candidate</option>
-                            {candidates.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                    {c.first_name} {c.last_name} — {c.email}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
                     <div className="form-group">
                         <label>Job Title</label>
                         <input
@@ -119,7 +156,8 @@ export default function ScheduleInterview() {
                             type="date"
                             value={form.interview_date}
                             onChange={handleChange}
-
+                            min={dateBounds.min}
+                            max={dateBounds.max}
                             required
                         />
                     </div>
@@ -142,7 +180,12 @@ export default function ScheduleInterview() {
 
                     <div className="form-group">
                         <label>Interviewer</label>
-                        <select name="interviewer_id" value={form.interviewer_id} onChange={handleChange} required>
+                        <select
+                            name="interviewer_id"
+                            value={form.interviewer_id}
+                            onChange={handleChange}
+                            required
+                        >
                             <option value="">Select an interviewer</option>
                             {interviewers.map((u) => (
                                 <option key={u.id} value={u.id}>
@@ -167,7 +210,7 @@ export default function ScheduleInterview() {
 
                     <div className="form-actions">
                         <button type="submit" className="btn btn-primary" disabled={loading}>
-                            {loading ? 'Scheduling...' : 'Schedule Interview'}
+                            {loading ? 'Saving...' : 'Save Changes'}
                         </button>
                         <button
                             type="button"
