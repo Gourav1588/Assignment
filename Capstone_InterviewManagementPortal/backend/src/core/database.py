@@ -7,6 +7,11 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from src.core.config import settings
 from src.models.users import User
+from src.models.jobs import Job
+from src.models.candidates import Candidate
+from src.models.status_history import StatusHistory
+from src.models.interview import Interview
+from src.models.feedback import Feedback
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +33,7 @@ class Database:
         
             await cls.client.admin.command("ping") 
         
-            await init_beanie(database=cls.db, document_models=[User])
+            await init_beanie(database=cls.db, document_models=[User,Job,Candidate,StatusHistory,Interview,Feedback])
             logger.info(f"Connected to database: {settings.DATABASE_NAME}")
         
         except Exception as e:

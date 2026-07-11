@@ -21,6 +21,9 @@ async def get_current_user(credentials: HTTPBasicCredentials = Depends(security_
     
     if not user or not verify_password(credentials.password, user.password):
       raise UnauthorizedException("Invalid email or password credentials.")
+  
+    if not user.is_active:
+        raise ForbiddenException("Your account has been deactivated. Please contact administration.")
     return user
 
 def require_role(*allowed_roles: UserRole):

@@ -8,7 +8,7 @@ Contains:
 import logging
 from src.models.users import User
 from src.core.security import hash_password, verify_password
-from src.core.exceptions import ResourceNotFoundException, UnauthorizedException
+from src.core.exceptions import ResourceNotFoundException, UnauthorizedException,ForbiddenException
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +23,13 @@ class AuthService:
         Validates credentials against registered MongoDB database documents.
         """
         user = await User.find_one(User.email == email.lower())
+        
         if not user:
             logger.warning(f"Failed login attempt: Account {email} not found.")
             raise UnauthorizedException("Invalid corporate email or password.")
+        
+        if not user.is_active:
+            raise ForbiddenException("Your account has been deactivated. Please contact administration.")
             
         if not verify_password(password, user.password):
             logger.warning(f"Failed login attempt: Incorrect password signature for {user.email}.")

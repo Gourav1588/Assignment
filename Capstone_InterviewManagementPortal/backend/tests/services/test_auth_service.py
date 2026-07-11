@@ -11,14 +11,10 @@ Contains:
 """
 
 import pytest
-from pydantic import BaseModel
 from src.services.auth_service import auth_service
 from src.models.users import User
 from src.core.security import hash_password
 from src.core.exceptions import UnauthorizedException
-
-
-
 
 
 async def test_authenticate_user_success():

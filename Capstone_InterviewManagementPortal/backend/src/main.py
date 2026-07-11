@@ -11,6 +11,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.core.database import Database
 from src.routers.auth import router as auth_router
 from src.core.error_handlers import register_error_handlers
+from src.routers.users import router as users_router 
+from src.routers.jobs import router as jobs_router
+from src.routers.candidates import router as candidates_router
+from src.routers.interviews import router as interview_router
+from src.routers.feedback import router as feedback_router
+from src.routers.dashboard import router as dashboard_router 
+from src.services.seed_service import seed_service
+
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +32,8 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("Initializing MongoDB client connection and binding Beanie models...")
         await Database.connect_db()  # Initialize the MongoDB client connection and bind Beanie models
+        
+        await seed_service.seed_admin()
     except Exception as e:
         logger.critical(f"Failed to connect to MongoDB during startup: {e}")
         raise e
@@ -32,6 +42,7 @@ async def lifespan(app: FastAPI):
     
     logger.info("Safely closing down database pool connections on shutdown...") 
     Database.close_db()          # Safely close down database pool connections on shutdown
+    
     
 
 app = FastAPI(
@@ -56,3 +67,9 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api/v1")  
+app.include_router(users_router, prefix="/api/v1")  
+app.include_router(jobs_router, prefix="/api/v1")
+app.include_router(candidates_router, prefix="/api/v1")
+app.include_router(interview_router, prefix="/api/v1")
+app.include_router(feedback_router, prefix="/api/v1")  
+app.include_router(dashboard_router, prefix="/api/v1")             
