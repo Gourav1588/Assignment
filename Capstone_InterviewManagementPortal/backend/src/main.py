@@ -17,6 +17,8 @@ from src.routers.candidates import router as candidates_router
 from src.routers.interviews import router as interview_router
 from src.routers.feedback import router as feedback_router
 from src.routers.dashboard import router as dashboard_router 
+from src.services.seed_service import seed_service
+
 
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,8 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("Initializing MongoDB client connection and binding Beanie models...")
         await Database.connect_db()  # Initialize the MongoDB client connection and bind Beanie models
+        
+        await seed_service.seed_admin()
     except Exception as e:
         logger.critical(f"Failed to connect to MongoDB during startup: {e}")
         raise e
@@ -38,6 +42,7 @@ async def lifespan(app: FastAPI):
     
     logger.info("Safely closing down database pool connections on shutdown...") 
     Database.close_db()          # Safely close down database pool connections on shutdown
+    
     
 
 app = FastAPI(

@@ -7,3 +7,6 @@ __pycache__/
 
 # 4. Local media storage (Candidate PDFs should stay local)
 backend/uploads/resumes/*
+
+htmlcov/
+.coverage

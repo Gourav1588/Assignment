@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     MONGO_URI: str
     DATABASE_NAME: str
+    
+    DEFAULT_ADMIN_NAME: str
+    DEFAULT_ADMIN_EMAIL: str
+    DEFAULT_ADMIN_PASSWORD: str
+
 
     # Tell Pydantic to read from the .env file located in the backend root directory
     model_config = SettingsConfigDict(
