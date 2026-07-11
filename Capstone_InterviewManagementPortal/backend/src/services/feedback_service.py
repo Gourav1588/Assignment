@@ -4,11 +4,16 @@ Business logic for Feedback Management module.
 Contains:
 - submit_feedback → validates interviewer, prevents duplicates, saves feedback
 - get_feedback    → returns feedback for a specific interview
+
+Feedback can only be given after the interview has taken place, and only by
+the interviewer it was assigned to.
 """
 import logging
+from src.core.time_utils import has_interview_passed
 from src.models.feedback import Feedback
 from src.repositories.feedback_repository import feedback_repository
 from src.repositories.interview_repository import interview_repository
+from src.repositories.user_repository import user_repository
 from src.schemas.request.feedback_request import FeedbackCreate
 from src.core.exceptions import (
     ResourceNotFoundException,
@@ -27,9 +32,7 @@ class FeedbackService:
         payload: FeedbackCreate,
         submitted_by_id: str,
     ) -> Feedback:
-        """
-        Submits feedback for an interview.
-        """
+        """Submits feedback for an interview that has already taken place."""
         interview = await interview_repository.find_by_id(interview_id)
         if not interview:
             raise ResourceNotFoundException("Interview not found.")
@@ -38,6 +41,17 @@ class FeedbackService:
         if interview.interviewer_id != submitted_by_id:
             raise ForbiddenException(
                 "Only the assigned interviewer can submit feedback."
+            )
+
+        if not has_interview_passed(interview.interview_date, interview.interview_time):
+            raise ConflictException(
+                "Feedback can only be submitted once the interview has taken place."
+            )
+
+        interviewer = await user_repository.find_by_id(submitted_by_id)
+        if not interviewer or not interviewer.is_active:
+            raise ConflictException(
+                "Cannot submit feedback — interviewer account is inactive."
             )
 
         # Prevent duplicate feedback
@@ -60,7 +74,7 @@ class FeedbackService:
         created = await feedback_repository.create_feedback(feedback)
         logger.info(
             "Feedback submitted for interview %s by %s",
-            interview_id, submitted_by_id
+            interview_id, submitted_by_id,
         )
         return created
 
@@ -70,18 +84,16 @@ class FeedbackService:
         current_user_id: str,
         current_user_role: str,
     ) -> Feedback:
-        """
-        Returns feedback for a specific interview.
-        """
+        """Returns feedback for a specific interview."""
         interview = await interview_repository.find_by_id(interview_id)
         if not interview:
             raise ResourceNotFoundException("Interview not found.")
-       
-         # Admin has no access to feedback
+
+        # Admin has no access to feedback
         if current_user_role == "Admin":
             raise ForbiddenException(
                 "Admins are not authorized to view interview feedback."
-        )
+            )
 
         # Interviewer can only view feedback for their assigned interview
         if current_user_role == "Interviewer":

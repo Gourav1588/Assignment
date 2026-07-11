@@ -35,9 +35,11 @@ class FeedbackRepository:
         Checks if feedback already exists for an interview.
         Used to prevent duplicate feedback submission.
         """
-        return await Feedback.find_one(
+        result = await Feedback.find_one(         
             {"interview_id": interview_id}
-        ) is not None
+        )
+        
+        return result is not None 
 
     @staticmethod
     async def count_by_interviewer(interviewer_id: str) -> int:
@@ -45,7 +47,7 @@ class FeedbackRepository:
         Counts feedback documents submitted by a specific interviewer.
         """
         return await Feedback.find(
-             {"interview_id": interviewer_id}).count()
+             {"interviewer_id": interviewer_id}).count()
 
 
 feedback_repository = FeedbackRepository()

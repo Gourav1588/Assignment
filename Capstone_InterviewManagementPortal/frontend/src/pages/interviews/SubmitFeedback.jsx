@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import interviewService from '../../services/interviewService'
 import { ROUTES } from '../../constants/route'
+import { validateFeedback } from '../../utils/feedbackValidation'
+import { hasInterviewPassed } from '../../utils/interviewTime'
 import './Interviews.css'
 
 const RECOMMENDATION_BADGE = {
@@ -19,7 +21,7 @@ export default function SubmitFeedback() {
         problem_solving: '',
         tech_areas_covered: '',
         comments: '',
-        recommendation: 'SELECT',
+        recommendation: '',
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -49,27 +51,11 @@ export default function SubmitFeedback() {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    function validate() {
-        const r = (v) => parseInt(v)
-        if (!form.technical_rating) return 'Technical rating is required.'
-        if (!form.communication_rating) return 'Communication rating is required.'
-        if (!form.problem_solving) return 'Problem solving rating is required.'
-        if (r(form.technical_rating) < 1 || r(form.technical_rating) > 5)
-            return 'Technical rating must be between 1 and 5.'
-        if (r(form.communication_rating) < 1 || r(form.communication_rating) > 5)
-            return 'Communication rating must be between 1 and 5.'
-        if (r(form.problem_solving) < 1 || r(form.problem_solving) > 5)
-            return 'Problem solving rating must be between 1 and 5.'
-        if (!form.tech_areas_covered.trim()) return 'Tech areas covered is required.'
-        if (!form.comments.trim()) return 'Comments are required.'
-        return null
-    }
-
     async function handleSubmit(e) {
         e.preventDefault()
         setError('')
 
-        const validationError = validate()
+        const validationError = validateFeedback(form)
         if (validationError) {
             setError(validationError)
             return
@@ -95,10 +81,14 @@ export default function SubmitFeedback() {
     if (fetching) return <p className="loading-text">Loading interview...</p>
     if (error && !interview) return <div className="error-msg">{error}</div>
 
+    const passed = interview
+        ? hasInterviewPassed(interview.interview_date, interview.interview_time)
+        : false
+
     return (
         <div>
             <div className="page-header">
-                <h2>Submit Feedback</h2>
+                <h2>{feedback ? 'Interview Feedback' : 'Submit Feedback'}</h2>
                 <button
                     className="btn btn-secondary"
                     onClick={() => navigate(ROUTES.MY_INTERVIEWS)}
@@ -116,6 +106,10 @@ export default function SubmitFeedback() {
                     <div className="detail-row">
                         <span className="detail-label">Date</span>
                         <span className="detail-value">{interview.interview_date}</span>
+                    </div>
+                    <div className="detail-row">
+                        <span className="detail-label">Time</span>
+                        <span className="detail-value">{interview.interview_time}</span>
                     </div>
                     <div className="detail-row">
                         <span className="detail-label">Focus Areas</span>
@@ -153,10 +147,17 @@ export default function SubmitFeedback() {
                         <span className="detail-label">Recommendation</span>
                         <span className="detail-value">
                             <span className={RECOMMENDATION_BADGE[feedback.recommendation]}>
-                                {feedback.recommendation.replace('_', ' ')}
+                                {feedback.recommendation.replace(/_/g, ' ')}
                             </span>
                         </span>
                     </div>
+                </div>
+            ) : !passed ? (
+                <div className="detail-card">
+                    <p style={{ fontSize: '14px', color: '#64748b' }}>
+                        <span className="badge badge-scheduled">Upcoming</span>
+                        &nbsp; Feedback can be submitted once this interview has taken place.
+                    </p>
                 </div>
             ) : (
                 <div className="form-card">
@@ -173,6 +174,7 @@ export default function SubmitFeedback() {
                                 value={form.technical_rating}
                                 onChange={handleChange}
                                 placeholder="1 to 5"
+                                required
                             />
                         </div>
 
@@ -186,6 +188,7 @@ export default function SubmitFeedback() {
                                 value={form.communication_rating}
                                 onChange={handleChange}
                                 placeholder="1 to 5"
+                                required
                             />
                         </div>
 
@@ -199,6 +202,7 @@ export default function SubmitFeedback() {
                                 value={form.problem_solving}
                                 onChange={handleChange}
                                 placeholder="1 to 5"
+                                required
                             />
                         </div>
 
@@ -207,8 +211,11 @@ export default function SubmitFeedback() {
                             <input
                                 name="tech_areas_covered"
                                 value={form.tech_areas_covered}
+                                minLength={2}
+                                maxLength={500}
                                 onChange={handleChange}
                                 placeholder="e.g. Python, APIs, SQL"
+                                required
                             />
                         </div>
 
@@ -217,8 +224,11 @@ export default function SubmitFeedback() {
                             <textarea
                                 name="comments"
                                 value={form.comments}
+                                minLength={5}
+                                maxLength={1000}
                                 onChange={handleChange}
                                 placeholder="Overall feedback about the candidate"
+                                required
                             />
                         </div>
 
@@ -228,7 +238,9 @@ export default function SubmitFeedback() {
                                 name="recommendation"
                                 value={form.recommendation}
                                 onChange={handleChange}
+                                required
                             >
+                                <option value="">Select a recommendation</option>
                                 <option value="SELECT">Select</option>
                                 <option value="REJECT">Reject</option>
                                 <option value="NEXT_ROUND">Next Round</option>

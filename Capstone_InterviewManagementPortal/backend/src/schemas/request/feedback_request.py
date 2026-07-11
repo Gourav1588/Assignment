@@ -1,7 +1,7 @@
 """
 Request schema for Feedback submission endpoint.
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field,field_validator
 from src.enums.interview_enums import RecommendationEnum
 
 
@@ -13,3 +13,14 @@ class FeedbackCreate(BaseModel):
     tech_areas_covered:   str = Field(..., min_length=1, max_length=500)
     comments:             str = Field(..., min_length=1, max_length=1000)
     recommendation:       RecommendationEnum
+
+    @field_validator("tech_areas_covered", "comments")
+    @classmethod
+    def validate_non_empty_strings(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Field cannot be empty or contain only spaces.")
+
+        if value.strip().isdigit():
+            raise ValueError("Field cannot contain only numbers.")
+
+        return value.strip() 
