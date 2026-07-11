@@ -1,15 +1,29 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import candidateService from '../../services/candidateService'
-import './Candidates.css'
 import { ROUTES } from '../../constants/route'
+import { validateCandidateUpdate } from '../../utils/candidateValidation'
+import './Candidates.css'
 
-const VALID_NEXT_STATUSES = {
-    PROFILE_CREATED: ['INTERVIEW_SCHEDULED'],
-    INTERVIEW_SCHEDULED: ['INTERVIEW_COMPLETED'],
-    INTERVIEW_COMPLETED: ['SELECTED', 'REJECTED'],
-    SELECTED: [],
-    REJECTED: [],
+const STATUS_BADGE = {
+    PROFILE_CREATED: 'badge badge-created',
+    INTERVIEW_SCHEDULED: 'badge badge-scheduled',
+    INTERVIEW_COMPLETED: 'badge badge-completed',
+    SELECTED: 'badge badge-selected',
+    REJECTED: 'badge badge-rejected',
+}
+
+const DECISION_OPTIONS = ['SELECTED', 'REJECTED']
+
+const STATUS_MESSAGE = {
+    PROFILE_CREATED:
+        'A decision can be made once this candidate has been interviewed.',
+    INTERVIEW_SCHEDULED:
+        'An interview is scheduled. A decision can be made once it has taken place and feedback has been submitted.',
+    SELECTED:
+        'This candidate has been selected. No further changes are allowed.',
+    REJECTED:
+        'This candidate has been rejected. No further changes are allowed.',
 }
 
 export default function EditCandidate() {
@@ -21,6 +35,7 @@ export default function EditCandidate() {
         total_experience: '',
     })
     const [currentStatus, setCurrentStatus] = useState('')
+    const [lastRecommendation, setLastRecommendation] = useState(null)
     const [newStatus, setNewStatus] = useState('')
     const [success, setSuccess] = useState('')
     const [error, setError] = useState('')
@@ -43,7 +58,8 @@ export default function EditCandidate() {
                     total_experience: candidate.total_experience,
                 })
                 setCurrentStatus(candidate.status)
-                setNewStatus(candidate.status)
+                setLastRecommendation(candidate.last_recommendation)
+                setNewStatus('')
             } catch {
                 setError('Failed to load candidate.')
             } finally {
@@ -57,21 +73,12 @@ export default function EditCandidate() {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    function validate() {
-        if (!form.first_name.trim()) return 'First name is required.'
-        if (!form.last_name.trim()) return 'Last name is required.'
-        if (!form.mobile_number.trim()) return 'Mobile number is required.'
-        if (!/^\d{10}$/.test(form.mobile_number)) return 'Mobile must be exactly 10 digits.'
-        if (!form.current_company.trim()) return 'Current company is required.'
-        if (form.total_experience === '') return 'Total experience is required.'
-        return null
-    }
-
     async function handleSubmit(e) {
         e.preventDefault()
         setError('')
+        setSuccess('')
 
-        const validationError = validate()
+        const validationError = validateCandidateUpdate(form)
         if (validationError) {
             setError(validationError)
             return
@@ -80,7 +87,10 @@ export default function EditCandidate() {
         setLoading(true)
         try {
             await candidateService.updateCandidate(id, {
-                ...form,
+                first_name: form.first_name.trim(),
+                last_name: form.last_name.trim(),
+                mobile_number: form.mobile_number.trim(),
+                current_company: form.current_company.trim(),
                 total_experience: parseFloat(form.total_experience),
             })
             setSuccess('Profile updated successfully.')
@@ -104,8 +114,8 @@ export default function EditCandidate() {
         setError('')
         setSuccess('')
 
-        if (newStatus === currentStatus) {
-            setError('Please select a different status.')
+        if (!newStatus) {
+            setError('Please select a decision.')
             return
         }
 
@@ -113,18 +123,22 @@ export default function EditCandidate() {
         try {
             await candidateService.updateStatus(id, newStatus)
             setCurrentStatus(newStatus)
-            setSuccess('Status updated successfully.')
+            setNewStatus('')
+            setSuccess('Decision recorded successfully.')
         } catch (err) {
             const detail = err.response?.data?.detail
-            setError(typeof detail === 'string' ? detail : 'Failed to update status.')
+            setError(typeof detail === 'string' ? detail : 'Failed to record decision.')
         } finally {
             setStatusLoading(false)
         }
     }
 
     if (fetching) return <p className="loading-text">Loading candidate...</p>
-    const nextOptions = VALID_NEXT_STATUSES[currentStatus] || []
-    const isTerminal = nextOptions.length === 0
+
+    const isCompleted = currentStatus === 'INTERVIEW_COMPLETED'
+    const needsAnotherRound = isCompleted && lastRecommendation === 'NEXT_ROUND'
+    const canDecide = isCompleted && !needsAnotherRound
+
     return (
         <>
             <div className="page-header">
@@ -152,7 +166,9 @@ export default function EditCandidate() {
                             value={form.first_name}
                             onChange={handleChange}
                             placeholder="Enter first name"
-
+                            minLength={2}
+                            maxLength={50}
+                            required
                         />
                     </div>
 
@@ -163,7 +179,9 @@ export default function EditCandidate() {
                             value={form.last_name}
                             onChange={handleChange}
                             placeholder="Enter last name"
-
+                            minLength={2}
+                            maxLength={50}
+                            required
                         />
                     </div>
 
@@ -175,7 +193,7 @@ export default function EditCandidate() {
                             onChange={handleChange}
                             placeholder="10 digit mobile number"
                             maxLength={10}
-
+                            required
                         />
                     </div>
 
@@ -186,7 +204,8 @@ export default function EditCandidate() {
                             value={form.current_company}
                             onChange={handleChange}
                             placeholder="Current employer"
-
+                            maxLength={100}
+                            required
                         />
                     </div>
 
@@ -201,7 +220,7 @@ export default function EditCandidate() {
                             value={form.total_experience}
                             onChange={handleChange}
                             placeholder="e.g. 3"
-
+                            required
                         />
                     </div>
 
@@ -213,40 +232,53 @@ export default function EditCandidate() {
                 </form>
             </div>
 
-
             <div className="detail-card">
                 <h3 style={{ fontSize: '15px', color: '#1e293b', marginBottom: '16px' }}>
-                    Update Status
+                    Hiring Decision
                 </h3>
-                {isTerminal ? (
-                    <p style={{ fontSize: '13px', color: '#94a3b8' }}>
-                        Current status <strong>{currentStatus.replace(/_/g, ' ')}</strong> is final — no further changes allowed.
+
+                <div className="form-group">
+                    <label>Current Status</label>
+                    <p style={{ fontSize: '13px', color: '#374151', marginTop: '4px' }}>
+                        <span className={STATUS_BADGE[currentStatus]}>
+                            {currentStatus.replace(/_/g, ' ')}
+                        </span>
                     </p>
-                ) : (
+                </div>
+
+                {canDecide ? (
                     <form onSubmit={handleStatusSubmit}>
                         <div className="form-group">
-                            <label>Current Status</label>
-                            <p style={{ fontSize: '13px', color: '#374151', marginTop: '4px' }}>
-                                <span className={`badge badge-${currentStatus.toLowerCase().replace(/_/g, '-').replace('profile-created', 'created').replace('interview-scheduled', 'scheduled').replace('interview-completed', 'completed')}`}>
-                                    {currentStatus.replace(/_/g, ' ')}
-                                </span>
-                            </p>
-                        </div>
-                        <div className="form-group">
-                            <label>Change To</label>
-                            <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                                <option value={currentStatus}>{currentStatus.replace(/_/g, ' ')} (current)</option>
-                                {nextOptions.map((s) => (
-                                    <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
+                            <label>Decision</label>
+                            <select
+                                value={newStatus}
+                                onChange={(e) => setNewStatus(e.target.value)}
+                                required
+                            >
+                                <option value="">Select a decision</option>
+                                {DECISION_OPTIONS.map((s) => (
+                                    <option key={s} value={s}>{s}</option>
                                 ))}
                             </select>
+                            <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
+                                Requires the interviewer to have submitted feedback.
+                            </p>
                         </div>
                         <div className="form-actions">
                             <button type="submit" className="btn btn-primary btn-lg" disabled={statusLoading}>
-                                {statusLoading ? 'Updating...' : 'Update Status'}
+                                {statusLoading ? 'Recording...' : 'Record Decision'}
                             </button>
                         </div>
                     </form>
+                ) : needsAnotherRound ? (
+                    <p style={{ fontSize: '13px', color: '#374151' }}>
+                        The interviewer recommended another round. Schedule the next
+                        interview from the Interviews page to continue with this candidate.
+                    </p>
+                ) : (
+                    <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                        {STATUS_MESSAGE[currentStatus]}
+                    </p>
                 )}
             </div>
         </>

@@ -26,16 +26,16 @@ class CandidateRepository:
     @staticmethod
     async def email_exists(email: str) -> bool:
         """Check if a candidate email already exists."""
-        return await Candidate.find_one(
-            Candidate.email == email.lower()
-        ) is not None
+        result = await Candidate.find_one(Candidate.email == email.lower())
+        return result is not None
+
 
     @staticmethod
     async def mobile_exists(mobile: str) -> bool:
         """Check if a candidate mobile number already exists."""
-        return await Candidate.find_one(
-            Candidate.mobile_number == mobile
-        ) is not None
+        result = await Candidate.find_one(Candidate.mobile_number == mobile)
+        return result is not None
+
 
     @staticmethod
     async def create_candidate(document: Candidate) -> Candidate:
@@ -57,7 +57,7 @@ class CandidateRepository:
         skip = (page - 1) * page_size
         query = Candidate.find(Candidate.status == status) if status else Candidate.find_all()
         total = await query.count()
-        candidates = await query.skip(skip).limit(page_size).to_list()
+        candidates = await query.sort("-_id").skip(skip).limit(page_size).to_list()
         return candidates, total
 
     @staticmethod

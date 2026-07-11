@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import candidateService from '../../services/candidateService'
 import jobService from '../../services/jobService'
 import { ROUTES } from '../../constants/route'
+import { validateCandidateCreate } from '../../utils/candidateValidation'
 import './Candidates.css'
 
 export default function CreateCandidate() {
@@ -37,28 +38,11 @@ export default function CreateCandidate() {
         setForm({ ...form, [e.target.name]: e.target.value })
     }
 
-    function validate() {
-        if (!form.first_name.trim()) return 'First name is required.'
-        if (!form.last_name.trim()) return 'Last name is required.'
-        if (!form.email.trim()) return 'Email is required.'
-        if (!form.mobile_number.trim()) return 'Mobile number is required.'
-        if (!/^\d{10}$/.test(form.mobile_number)) {
-            return 'Mobile number must be exactly 10 digits.'
-        }
-        if (!form.current_company.trim()) return 'Current company is required.'
-        if (form.total_experience === '') return 'Total experience is required.'
-        if (!form.applied_job) return 'Please select an applied job.'
-        if (!resumeFile) return 'Resume is required.'
-        if (resumeFile.type !== 'application/pdf') return 'Resume must be a PDF file.'
-        if (resumeFile.size > 5 * 1024 * 1024) return 'Resume must not exceed 5MB.'
-        return null
-    }
-
     async function handleSubmit(e) {
         e.preventDefault()
         setError('')
 
-        const validationError = validate()
+        const validationError = validateCandidateCreate(form, resumeFile)
         if (validationError) {
             setError(validationError)
             return
@@ -67,11 +51,11 @@ export default function CreateCandidate() {
         setLoading(true)
         try {
             const formData = new FormData()
-            formData.append('first_name', form.first_name)
-            formData.append('last_name', form.last_name)
-            formData.append('email', form.email)
-            formData.append('mobile_number', form.mobile_number)
-            formData.append('current_company', form.current_company)
+            formData.append('first_name', form.first_name.trim())
+            formData.append('last_name', form.last_name.trim())
+            formData.append('email', form.email.trim())
+            formData.append('mobile_number', form.mobile_number.trim())
+            formData.append('current_company', form.current_company.trim())
             formData.append('total_experience', form.total_experience)
             formData.append('applied_job', form.applied_job)
             formData.append('resume', resumeFile)
@@ -110,6 +94,8 @@ export default function CreateCandidate() {
                             value={form.first_name}
                             onChange={handleChange}
                             placeholder="Enter first name"
+                            minLength={2}
+                            maxLength={50}
                             required
                         />
                     </div>
@@ -121,6 +107,8 @@ export default function CreateCandidate() {
                             value={form.last_name}
                             onChange={handleChange}
                             placeholder="Enter last name"
+                            maxLength={50}
+                            minLength={2}
                             required
                         />
                     </div>
@@ -156,6 +144,8 @@ export default function CreateCandidate() {
                             value={form.current_company}
                             onChange={handleChange}
                             placeholder="Current employer"
+                            minLength={2}
+                            maxLength={100}
                             required
                         />
                     </div>
@@ -196,11 +186,11 @@ export default function CreateCandidate() {
                         <label>Resume</label>
                         <input
                             type="file"
-                            accept=".pdf"
+                            accept="application/pdf"
                             onChange={(e) => setResumeFile(e.target.files[0])}
                             required
                         />
-                        <p className="form-hint">PDF only · Max 5MB</p>
+                        <p className="form-hint">PDF only · Max 10MB</p>
                     </div>
 
                     <div className="form-actions">

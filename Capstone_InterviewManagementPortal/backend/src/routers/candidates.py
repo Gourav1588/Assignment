@@ -80,7 +80,11 @@ async def get_candidate(
 ):
     """HR retrieves a single candidate by their ID."""
     logger.info("Get candidate %s request by: %s", candidate_id, current_user.email)
-    return await candidate_service.get_candidate(candidate_id)
+    candidate = await candidate_service.get_candidate(candidate_id)
+    last_recommendation = await candidate_service.get_last_recommendation(candidate_id)
+    response = CandidateResponse.model_validate(candidate)
+    response.last_recommendation = last_recommendation
+    return response
 
 
 @router.put("/{candidate_id}", response_model=CandidateResponse)

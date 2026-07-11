@@ -22,10 +22,12 @@ class CandidateResponse(BaseModel):
     applied_job: str
     status: CandidateStatus
     created_by:str
+    last_recommendation: str | None = None
 
     model_config = ConfigDict(
         populate_by_name=True,
-        arbitrary_types_allowed=True
+        arbitrary_types_allowed=True,
+        from_attributes=True
     )
     
 class StatusHistoryResponse(BaseModel):
