@@ -98,6 +98,8 @@ export default function EditJob() {
                             name="title"
                             value={form.title}
                             onChange={handleChange}
+                            minLength={2}
+                            maxLength={100}
                             placeholder="e.g. Backend Developer"
                             required
                         />
@@ -109,6 +111,8 @@ export default function EditJob() {
                             name="role"
                             value={form.role}
                             onChange={handleChange}
+                            minLength={2}
+                            maxLength={100}
                             placeholder="e.g. Software Engineer"
                             required
                         />
@@ -120,6 +124,8 @@ export default function EditJob() {
                             name="details"
                             value={form.details}
                             onChange={handleChange}
+                            minLength={10}
+                            maxLength={500}
                             placeholder="Describe the role and responsibilities"
                             required
                         />
@@ -131,6 +137,8 @@ export default function EditJob() {
                             name="required_skills"
                             value={form.required_skills}
                             onChange={handleChange}
+                            minLength={2}
+                            maxLength={225}
                             placeholder="e.g. Python, FastAPI, MongoDB"
                             required
                         />
@@ -165,6 +173,8 @@ export default function EditJob() {
                             name="location"
                             value={form.location}
                             onChange={handleChange}
+                            minLength={2}
+                            maxLength={100}
                             placeholder="e.g. Bangalore"
                             required
                         />

@@ -21,7 +21,7 @@ class JobRepository:
         """
         skip = (page - 1) * page_size
         total = await Job.count()
-        jobs = await Job.find_all().skip(skip).limit(page_size).to_list()
+        jobs = await Job.find_all().sort("-_id").skip(skip).limit(page_size).to_list()
         return jobs, total
 
     @staticmethod

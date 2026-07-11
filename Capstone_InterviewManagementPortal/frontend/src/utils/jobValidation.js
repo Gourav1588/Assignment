@@ -56,6 +56,10 @@ export function validateJob(form) {
         return 'Experience required must be a valid positive number.'
     }
 
+    if (experience < 0 || experience > 50) {
+        return 'Experience required must be between 0 and 50 years.'
+    }
+
     if (!form.location.trim()) {
         return 'Location is required.'
     }

@@ -72,6 +72,8 @@ export default function CreateJob() {
                             value={form.title}
                             onChange={handleChange}
                             placeholder="e.g. Backend Developer"
+                            minLength={2}
+                            maxLength={100}
                             required
                         />
                     </div>
@@ -82,6 +84,8 @@ export default function CreateJob() {
                             name="role"
                             value={form.role}
                             onChange={handleChange}
+                            minLength={2}
+                            maxLength={100}
                             placeholder="e.g. Software Engineer"
                             required
                         />
@@ -93,6 +97,8 @@ export default function CreateJob() {
                             name="details"
                             value={form.details}
                             onChange={handleChange}
+                            minLength={10}
+                            maxLength={500}
                             placeholder="Describe the role and responsibilities"
                             required
                         />
@@ -104,6 +110,8 @@ export default function CreateJob() {
                             name="required_skills"
                             value={form.required_skills}
                             onChange={handleChange}
+                            minLength={2}
+                            maxLength={50}
                             placeholder="e.g. Python, FastAPI, MongoDB"
                             required
                         />
@@ -115,7 +123,7 @@ export default function CreateJob() {
                             name="experience_required"
                             value={form.experience_required}
                             onChange={handleChange}
-                            placeholder="e.g. 2-4 years"
+                            placeholder="e.g. 2 or 4 "
                             required
                         />
                     </div>
@@ -138,6 +146,8 @@ export default function CreateJob() {
                             name="location"
                             value={form.location}
                             onChange={handleChange}
+                            minLength={2}
+                            maxLength={100}
                             placeholder="e.g. Bangalore"
                             required
                         />
