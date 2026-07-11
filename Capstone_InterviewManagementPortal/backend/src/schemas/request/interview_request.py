@@ -118,24 +118,24 @@ class InterviewUpdate(BaseModel):
 
         return v
 
-    # @field_validator("interview_time")
-    # @classmethod
-    # def validate_office_hours(cls, v: str | None) -> str | None:
-    #     if v is None:
-    #         return v
+    @field_validator("interview_time")
+    @classmethod
+    def validate_office_hours(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
 
-    #     if not re.match(r"^\d{2}:\d{2}$", v):
-    #         raise ValueError("Time must be in HH:MM format.")
+        if not re.match(r"^\d{2}:\d{2}$", v):
+            raise ValueError("Time must be in HH:MM format.")
 
-    #     hour, minute = map(int, v.split(":"))
+        hour, minute = map(int, v.split(":"))
 
-    #     if hour > 23 or minute > 59:
-    #         raise ValueError("Invalid time value.")
+        if hour > 23 or minute > 59:
+            raise ValueError("Invalid time value.")
 
-    #     if hour < 9 or (hour == 18 and minute > 0) or hour > 18:
-    #         raise ValueError("Interview time must be between 09:00 AM and 06:00 PM.")
+        if hour < 9 or (hour == 18 and minute > 0) or hour > 18:
+            raise ValueError("Interview time must be between 09:00 AM and 06:00 PM.")
 
-    #     return v
+        return v
 
     @field_validator("job_title", "focus_areas")
     @classmethod
