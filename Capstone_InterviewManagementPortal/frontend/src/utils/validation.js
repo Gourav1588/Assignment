@@ -46,7 +46,7 @@ export function validateEmail(email) {
         return 'Email is required.'
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[A-Za-z0-9]+([._-][A-Za-z0-9]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/
 
     if (!emailRegex.test(trimmedEmail)) {
         return 'Please enter a valid email address.'

@@ -6,6 +6,7 @@ This module handles direct database operations for the User collection.
 from typing import Optional
 from src.models.users import User
 from beanie import PydanticObjectId
+from src.enums.roles import UserRole
 
 class UserRepository:
     """
@@ -40,7 +41,7 @@ class UserRepository:
         """
         skip = (page - 1) * page_size
         total = await User.count()
-        users = await User.find_all().skip(skip).limit(page_size).to_list()
+        users = await User.find_all().sort("-_id").skip(skip).limit(page_size).to_list()
         return users, total
 
 
@@ -90,5 +91,22 @@ class UserRepository:
             
         await user.set({"is_active": True})
         return user
+    
+    @staticmethod
+    async def count_all() -> int:
+        """Returns the total number of user accounts."""
+        return await User.count()
+    
+
+    @staticmethod
+    async def count_active() -> int:
+        """Returns the number of accounts that are currently enabled."""
+        return await User.find({"is_active": True}).count()
+    
+
+    @staticmethod
+    async def count_by_role(role: UserRole) -> int:
+        """Returns the number of accounts holding the given role."""
+        return await User.find({"role": role}).count()
     
 user_repository = UserRepository()

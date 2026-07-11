@@ -21,6 +21,7 @@ export default function UserList() {
 
     async function fetchUsers() {
         setLoading(true)
+        setError('')
         try {
             const data = await userService.getAllUsers(page, PAGE_SIZE)
             setUsers(data.items)
@@ -34,22 +35,27 @@ export default function UserList() {
 
     async function handleDisable(id) {
         if (!window.confirm('Are you sure you want to disable this user?')) return
+
+        setError('')
         try {
             await userService.disableUser(id)
             // refresh list after disable
             fetchUsers()
-        } catch {
-            setError('Failed to disable user.')
+        } catch (err) {
+            const detail = err.response?.data?.detail
+            setError(typeof detail === 'string' ? detail : 'Failed to disable user.')
         }
     }
     async function handleActivate(id) {
         if (!window.confirm('Are you sure you want to active this user?')) return
+        setError('')
         try {
             await userService.activateUser(id)
             // refresh list after disable
             fetchUsers()
-        } catch {
-            setError('Failed to activate user.')
+        } catch (err) {
+            const detail = err.response?.data?.detail
+            setError(typeof detail === 'string' ? detail : 'Failed to activate user.')
         }
     }
 

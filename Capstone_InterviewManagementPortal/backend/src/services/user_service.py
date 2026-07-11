@@ -18,6 +18,8 @@ from src.core.exceptions import ResourceNotFoundException, DuplicateEmailExcepti
 from src.enums.roles import UserRole
 from src.schemas.response.user_response import UserResponse
 from src.schemas.response.pagination import PaginatedResponse
+from src.repositories.interview_repository import interview_repository  
+from src.repositories.feedback_repository import feedback_repository 
 
 
 logger = logging.getLogger(__name__)
@@ -91,6 +93,26 @@ class UserService:
         updated = await user_repository.update_user(user_id, update_data)
         logger.info("User updated: %s", user_id)
         return updated
+    
+    
+    async def _has_pending_interviews(self, interviewer_id: str) -> bool:
+        """
+        Checks whether an interviewer still has interviews to conduct.
+        An interview is pending if it is scheduled today or later
+        and feedback has not been submitted for it yet.
+        """
+        upcoming = await interview_repository.find_upcoming_for_interviewer(
+            interviewer_id
+        )
+
+        for interview in upcoming:
+            has_feedback = await feedback_repository.exists_for_interview(
+                str(interview.id)
+            )
+            if not has_feedback:
+                return True
+
+        return False
 
     async def disable_user(self, user_id: str) -> User:
         """
@@ -104,6 +126,13 @@ class UserService:
         
         if not user.is_active:
             raise ConflictException("User is already disabled.")
+        
+        if user.role == UserRole.INTERVIEWER:
+            if await self._has_pending_interviews(user_id):
+                raise ConflictException(
+                    "Cannot disable this interviewer — they have upcoming "
+                    "interviews awaiting feedback. Reassign those interviews first."
+                )
         
         disabled = await user_repository.disable_user(user_id)
         logger.info("User disabled: %s", user_id)

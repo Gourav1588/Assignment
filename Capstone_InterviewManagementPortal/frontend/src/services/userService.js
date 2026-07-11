@@ -36,7 +36,7 @@ const userService = {
 
     async getAllInterviewersForDropdown() {
         const response = await api.get('/users', {
-            params: { page: 1, page_size: 1000 }
+            params: { page: 1, page_size: 100 }
         })
         return response.data.items.filter(u => u.role === 'Interviewer')
     },

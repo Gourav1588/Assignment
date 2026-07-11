@@ -37,8 +37,20 @@ export default function EditUser() {
         e.preventDefault()
         setError('')
 
-        if (!form.full_name.trim()) {
+        const fullName = form.full_name.trim()
+
+        if (!fullName) {
             setError('Full name is required.')
+            return
+        }
+
+        if (fullName.length < 2 || fullName.length > 50) {
+            setError('Full name must be between 2 and 50 characters.')
+            return
+        }
+
+        if (!/^[A-Za-z ]+$/.test(fullName)) {
+            setError('Full name can only contain letters and spaces.')
             return
         }
 

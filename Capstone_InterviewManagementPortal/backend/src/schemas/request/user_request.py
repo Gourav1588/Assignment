@@ -1,5 +1,5 @@
 import re
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator,model_validator
 from src.enums.roles import UserRole
 
 
@@ -30,7 +30,7 @@ class UserCreate(BaseModel):
         if len(v) < 2:
             raise ValueError("Full name must be at least 2 characters long.")
 
-        if not re.fullmatch(r"[A-Za-z ]+", v):
+        if not re.fullmatch(r"[A-Za-z]+(?: [A-Za-z]+)*", v):
             raise ValueError("Full name can contain only letters and spaces.")
 
         return v
@@ -61,10 +61,17 @@ class UserUpdate(BaseModel):
         if len(v) < 2:
             raise ValueError("Full name must be at least 2 characters long.")
 
-        if not re.fullmatch(r"[A-Za-z ]+", v):
+        if not re.fullmatch(r"[A-Za-z]+(?: [A-Za-z]+)*", v):
             raise ValueError("Full name can contain only letters and spaces.")
 
         return v
+    
+    @model_validator(mode="after") 
+    def validate_at_least_one_field(self):
+        if self.full_name is None and self.role is None:
+            raise ValueError("At least one field must be provided to update.")
+        return self
+
 
 
 
