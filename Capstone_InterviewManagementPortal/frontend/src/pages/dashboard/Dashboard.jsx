@@ -1,12 +1,14 @@
 import { useAuth } from '../../context/AuthContext'
 import HRDashboard from './HRDashboard'
 import InterviewerDashboard from './InterviewerDashboard'
+import AdminDashboard from './AdminDashboard'
 
 export default function Dashboard() {
     const { user } = useAuth()
 
     if (user?.role === 'HR') return <HRDashboard />
     if (user?.role === 'Interviewer') return <InterviewerDashboard />
+    if (user?.role === 'Admin') return <AdminDashboard />
 
     return (
         <div style={{ padding: 24 }}>

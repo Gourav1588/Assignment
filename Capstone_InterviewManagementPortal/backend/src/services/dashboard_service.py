@@ -11,9 +11,12 @@ from src.models.candidates import Candidate
 from src.models.interview import Interview
 from src.models.feedback import Feedback
 from src.enums.candidate_enums import CandidateStatus
+from src.repositories.user_repository import user_repository
+from src.enums.roles import UserRole
 from src.schemas.response.dashboard_response import (
     HRDashboardResponse,
     InterviewerDashboardResponse,
+    AdminDashboardResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -75,6 +78,34 @@ class DashboardService:
             pending_feedback=pending,
             completed_feedback=completed,
         )
+        
+    async def get_admin_dashboard(self) -> AdminDashboardResponse:
+        """
+        Returns counts for the Admin dashboard.
+        Account figures cover what Admin manages directly. The system figures
+        give a read only sense of activity without exposing hiring outcomes.
+        """
+        total_users   = await user_repository.count_all()
+        active_users  = await user_repository.count_active()
+        hr_users      = await user_repository.count_by_role(UserRole.HR)
+        interviewers  = await user_repository.count_by_role(UserRole.INTERVIEWER)
+
+        total_jobs       = await Job.count()
+        total_candidates = await Candidate.count()
+        total_interviews = await Interview.count()
+
+        logger.info("Admin dashboard data fetched")
+        return AdminDashboardResponse(
+            total_users=total_users,
+            active_users=active_users,
+            disabled_users=total_users - active_users,
+            hr_users=hr_users,
+            interviewers=interviewers,
+            total_jobs=total_jobs,
+            total_candidates=total_candidates,
+            total_interviews=total_interviews,
+        )
+
 
 
 dashboard_service = DashboardService()

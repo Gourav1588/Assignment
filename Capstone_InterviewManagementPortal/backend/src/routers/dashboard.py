@@ -11,6 +11,7 @@ from src.models.users import User
 from src.schemas.response.dashboard_response import (
     HRDashboardResponse,
     InterviewerDashboardResponse,
+    AdminDashboardResponse
 )
 from src.services.dashboard_service import dashboard_service
 from src.core.dependencies import require_role
@@ -39,3 +40,11 @@ async def interviewer_dashboard(
     return await dashboard_service.get_interviewer_dashboard(
         interviewer_id=str(current_user.id)
     )
+    
+@router.get("/admin", response_model=AdminDashboardResponse)
+async def admin_dashboard(
+    current_user: User = Depends(require_role(UserRole.ADMIN)),
+):
+    """Returns account and system counts for the Admin dashboard."""
+    logger.info("Admin dashboard accessed by: %s", current_user.email)
+    return await dashboard_service.get_admin_dashboard()

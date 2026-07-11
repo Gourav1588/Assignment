@@ -18,3 +18,18 @@ class InterviewerDashboardResponse(BaseModel):
     assigned_interviews: int
     pending_feedback:    int
     completed_feedback:  int
+    
+class AdminDashboardResponse(BaseModel):
+    """
+    Counts for the Admin dashboard.
+    Covers the accounts Admin governs, plus a read only view of overall
+    system activity. Hiring outcomes and feedback are deliberately excluded.
+    """
+    total_users:       int
+    active_users:      int
+    disabled_users:    int
+    hr_users:          int
+    interviewers:      int
+    total_jobs:        int
+    total_candidates:  int
+    total_interviews:  int
