@@ -16,6 +16,7 @@ export const ROUTES = {
   CANDIDATE_HISTORY: '/candidates/:id/history',
   INTERVIEWS: '/interviews',
   INTERVIEW_CREATE: '/interviews/create',
+  INTERVIEW_EDIT: '/interviews/:id/edit',
   MY_INTERVIEWS: '/my-interviews',
   SUBMIT_FEEDBACK: '/my-interviews/:id/feedback',
   INTERVIEW_DETAIL: '/interviews/:id'
@@ -23,6 +24,7 @@ export const ROUTES = {
 
 export const NAV_ITEMS = {
   Admin: [
+    { label: 'Dashboard', path: ROUTES.DASHBOARD },
     { label: 'Users', path: ROUTES.USERS },
   ],
   HR: [

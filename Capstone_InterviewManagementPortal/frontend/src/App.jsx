@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import MainLayout from './components/layout/MainLayout'
 import { ROUTES } from './constants/route'
@@ -19,6 +19,7 @@ import StatusHistory from './pages/candidates/StatusHistory'
 import InterviewList from './pages/interviews/InterviewList'
 import ScheduleInterview from './pages/interviews/ScheduleInterview'
 import InterviewDetail from './pages/interviews/InterviewDetail'
+import EditInterview from './pages/interviews/EditInterview'
 import MyInterviewList from './pages/interviews/MyInterviewList'
 import SubmitFeedback from './pages/interviews/SubmitFeedback'
 import Dashboard from './pages/dashboard/Dashboard'
@@ -91,6 +92,7 @@ function AppRoutes() {
       <Route path={ROUTES.CANDIDATE_EDIT} element={<ProtectedRoute allowedRoles={['HR']}><EditCandidate /></ProtectedRoute>} />
       <Route path={ROUTES.INTERVIEWS} element={<ProtectedRoute allowedRoles={['HR']}><InterviewList /></ProtectedRoute>} />
       <Route path={ROUTES.INTERVIEW_CREATE} element={<ProtectedRoute allowedRoles={['HR']}><ScheduleInterview /></ProtectedRoute>} />
+      <Route path={ROUTES.INTERVIEW_EDIT} element={<ProtectedRoute allowedRoles={['HR']}><EditInterview /></ProtectedRoute>} />
       <Route path={ROUTES.INTERVIEW_DETAIL} element={<ProtectedRoute allowedRoles={['HR']}><InterviewDetail /></ProtectedRoute>} />
 
       {/* Interviewer */}
